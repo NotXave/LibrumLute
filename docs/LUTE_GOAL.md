@@ -68,6 +68,10 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (Anki QA) — gtest exports a term with translation and tag, checks the
+  header and the row `harbor\tHafen\tnoun\t3`; 32 tests green.
+
+
 - Phase 7 (Anki) — `exportAnkiTsv()` writes an Anki-friendly file (Text,
   Translation, Tags via wordtags GROUP_CONCAT, Status); the Terms page has an
   "Export Anki" save dialog. Build green; a pytest/gtest row check follows.

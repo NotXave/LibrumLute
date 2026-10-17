@@ -576,3 +576,44 @@ TEST(LuteDatabase, ListsAndTogglesDictionaries)
     ASSERT_TRUE(database.setDictionaryActive(dictionary.id, dictionary.active,
                                             &error));
 }
+
+
+TEST(LuteDatabase, ExportsAnkiTsvWithTags)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm term;
+    term.languageId = english->id;
+    term.text = QStringLiteral("harbor");
+    term.translation = QStringLiteral("Hafen");
+    term.status = 3;
+    term.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(term, &error));
+
+    LuteTag tag;
+    tag.text = QStringLiteral("noun");
+    ASSERT_TRUE(database.saveTag(tag, &error));
+    ASSERT_TRUE(database.setTermTags(term.id, {tag.id}, &error));
+
+    const QString ankiPath = directory.filePath(QStringLiteral("anki.txt"));
+    ASSERT_TRUE(database.exportAnkiTsv(ankiPath, english->id, &error))
+        << error.toStdString();
+
+    QFile file(ankiPath);
+    ASSERT_TRUE(file.open(QIODevice::ReadOnly | QIODevice::Text));
+    const QString content = QString::fromUtf8(file.readAll());
+    file.close();
+
+    EXPECT_TRUE(content.startsWith(
+        QStringLiteral("Text\tTranslation\tTags\tStatus")));
+    EXPECT_TRUE(content.contains(
+        QStringLiteral("harbor\tHafen\tnoun\t3")));
+}
