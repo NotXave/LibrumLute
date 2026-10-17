@@ -294,6 +294,12 @@ Newest entries first; each entry: what changed, evidence, commit.
   dictionary checkboxes and the term delete action; smoke test opened the
   Terms page with the Polish library copy (screenshot 126 KB).
 
+## Phase log
+
+- Phase 9 (screenshots) — final screenshot set recaptured from the packaged
+  feature state against the user's Polish DB copy: library, reader, terms,
+  languages, statistics, tags (all in `docs/lute/`).
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
