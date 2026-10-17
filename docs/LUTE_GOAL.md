@@ -290,6 +290,9 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Phase 9 (packaging refresh, round 41) — packaged exe rebuilt with
+  dictionary URI editing; smoke test opened the Languages page (69 languages)
+  against the Polish DB copy.
 - Phase 9 (packaging refresh) — packaged exe rebuilt with Anki export,
   dictionary checkboxes and the term delete action; smoke test opened the
   Terms page with the Polish library copy (screenshot 126 KB).
@@ -322,7 +325,7 @@ Newest entries first; each entry: what changed, evidence, commit.
 | C3 library | done | 271 books of the user DB listed, create/import text + PDF, delete-free read |
 | C4 reader | done | rich text per page, status colours, click popup, slider, page jump, bookmarks (`textbookmarks`), shortcuts, mark read |
 | C5 terms | mostly | 14,358 terms, search, status filter, edit popup, delete, TSV export/import, Anki export |
-| C6 languages/dicts | mostly | 69 languages CRUD, parser fields, dictionaries list + activation |
+| C6 languages/dicts | done | 69 languages CRUD, parser fields, dictionaries list + activation + URI editing |
 | C7 statistics | done | cards, 14-day series, status distribution |
 | C8 tags/families | mostly | tag CRUD, term assignment + toggle, parent link/unlink, popup chips |
 | C9 import/export/backup | mostly | text/PDF import, TSV export/import, Anki export, VACUUM INTO backup + verified restore |
