@@ -555,6 +555,169 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-phrase` drags over three words, checks that
+    // the phrase popup opens and stores the phrase with a status.
+    if(app.arguments().contains("--lute-demo-phrase"))
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(3000, &app, [&engine, externalBookController = externalBookController.get()]() {
+            externalBookController->setCurrentPage(0);
+        });
+
+        auto* pollTimer = new QTimer(&engine);
+        pollTimer->setInterval(400);
+        QObject::connect(pollTimer, &QTimer::timeout, &engine,
+                         [&engine, pollTimer, luteController = luteController.get()]() {
+            auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0));
+            if(!window)
+                return;
+            QQuickItem* pageItem = findLutePageItem(window->contentItem());
+            if(!pageItem)
+                return;
+
+            const QVariantList words = luteController->pageWords(0);
+            int startIndex = -1;
+            int endIndex = -1;
+            for(int i = 0; i < words.size(); ++i)
+            {
+                const QString text = words.at(i).toMap().value("word").toString();
+                if(startIndex < 0 && text.compare("run", Qt::CaseInsensitive) == 0)
+                    startIndex = i;
+                else if(startIndex >= 0 && text.compare("of", Qt::CaseInsensitive) == 0)
+                {
+                    endIndex = i;
+                    break;
+                }
+            }
+            if(startIndex < 0 || endIndex < 0)
+                return;
+            pollTimer->stop();
+
+            auto pointFor = [pageItem](const QVariantMap& word) {
+                const QVariantMap rect = word.value("rect").toMap();
+                const QPointF local((rect.value("x").toDouble()
+                                     + rect.value("w").toDouble() / 2)
+                                        * pageItem->width(),
+                                    (rect.value("y").toDouble()
+                                     + rect.value("h").toDouble() / 2)
+                                        * pageItem->height());
+                return pageItem->mapToScene(local);
+            };
+
+            const QPointF start = pointFor(words.at(startIndex).toMap());
+            const QPointF end = pointFor(words.at(endIndex).toMap());
+
+            window->requestActivate();
+            QMouseEvent press(QEvent::MouseButtonPress, start,
+                              window->mapToGlobal(start.toPoint()),
+                              Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+            QCoreApplication::sendEvent(window, &press);
+            QMouseEvent move(QEvent::MouseMove, end,
+                             window->mapToGlobal(end.toPoint()), Qt::NoButton,
+                             Qt::LeftButton, Qt::NoModifier);
+            QCoreApplication::sendEvent(window, &move);
+            QMouseEvent release(QEvent::MouseButtonRelease, end,
+                                window->mapToGlobal(end.toPoint()),
+                                Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+            QCoreApplication::sendEvent(window, &release);
+
+            qInfo() << "lute phrase: popup" << luteController->wordPopupVisible()
+                    << "text"
+                    << luteController->activeWord().value("word").toString()
+                    << "isPhrase" << luteController->activeWord().value("isPhrase");
+            if(luteController->wordPopupVisible())
+                luteController->setActiveStatus(3);
+
+            QTimer::singleShot(1400, &engine, [&engine]() {
+                if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                    window->grabWindow().save(QStringLiteral("lute-phrase-debug.png"));
+            });
+        });
+        pollTimer->start();
+
+        QTimer::singleShot(6000, &engine, [&engine, outputPath, pollTimer]() {
+            pollTimer->stop();
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-ai` points the AI client at a mock Ollama
+    // server, opens a word and stores/verifies the returned suggestion.
+    if(app.arguments().contains("--lute-demo-ai"))
+    {
+        const QString outputPath = demoOutputPath;
+        QSettings settings;
+        const QVariant previousProvider = settings.value(QStringLiteral("lute/aiProvider"));
+        const QVariant previousModel = settings.value(QStringLiteral("lute/aiModel"));
+        const QVariant previousBaseUrl = settings.value(QStringLiteral("lute/aiBaseUrl"));
+        settings.setValue(QStringLiteral("lute/aiProvider"), QStringLiteral("ollama"));
+        settings.setValue(QStringLiteral("lute/aiModel"), QStringLiteral("mock-model"));
+        settings.setValue(QStringLiteral("lute/aiBaseUrl"),
+                          QStringLiteral("http://127.0.0.1:11888"));
+        settings.setValue(QStringLiteral("lute/aiTargetLanguage"), QStringLiteral("German"));
+
+        QTimer::singleShot(3000, &app, [&engine, externalBookController = externalBookController.get()]() {
+            externalBookController->setCurrentPage(0);
+        });
+
+        auto* pollTimer = new QTimer(&engine);
+        pollTimer->setInterval(400);
+        QObject::connect(pollTimer, &QTimer::timeout, &engine,
+                         [&engine, pollTimer, luteController = luteController.get()]() {
+            auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0));
+            if(!window)
+                return;
+            QQuickItem* pageItem = findLutePageItem(window->contentItem());
+            if(!pageItem)
+                return;
+            pollTimer->stop();
+
+            const QVariantList words = luteController->pageWords(0);
+            for(const QVariant& entry : words)
+            {
+                const QVariantMap word = entry.toMap();
+                if(word.value("word").toString().compare("harbor", Qt::CaseInsensitive) != 0)
+                    continue;
+                const QVariantMap rect = word.value("rect").toMap();
+                luteController->selectAtPagePoint(
+                    0, rect.value("x").toDouble() + rect.value("w").toDouble() / 2,
+                    rect.value("y").toDouble() + rect.value("h").toDouble() / 2);
+                break;
+            }
+            luteController->requestAiSuggestion();
+            qInfo() << "lute ai: requested, busy" << luteController->aiBusy();
+        });
+        pollTimer->start();
+
+        QTimer::singleShot(6200, &engine, [&engine, luteController = luteController.get(), outputPath,
+                                          previousProvider, previousModel, previousBaseUrl]() {
+            qInfo() << "lute ai: suggestion" << luteController->aiSuggestion()
+                    << "error" << luteController->aiError();
+
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+
+            QSettings settings;
+            if(previousProvider.isValid())
+                settings.setValue(QStringLiteral("lute/aiProvider"), previousProvider);
+            else
+                settings.remove(QStringLiteral("lute/aiProvider"));
+            if(previousModel.isValid())
+                settings.setValue(QStringLiteral("lute/aiModel"), previousModel);
+            else
+                settings.remove(QStringLiteral("lute/aiModel"));
+            if(previousBaseUrl.isValid())
+                settings.setValue(QStringLiteral("lute/aiBaseUrl"), previousBaseUrl);
+            else
+                settings.remove(QStringLiteral("lute/aiBaseUrl"));
+
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-settings` / `--lute-demo-stats` open the
     // Lute settings or statistics page and save a screenshot of the window.
     const bool demoSettings = app.arguments().contains("--lute-demo-settings");

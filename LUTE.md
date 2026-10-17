@@ -24,8 +24,12 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Word extraction through MuPDF** – `LuteWordExtractor` uses the engine
   Librum renders with, so every word box lines up with the rendered page. It
   also builds the sentence context with Lute's own sentence-splitting rules.
-* **Phrase support** – multi-word terms from Lute are matched per page and
-  highlighted as one block.
+* **Phrase support** – drag over several words to open the Lute popup for that
+  phrase; choosing a status stores it as a multi-word term. Stored phrases are
+  matched per page and highlighted (and boxed) as one block.
+* **Verified AI** – the Ollama path is exercised against a mock server by
+  `--lute-demo-ai` (the popup shows the returned gloss with "Use as
+  definition"). OpenAI and Gemini use the same request/parse pipeline.
 * **AI translation** – Ollama (local), OpenAI and Gemini, with the provider,
   model, base URL and API key configured in *Settings → Lute*. The AI gets the
   word and its sentence as context.
@@ -40,9 +44,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
   with a file path (`librum.exe book.pdf`, "Open with Librum"). Settings are
   seeded from the shipped defaults in this mode.
 
-| Start page | Settings → Lute | Statistics |
-| --- | --- | --- |
-| ![Start](docs/lute/start.png) | ![Settings](docs/lute/settings.png) | ![Statistics](docs/lute/statistics.png) |
+| Phrase popup | AI gloss | Settings → Lute | Statistics |
+| --- | --- | --- | --- |
+| ![Phrase](docs/lute/phrase.png) | ![AI](docs/lute/ai.png) | ![Settings](docs/lute/settings.png) | ![Statistics](docs/lute/statistics.png) |
 
 ## Building
 
@@ -94,18 +98,34 @@ Notes on the Windows build in this fork:
 librum.exe --lute-selftest book.pdf          # extract words, print, exit
 librum.exe book.pdf --lute-demo --out r.png   # seed statuses, open popup, screenshot
 librum.exe book.pdf --lute-demo-click --out c.png  # click a word through the real event path
+librum.exe book.pdf --lute-demo-phrase --out p.png # drag over "run out of", store it as a phrase
+librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via a mock Ollama server on :11888
 librum.exe book.pdf --lute-demo-settings --out s.png
 librum.exe book.pdf --lute-demo-stats --out t.png
 librum.exe --lute-demo-login --out l.png
 ```
+
+## Tests
+
+```powershell
+cmake -S . -B build-tests -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON `
+      -DNO_VENV=ON -DCMAKE_PREFIX_PATH=C:/Qt/6.8.3/msvc2022_64
+cmake --build build-tests --target lute_unit_tests
+ctest --test-dir build-tests -R LuteUnitTests --output-on-failure
+```
+
+`tests/lute_unit_tests` covers the tokenizer/sentence splitter, the database
+round trip (template creation, terms, phrases, reading statistics, books/texts)
+and the phrase matcher (16 gtest cases).
 
 ## Known limitations
 
 * The Librum server features (account, cloud library, book downloads, sync) are
   untouched and still need a Librum server; this fork focuses on reading local
   PDFs.
-* Dragging over several words still opens Librum's selection popup; the Lute
-  phrase popup is reached by clicking a word that is part of a stored phrase.
+* A drag selection opens the Lute phrase popup instead of Librum's selection
+  options, so Librum's copy/highlight entries are only reachable through its
+  own shortcuts while Lute is active.
 * Pages with a `/Rotate` entry are extracted in unrotated page space.
 * Translations/statuses are stored per language exactly like Lute; switching the
   language in *Settings → Lute* switches the vocabulary.

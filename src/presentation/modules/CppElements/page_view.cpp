@@ -518,6 +518,16 @@ void PageView::copyHighlightedText(const QString& uuid)
     clipboard->setText(text);
 }
 
+QPointF PageView::getSelectionStart() const
+{
+    return m_selectionStart;
+}
+
+QPointF PageView::getSelectionEnd() const
+{
+    return m_selectionEnd;
+}
+
 QString PageView::getSelectedText()
 {
     return m_pageController->getTextFromSelection(m_selectionStart,

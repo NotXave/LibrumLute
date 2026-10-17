@@ -52,6 +52,17 @@ Pane {
                     const page = pageItem.pageNumber !== undefined
                             ? pageItem.pageNumber
                             : root.bookController.currentPage
+                    if (pageItem.getSelectionStart && pageItem.getSelectionEnd) {
+                        const start = pageItem.getSelectionStart()
+                        const end = pageItem.getSelectionEnd()
+                        if (LuteController.selectRangeAtPage(
+                                    page, start.x / pageItem.width,
+                                    start.y / pageItem.height,
+                                    end.x / pageItem.width,
+                                    end.y / pageItem.height))
+                            return
+                    }
+
                     const nx = centerX / pageItem.width
                     const ny = topY / pageItem.height
                     if(LuteController.selectAtPagePoint(page, nx, ny))

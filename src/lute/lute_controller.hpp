@@ -127,6 +127,11 @@ public slots:
     /// Selecting a word at a normalised page point opens the Lute popup.
     bool selectAtPagePoint(int pageIndex, qreal normalizedX,
                            qreal normalizedY);
+
+    /// Selects the range between two normalised page points (a drag selection
+    /// in Librum's PageView).
+    bool selectRangeAtPage(int pageIndex, qreal startX, qreal startY,
+                           qreal endX, qreal endY);
     void closeWordPopup();
 
     void setActiveStatus(int status);

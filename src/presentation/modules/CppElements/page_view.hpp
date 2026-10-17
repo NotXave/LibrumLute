@@ -53,6 +53,8 @@ public:
     Q_INVOKABLE void copySelectedText();
     Q_INVOKABLE void copyHighlightedText(const QString& uuid);
     Q_INVOKABLE QString getSelectedText();
+    Q_INVOKABLE QPointF getSelectionStart() const;
+    Q_INVOKABLE QPointF getSelectionEnd() const;
     Q_INVOKABLE QString getHighlightedText(const QString& uuid);
 
     Q_INVOKABLE void removeSelection();

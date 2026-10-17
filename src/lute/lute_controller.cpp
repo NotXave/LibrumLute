@@ -739,6 +739,28 @@ bool LuteController::selectAtPagePoint(int pageIndex, qreal normalizedX,
     return true;
 }
 
+bool LuteController::selectRangeAtPage(int pageIndex, qreal startX,
+                                       qreal startY, qreal endX, qreal endY)
+{
+    if(!documentOpen())
+        return false;
+
+    const QVector<WordQuad>& words = m_extractor->words(pageIndex);
+    if(words.isEmpty())
+        return false;
+
+    const int startIndex = wordIndexAt(words, QPointF(startX, startY));
+    const int endIndex = wordIndexAt(words, QPointF(endX, endY));
+    if(startIndex < 0 || endIndex < 0)
+        return false;
+
+    const int firstIndex = std::min(startIndex, endIndex);
+    const int lastIndex = std::max(startIndex, endIndex);
+    buildActiveWord(pageIndex, words.at(firstIndex), firstIndex, lastIndex,
+                    firstIndex != lastIndex);
+    return true;
+}
+
 void LuteController::closeWordPopup()
 {
     if(!m_popupVisible && m_activeWord.isEmpty())
