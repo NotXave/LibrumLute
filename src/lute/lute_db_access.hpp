@@ -90,6 +90,9 @@ public:
     bool saveTag(LuteTag& tag, QString* error = nullptr);
     bool deleteTag(qint64 tagId, QString* error = nullptr);
     QVector<LuteTag> tagsForTerm(qint64 termId);
+    QVector<LuteTerm> parentsForTerm(qint64 termId);
+    bool setTermParents(qint64 termId, const QVector<qint64>& parentIds,
+                        QString* error = nullptr);
     bool setTermTags(qint64 termId, const QVector<qint64>& tagIds,
                      QString* error = nullptr);
 

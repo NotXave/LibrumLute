@@ -137,6 +137,46 @@ Popup {
             }
         }
 
+        // ---- word family (parents) --------------------------------------
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 6
+            spacing: 6
+            visible: LuteController.activeWord.parents !== undefined
+                     && LuteController.activeWord.parents.length > 0
+
+            Label {
+                text: qsTr("Family:")
+                color: Style.colorLightText
+                font.pointSize: Fonts.size9
+            }
+
+            Repeater {
+                model: LuteController.activeWord.parents !== undefined
+                       ? LuteController.activeWord.parents : []
+
+                delegate: Rectangle {
+                    required property var modelData
+                    Layout.preferredHeight: 22
+                    Layout.preferredWidth: parentLabel.implicitWidth + 16
+                    radius: 11
+                    color: Style.colorControlBackground
+                    border.width: 1
+                    border.color: Style.colorContainerBorder
+
+                    Label {
+                        id: parentLabel
+                        anchors.centerIn: parent
+                        text: modelData.translation.length > 0
+                              ? modelData.text + " — " + modelData.translation
+                              : modelData.text
+                        color: Style.colorText
+                        font.pointSize: Fonts.size9
+                    }
+                }
+            }
+        }
+
         // ---- sentence context -------------------------------------------
         Pane {
             Layout.fillWidth: true

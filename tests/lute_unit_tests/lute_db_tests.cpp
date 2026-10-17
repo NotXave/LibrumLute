@@ -476,3 +476,41 @@ TEST(LuteDatabase, AssignsTagsToTerms)
     ASSERT_TRUE(database.setTermTags(term.id, {}, &error));
     EXPECT_TRUE(database.tagsForTerm(term.id).isEmpty());
 }
+
+
+TEST(LuteDatabase, LinksTermFamilies)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm child;
+    child.languageId = english->id;
+    child.text = QStringLiteral("harbors");
+    child.status = 3;
+    child.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(child, &error));
+
+    LuteTerm parent;
+    parent.languageId = english->id;
+    parent.text = QStringLiteral("harbor");
+    parent.translation = QStringLiteral("Hafen");
+    parent.status = 5;
+    parent.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(parent, &error));
+
+    ASSERT_TRUE(database.setTermParents(child.id, {parent.id}, &error));
+    const QVector<LuteTerm> parents = database.parentsForTerm(child.id);
+    ASSERT_EQ(parents.size(), 1);
+    EXPECT_EQ(parents.first().text, QStringLiteral("harbor"));
+    EXPECT_EQ(parents.first().translation, QStringLiteral("Hafen"));
+
+    ASSERT_TRUE(database.setTermParents(child.id, {}, &error));
+    EXPECT_TRUE(database.parentsForTerm(child.id).isEmpty());
+}

@@ -912,6 +912,61 @@ bool LuteDbAccess::saveTag(LuteTag& tag, QString* error)
     return true;
 }
 
+QVector<LuteTerm> LuteDbAccess::parentsForTerm(qint64 termId)
+{
+    QVector<LuteTerm> result;
+    if(!m_impl->db.isOpen())
+        return result;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT WpParentWoID FROM wordparents WHERE WpWoID = ?"));
+    query.addBindValue(termId);
+    if(!query.exec())
+        return result;
+    QVector<qint64> ids;
+    while(query.next())
+        ids.append(query.value(0).toLongLong());
+    for(qint64 id : ids)
+    {
+        if(const auto parent = termById(id))
+            result.append(*parent);
+    }
+    return result;
+}
+
+bool LuteDbAccess::setTermParents(qint64 termId,
+                                 const QVector<qint64>& parentIds,
+                                 QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+    QSqlQuery clear(m_impl->db);
+    clear.prepare(QStringLiteral("DELETE FROM wordparents WHERE WpWoID = ?"));
+    clear.addBindValue(termId);
+    if(!clear.exec())
+    {
+        if(error)
+            *error = clear.lastError().text();
+        return false;
+    }
+    for(qint64 parentId : parentIds)
+    {
+        QSqlQuery insert(m_impl->db);
+        insert.prepare(QStringLiteral(
+            "INSERT INTO wordparents (WpWoID, WpParentWoID) VALUES (?, ?)"));
+        insert.addBindValue(termId);
+        insert.addBindValue(parentId);
+        if(!insert.exec())
+        {
+            if(error)
+                *error = insert.lastError().text();
+            return false;
+        }
+    }
+    return true;
+}
+
 QVector<LuteTag> LuteDbAccess::tagsForTerm(qint64 termId)
 {
     QVector<LuteTag> result;

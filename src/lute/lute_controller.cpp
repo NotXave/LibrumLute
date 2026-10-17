@@ -1317,6 +1317,20 @@ void LuteController::buildActiveWord(int pageIndex, const WordQuad& word,
     }
     map.insert(QStringLiteral("tags"), tagNames);
 
+    QVariantList parents;
+    if(term)
+    {
+        for(const LuteTerm& parent : m_database.parentsForTerm(term->id))
+        {
+            QVariantMap entry;
+            entry.insert(QStringLiteral("id"), parent.id);
+            entry.insert(QStringLiteral("text"), parent.text);
+            entry.insert(QStringLiteral("translation"), parent.translation);
+            parents.append(entry);
+        }
+    }
+    map.insert(QStringLiteral("parents"), parents);
+
     m_activeWord = map;
     m_popupVisible = true;
     m_aiSuggestion.clear();
