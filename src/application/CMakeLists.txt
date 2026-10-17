@@ -112,10 +112,14 @@ if(UNIX)
     set(MUPDF_OUTPUT "${MUPDF_OUTPUT_DIR}/libmupdfcpp.so" PARENT_SCOPE)
     set(MUPDF_BUILD_COMMAND ./scripts/mupdfwrap.py ${VENV_OPTION} -d build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release> -b --m-target 'libs tools' ${EXTRA_MAKE_AGRS} -j 0 m01)
 elseif(WIN32)
-    set(MUPDF_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
+    # Fork change: we force `--vs-upgrade 1` below, so MuPDF builds into the
+    # upgraded solution tree.
+    set(MUPDF_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
     set(MUPDF_OUTPUT "${MUPDF_OUTPUT_DIR}/mupdfcpp64.lib" PARENT_SCOPE)
     set(MUPDF_OUTPUT "${MUPDF_OUTPUT_DIR}/mupdfcpp64.lib")
-    set(MUPDF_BUILD_COMMAND python scripts/mupdfwrap.py ${VENV_OPTION} -d build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release> -b --m-target mutool -j 0 m01)
+    # Fork change: upgrade the MuPDF solution to the installed VS2022 toolset
+    # (the checked-in solution targets the VS2019 toolset v142).
+    set(MUPDF_BUILD_COMMAND python scripts/mupdfwrap.py --vs-upgrade 1 ${VENV_OPTION} -d build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release> -b --m-target mutool -j 0 m01)
 endif()
 
 message("MuPdf build command: " ${MUPDF_BUILD_COMMAND})

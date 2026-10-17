@@ -95,6 +95,9 @@
         <file>readingPage/MSelectionOptionsPopup.qml</file>
         <file>modules/CustomComponents/MSlider.qml</file>
         <file>readingPage/MDictionaryPopup.qml</file>
+        <file>lute/MLutePageOverlay.qml</file>
+        <file>lute/MLuteWordPopup.qml</file>
+        <file>lute/MLuteSettingsPage.qml</file>
         <file>readingPage/MBookmarkItem.qml</file>
         <file>readingPage/MExplanationPopup.qml</file>
         <file>TranslationsModel.qml</file>
@@ -117,6 +120,7 @@
         <file>modules/CustomComponents/bookSelector/MBookSelector.qml</file>
         <file>modules/CustomComponents/bookSelector/MBookSelectorPopup.qml</file>
         <file>modules/CustomComponents/MAlertBox.qml</file>
+        <file>modules/CustomComponents/IconImage.qml</file>
         <file>modules/CustomComponents/MProgressArc.qml</file>
         <file>modules/CustomComponents/MSpinner.qml</file>
         <file>toolsPage/MExtractPagesPopup.qml</file>

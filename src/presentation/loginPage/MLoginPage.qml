@@ -2,6 +2,8 @@ import QtQuick
 import QtCore
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
+import Librum.lute 1.0
 import QtQuick.Window
 import CustomComponents
 import Librum.style
@@ -20,6 +22,12 @@ MFlickWrapper {
                               emailInput.giveFocus()
 
     Component.onCompleted: {
+        // Fork: a PDF opened via the file manager is read without an account.
+        if (externalBook) {
+            loadPage(externalReadingPage, undefined, false)
+            return
+        }
+
         // Focus the emailInput when page has loaded.
         emailInput.giveFocus()
 
@@ -289,6 +297,22 @@ MFlickWrapper {
                                             internal.login()
                                         }
                     }
+
+                    MButton {
+                        id: openLocalButton
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        Layout.topMargin: 12
+                        borderWidth: 1
+                        borderColor: Style.colorButtonBorder
+                        backgroundColor: "transparent"
+                        textColor: Style.colorText
+                        fontSize: Fonts.size12
+                        text: qsTr("Open a PDF without an account")
+
+                        onClicked: localFileDialog.open()
+                    }
+
                 }
             }
 
@@ -326,6 +350,32 @@ MFlickWrapper {
         onDecisionMade: close()
         onOpenedChanged: if (opened)
                              loginFailedPopup.giveFocus()
+    }
+
+
+    FileDialog {
+        id: localFileDialog
+        title: qsTr("Open a PDF")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("PDF documents (*.pdf)"), qsTr("All files (*)")]
+
+        onAccepted: {
+            const path = root.toLocalPath(selectedFile)
+            if (ExternalBookController.setUp(path)) {
+                LuteController.setDocumentPath(path)
+                baseRoot.externalBookMode = true
+                loadPage(externalReadingPage, undefined, false)
+            }
+        }
+    }
+
+    function toLocalPath(url) {
+        let path = decodeURIComponent(url.toString())
+        if (path.startsWith("file:///"))
+            path = path.substring(8)
+        else if (path.startsWith("file://"))
+            path = path.substring(7)
+        return path
     }
 
     QtObject {

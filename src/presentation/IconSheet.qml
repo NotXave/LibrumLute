@@ -104,6 +104,8 @@ Item {
     property string settingsSidebarStorageSelected
     property string settingsSidebarSupportUs
     property string settingsSidebarSupportUsSelected
+    property string settingsSidebarLute
+    property string settingsSidebarLuteSelected
     property string settingsSidebarUpdates
     property string settingsSidebarUpdatesSelected
 
@@ -469,6 +471,8 @@ Item {
             PropertyChanges {
                 target: iconSheet
                 settingsSidebarSupportUsSelected: "/resources/images/light_mode/settings_sidebar/support_us_selected_icon.svg"
+    settingsSidebarLute: "/resources/images/light_mode/settings_sidebar/lute_icon.svg"
+    settingsSidebarLuteSelected: "/resources/images/light_mode/settings_sidebar/lute_selected_icon.svg"
             }
             PropertyChanges {
                 target: iconSheet

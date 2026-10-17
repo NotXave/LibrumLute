@@ -7,6 +7,7 @@ import "settingsSidebar"
 import "shortcutsPage"
 import "updatesPage"
 import "accountPage"
+import "../lute"
 
 Page {
     id: settingsManager
@@ -19,6 +20,7 @@ Page {
     property alias accountPage: accountPage
     property alias storagePage: storagePage
     property alias supportUsPage: supportUsPage
+    property alias lutePage: lutePage
 
     LayoutMirroring.enabled: baseRoot.rightAlign
     LayoutMirroring.childrenInherit: true
@@ -67,6 +69,10 @@ Page {
         sequence: "Shift+8"
         onActivated: loadSettingsPage(supportUsPage,
                                       settingsSidebar.supportUsItem)
+    }
+    Shortcut {
+        sequence: "Shift+9"
+        onActivated: loadSettingsPage(lutePage, settingsSidebar.luteItem)
     }
 
     RowLayout {
@@ -130,6 +136,10 @@ Page {
     Component {
         id: supportUsPage
         MSupportUsPage {}
+    }
+    Component {
+        id: lutePage
+        MLuteSettingsPage {}
     }
 
 

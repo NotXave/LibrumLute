@@ -107,7 +107,8 @@ Page {
             bookTitle: ""
 
             onBackButtonClicked: {
-                loadPage(homePage, sidebar.homeItem, false)
+                // Fork: without a Librum account, go back to the start page.
+                loadPage(loginPage, undefined, false)
 
                 baseRoot.externalBookMode = false
             }

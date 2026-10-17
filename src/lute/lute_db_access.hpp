@@ -1,0 +1,89 @@
+#pragma once
+
+#include "lute_language.hpp"
+#include "lute_stats.hpp"
+#include "lute_term.hpp"
+
+#include <QHash>
+#include <QString>
+#include <QStringList>
+#include <QVector>
+
+#include <memory>
+#include <optional>
+
+namespace lute {
+
+/// Read/write gateway to an official Lute v3 `lute.db` (SQLite).
+///
+/// This is Loop 0 of the plan ("Option A: direct QtSql access"): no Python
+/// server is needed at runtime. The class only ever touches Lute's own tables
+/// and columns, so a database written here stays fully usable by Lute v3 and
+/// vice versa.
+class LuteDbAccess
+{
+public:
+    LuteDbAccess();
+    ~LuteDbAccess();
+
+    LuteDbAccess(const LuteDbAccess&) = delete;
+    LuteDbAccess& operator=(const LuteDbAccess&) = delete;
+
+    bool open(const QString& dbPath, QString* error = nullptr);
+    void close();
+    bool isOpen() const;
+    QString path() const;
+    QString lastError() const;
+
+    // ---- languages --------------------------------------------------------
+    QVector<LuteLanguage> languages();
+    std::optional<LuteLanguage> languageById(int languageId);
+    std::optional<LuteLanguage> languageByName(const QString& name);
+
+    // ---- terms ------------------------------------------------------------
+    /// `getTermByText` from the plan: single case-insensitive lookup.
+    std::optional<LuteTerm> getTermByText(const QString& word, int languageId);
+
+    /// `getTermsForPage` from the plan: status per lower-cased word.
+    QHash<QString, int> getTermsForPage(const QStringList& words, int languageId);
+
+    /// Full term records for a batch of words (used by the popup and overlay).
+    QHash<QString, LuteTerm> getTermMap(const QStringList& words, int languageId);
+
+    /// Terms stored with `WoTokenCount > 1`, i.e. phrases like "run out of".
+    QVector<LuteTerm> multiWordTerms(int languageId);
+
+    QVector<LuteTerm> termsByStatus(int languageId, const QVector<int>& statuses,
+                                    int limit = 0);
+
+    /// Inserts a new term or updates the existing row with the same
+    /// (WoTextLC, WoLgID) pair. `term.id` is filled in on return.
+    bool saveTerm(LuteTerm& term, QString* error = nullptr);
+    bool updateStatus(qint64 wordId, int status, QString* error = nullptr);
+    bool updateTranslation(qint64 wordId, const QString& translation, QString* error = nullptr);
+    bool updateRomanization(qint64 wordId, const QString& romanization, QString* error = nullptr);
+    bool deleteTerm(qint64 wordId, QString* error = nullptr);
+
+    // ---- statistics -------------------------------------------------------
+    QHash<int, int> statusCounts(int languageId);
+    QVector<DailyCount> statusChangesPerDay(int languageId, int days);
+    QVector<DailyCount> createdPerDay(int languageId, int days);
+    int totalTerms(int languageId);
+    int wordsReadTotal(int languageId);
+    int wordsReadLast7Days(int languageId);
+    bool recordWordsRead(int languageId, int wordCount, qint64 textId = 0);
+
+    // ---- library (books/texts) --------------------------------------------
+    std::optional<qint64> findBookBySource(const QString& sourceUri, int languageId);
+    qint64 findOrCreateBook(const QString& title, const QString& sourceUri, int languageId,
+                            QString* error = nullptr);
+    std::optional<qint64> findTextForBook(qint64 bookId);
+    qint64 createText(qint64 bookId, int order, const QString& text, int wordCount,
+                      QString* error = nullptr);
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
+};
+
+} // namespace lute

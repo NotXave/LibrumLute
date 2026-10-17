@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/lute">
+        <file alias="lute_template.db">resources/lute_template.db</file>
+        <file alias="lute_baseline.sql">resources/lute_baseline.sql</file>
+        <file alias="lute_languages.sql">resources/lute_languages.sql</file>
+    </qresource>
+</RCC>

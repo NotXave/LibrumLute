@@ -5,6 +5,8 @@ import Librum.elements
 import Librum.style
 import Librum.globals
 import Librum.controllers
+import Librum.lute 1.0
+import "../lute"
 import "DocumentNavigation.js" as NavigationLogic
 
 
@@ -40,6 +42,22 @@ Pane {
 
         function onTextSelectionFinished(centerX, topY) {
             selectionOptionsPopup.highlight = ""
+
+            // A single click selects one word. If Lute knows the word, open
+            // the Lute popup instead of Librum's selection options.
+            const focusedPage = activeFocusItem ? activeFocusItem : pageView.currentItem
+            if(LuteController.documentOpen && focusedPage) {
+                const pageItem = focusedPage
+                if(pageItem.width > 0 && pageItem.height > 0) {
+                    const page = pageItem.pageNumber !== undefined
+                            ? pageItem.pageNumber
+                            : root.bookController.currentPage
+                    const nx = centerX / pageItem.width
+                    const ny = topY / pageItem.height
+                    if(LuteController.selectAtPagePoint(page, nx, ny))
+                        return
+                }
+            }
 
             internal.openSelectionOptionsPopup(centerX, topY)
         }
@@ -149,12 +167,19 @@ Pane {
                 }
 
                 onMouseHoverMoved: internal.showCursor()
+
+                // Lute's coloured underlines for this page.
+                MLutePageOverlay {
+                    anchors.fill: parent
+                    pageNumber: page.pageNumber
+                }
             }
 
             // Set the book's current page once the model is loaded
             onContentYChanged: {
                 NavigationLogic.updateCurrentPageCounter()
                 selectionOptionsPopup.close()
+                lutePopup.close()
             }
 
             onContentXChanged: selectionOptionsPopup.close()
@@ -244,6 +269,19 @@ Pane {
                                      }
     }
 
+    // Lute's word popup (statuses, translation, AI gloss).
+    MLuteWordPopup {
+        id: lutePopup
+    }
+
+    Connections {
+        target: LuteController
+
+        function onWordPopupChanged() {
+            internal.showLutePopup()
+        }
+    }
+
     MDictionaryPopup {
         id: dictionaryPopup
     }
@@ -309,9 +347,10 @@ Pane {
             internal.openPopupAt(selectionOptionsPopup, centerX, bottomY)
         }
 
-        function openPopupAt(popup, centerX, bottomY) {
-            let pageYOffset = pageView.contentY - activeFocusItem.y
-            let pageXOffset = pageView.contentX - activeFocusItem.x
+        function openPopupAt(popup, centerX, bottomY, pageItem = null) {
+            const item = pageItem ? pageItem : activeFocusItem
+            let pageYOffset = pageView.contentY - item.y
+            let pageXOffset = pageView.contentX - item.x
 
             let posY = bottomY + -pageYOffset + 6
             let spaceToBottom = (pageView.y + root.height) - (posY + popup.height)
@@ -329,6 +368,20 @@ Pane {
             popup.y = posY
 
             popup.open()
+        }
+
+        function showLutePopup() {
+            const item = activeFocusItem ? activeFocusItem : pageView.currentItem
+            if(!LuteController.wordPopupVisible || !item) {
+                lutePopup.close()
+                return
+            }
+            const rect = LuteController.activeWord.rect
+            if(!rect)
+                return
+            internal.openPopupAt(lutePopup,
+                                 (rect.x + rect.w / 2) * item.width,
+                                 (rect.y + rect.h) * item.height, item)
         }
 
         function showCursor() {

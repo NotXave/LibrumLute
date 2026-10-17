@@ -25,6 +25,10 @@ get_target_property(ADAPTERS_BIN_DIR adapters CMAKE_BINARY_DIR)
 
 add_subdirectory(presentation/)
 
+# Lute language-learning slice (fork addition)
+add_subdirectory(lute/)
+get_target_property(LUTE_INCLUDES lute INTERFACE_INCLUDE_DIRECTORIES)
+
 # Building
 set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/resources.rc")
 qt_add_executable(librum
@@ -37,7 +41,9 @@ qt_add_executable(librum
 )
 
 # Set WIN32 for windows to avoid console getting opened on start on windows
-if(WIN32)
+# (fork: -DLIBRUM_CONSOLE=ON keeps the console so QML errors stay visible)
+set(LIBRUM_CONSOLE OFF CACHE BOOL "Keep the console window for debugging")
+if(WIN32 AND NOT LIBRUM_CONSOLE)
     set_target_properties(librum PROPERTIES WIN32_EXECUTABLE true)
 endif()
 
@@ -65,6 +71,7 @@ target_link_libraries(librum
         adapters
         application
         infrastructure
+        lute
         ${MUPDF_OUTPUT}
         Qt6::Quick
         Qt6::Widgets
@@ -75,6 +82,7 @@ target_include_directories(librum
     PRIVATE
         ${ADAPTERS_INCLUDES}
         ${APPLICATION_INCLUDES}
+        ${LUTE_INCLUDES}
         ${INFRASTRUCTURE_INCLUDES}
 )
 

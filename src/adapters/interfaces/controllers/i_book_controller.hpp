@@ -66,7 +66,7 @@ public:
 
     virtual void followLink(const char* uri) = 0;
 
-    virtual QString getFilePath() const = 0;
+    Q_INVOKABLE virtual QString getFilePath() const = 0;
     virtual void setCurrentPage(int newCurrentPage) = 0;
 
     virtual int getPageCount() const = 0;

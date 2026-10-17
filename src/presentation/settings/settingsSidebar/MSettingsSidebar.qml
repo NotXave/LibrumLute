@@ -17,6 +17,7 @@ Item {
     property MSettingsSidebarItem accountItem: accountItem
     property MSettingsSidebarItem storageItem: storageItem
     property MSettingsSidebarItem supportUsItem: supportUsItem
+    property MSettingsSidebarItem luteItem: luteItem
     property MSettingsSidebarItem currentItem: aboutItem
 
     implicitWidth: 238
@@ -157,6 +158,33 @@ Item {
                 selectedIcon: Icons.settingsSidebarUpdatesSelected
 
                 onClicked: loadSettingsPage(updatesPage, root.updatesItem)
+            }
+
+
+            Label {
+                Layout.topMargin: 25
+                Layout.leftMargin: 25
+                //: Keep it capitalized
+                text: qsTr("LANGUAGE LEARNING")
+                font.pointSize: Fonts.size10
+                font.bold: true
+                color: Style.colorLightText
+            }
+
+            MSettingsSidebarItem {
+                id: luteItem
+                Layout.preferredHeight: 32
+                Layout.preferredWidth: internal.sidebarItemWidth
+                Layout.topMargin: 12
+                Layout.leftMargin: 1
+                imageLeftMargin: 24
+                imageWidth: 18
+                labelLeftMargin: 10
+                textContent: qsTr("Lute")
+                defaultIcon: Icons.settingsSidebarLute
+                selectedIcon: Icons.settingsSidebarLuteSelected
+
+                onClicked: loadSettingsPage(lutePage, root.luteItem)
             }
 
             Label {

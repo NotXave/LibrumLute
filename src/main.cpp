@@ -10,6 +10,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QQuickWindow>
+#include <QTimer>
+#include <QImage>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QString>
@@ -31,6 +34,7 @@
 #include "i_user_service.hpp"
 #include "key_sequence_recorder.hpp"
 #include "library_proxy_model.hpp"
+#include "lute_controller.hpp"
 #include "message_handler.hpp"
 #include "page_view.hpp"
 #include "setting_groups.hpp"
@@ -50,6 +54,41 @@ void registerTypes();
 void setupGlobalSettings();
 void setupFonts();
 
+// Fork QA helper: `librum.exe --lute-selftest <file.pdf>` extracts the words of
+// the document and prints them, then exits. Used to verify the Lute slice
+// without a GUI session.
+static int runLuteSelfTest(const QString& filePath)
+{
+    lute::LuteController controller;
+    controller.initialize();
+    if(!controller.databaseOpen())
+    {
+        qWarning() << "lute selftest: database could not be opened";
+        return 2;
+    }
+    if(!controller.setDocumentPath(filePath))
+    {
+        qWarning() << "lute selftest: document could not be opened";
+        return 3;
+    }
+    qInfo() << "lute selftest: database" << controller.databasePath();
+    qInfo() << "lute selftest: language" << controller.languageName();
+    qInfo() << "lute selftest: pages" << controller.pageCount();
+    qInfo() << "lute selftest: title" << controller.documentTitle();
+    for(int page = 0; page < controller.pageCount(); ++page)
+    {
+        const auto words = controller.pageWords(page);
+        qInfo() << "lute selftest: page" << page << "words" << words.size();
+        for(int i = 0; i < words.size() && i < 5; ++i)
+        {
+            const auto word = words.at(i).toMap();
+            qInfo() << "   " << word.value("word").toString() << "|"
+                    << word.value("sentence").toString().left(70);
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     // clang-format off
@@ -65,6 +104,13 @@ int main(int argc, char* argv[])
 
     qInstallMessageHandler(logging::messageHandler);
     setupGlobalSettings();
+
+    if(app.arguments().contains("--lute-selftest"))
+    {
+        const int index = app.arguments().indexOf("--lute-selftest");
+        if(index + 1 < app.arguments().size())
+            return runLuteSelfTest(app.arguments().at(index + 1));
+    }
     setupFonts();
 
     // Register types
@@ -149,6 +195,12 @@ int main(int argc, char* argv[])
     qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "ExternalBookController",
                                  externalBookController.get());
 
+    // Lute language-learning stack (fork addition)
+    auto luteController = std::make_unique<lute::LuteController>();
+    luteController->initialize();
+    qmlRegisterSingletonInstance("Librum.lute", 1, 0, "LuteController",
+                                 luteController.get());
+
     // Free books stack
     auto* freeBooksService = config::diConfig().create<application::IFreeBooksService*>();
     auto freeBooksController = std::make_unique<FreeBooksController>(freeBooksService);
@@ -160,6 +212,11 @@ int main(int argc, char* argv[])
     auto settingsController = std::make_unique<SettingsController>(settingsService);
     qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "SettingsController",
                                  settingsController.get());
+
+    // Fork: the reading UI needs the appearance/behavior/shortcut values even
+    // when no account is used (offline reading of a local PDF). Loading the
+    // local profile here seeds them with the shipped defaults.
+    settingsService->loadUserSettings(QString(), QString());
 
     // Tools Stack
     auto toolsService = std::make_unique<application::services::ToolsService>(libraryService);
@@ -260,9 +317,29 @@ int main(int argc, char* argv[])
         appInfoController->switchToLanguage(storedLanguage);
     }
 
-    if(app.arguments().size() == 2)
+    // Fork: the first positional argument is the book to open. Flags such as
+    // --lute-demo and --out do not count as book paths.
+    QStringList positionalArguments;
+    QString demoOutputPath;
+    for(int i = 1; i < app.arguments().size(); ++i)
     {
-        QString filePath = app.arguments().at(1);
+        const QString argument = app.arguments().at(i);
+        if(argument == "--out")
+        {
+            if(i + 1 < app.arguments().size())
+                demoOutputPath = app.arguments().at(++i);
+            continue;
+        }
+        if(argument.startsWith("--"))
+            continue;
+        positionalArguments.append(argument);
+    }
+    if(demoOutputPath.isEmpty())
+        demoOutputPath = QStringLiteral("lute-demo.png");
+
+    if(!positionalArguments.isEmpty())
+    {
+        QString filePath = positionalArguments.at(0);
         QFileInfo fileInfo(filePath);
         if(!fileInfo.isFile())
         {
@@ -276,6 +353,8 @@ int main(int argc, char* argv[])
             std::cerr << "The file type of: " << filePath.toStdString() << " is not supported.\n";
             return -1;
         }
+        // Let Lute index the same document for word lookups and highlights.
+        luteController->setDocumentPath(filePath);
         engine.rootContext()->setContextProperty("externalBook", true);
     }
     else {
@@ -292,6 +371,107 @@ int main(int argc, char* argv[])
         },
         Qt::QueuedConnection);
     engine.load(url);
+
+    // Fork QA helper: `librum.exe --lute-demo <file.pdf> [out.png]` opens the
+    // reader, seeds a few Lute statuses, opens the word popup and saves a
+    // screenshot of the real window, then quits. Used for screenshots/QA.
+    const int luteDemoIndex = app.arguments().indexOf("--lute-demo");
+    if(luteDemoIndex >= 0 && luteDemoIndex + 1 < app.arguments().size())
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(3000, &app, [&engine, externalBookController = externalBookController.get(),
+                                        luteController = luteController.get(), outputPath]() {
+            qInfo() << "lute demo: step 1 setCurrentPage";
+            externalBookController->setCurrentPage(0);
+
+            QTimer::singleShot(700, &engine, [&engine, luteController, outputPath]() {
+                const QStringList words = {QStringLiteral("harbor"),
+                                           QStringLiteral("lighthouse"),
+                                           QStringLiteral("murmured"),
+                                           QStringLiteral("resilience"),
+                                           QStringLiteral("patience"),
+                                           QStringLiteral("boat")};
+                const QList<int> statuses = {3, 5, 4, 1, 99, 2};
+
+                qInfo() << "lute demo: step 2 pageWords";
+                const QVariantList pageWords = luteController->pageWords(0);
+                qInfo() << "lute demo: got" << pageWords.size() << "words";
+                QVariantMap harbor;
+                for(const QVariant& entry : pageWords)
+                {
+                    const QVariantMap word = entry.toMap();
+                    const QString text = word.value(QStringLiteral("word")).toString();
+                    const int index = word.value(QStringLiteral("index")).toInt();
+                    for(int i = 0; i < words.size(); ++i)
+                    {
+                        if(text.compare(words.at(i), Qt::CaseInsensitive) == 0)
+                        {
+                            qInfo() << "lute demo: seeding" << text << index;
+                            luteController->setStatusForWord(0, index, statuses.at(i));
+                        }
+                    }
+                    if(text.compare(QStringLiteral("harbor"), Qt::CaseInsensitive) == 0
+                       && harbor.isEmpty())
+                        harbor = word;
+                }
+
+                if(!harbor.isEmpty())
+                {
+                    const QVariantMap rect = harbor.value(QStringLiteral("rect")).toMap();
+                    qInfo() << "lute demo: selectAtPagePoint";
+                    luteController->selectAtPagePoint(
+                        0, rect.value(QStringLiteral("x")).toDouble()
+                               + rect.value(QStringLiteral("w")).toDouble() / 2,
+                        rect.value(QStringLiteral("y")).toDouble()
+                            + rect.value(QStringLiteral("h")).toDouble() / 2);
+                }
+
+                QTimer::singleShot(1600, &engine, [&engine, outputPath]() {
+                    qInfo() << "lute demo: grabbing window";
+                    if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                    {
+                        qInfo() << "lute demo: window" << window;
+                        window->grabWindow().save(outputPath);
+                    }
+                    QCoreApplication::quit();
+                });
+            });
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-login` captures the start page.
+    if(app.arguments().contains("--lute-demo-login"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(3500, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-settings` / `--lute-demo-stats` open the
+    // Lute settings or statistics page and save a screenshot of the window.
+    const bool demoSettings = app.arguments().contains("--lute-demo-settings");
+    const bool demoStats = app.arguments().contains("--lute-demo-stats");
+    if(demoSettings || demoStats)
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(3000, &app, [demoSettings, luteController = luteController.get()]() {
+            if(demoSettings)
+                luteController->openSettings();
+            else
+                luteController->openStatistics();
+        });
+
+        QTimer::singleShot(5000, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
 
     return QGuiApplication::exec();
     // clang-format on

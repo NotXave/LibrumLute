@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Librum.models
 import Librum.controllers
+import Librum.lute 1.0
 import CustomComponents
 import "PageNavigationLogic.js" as PageNavLogic
 
@@ -29,6 +30,26 @@ ApplicationWindow {
 
     // Only initalize once at the start
     Component.onCompleted: externalBookMode = externalBook
+
+    // Fork: Lute pages are reachable from the reader and the settings.
+    Connections {
+        target: LuteController
+
+        function onShowStatisticsRequested() {
+            loadPage(statisticsPage, sidebar.statisticsItem)
+        }
+
+        function onShowSettingsRequested() {
+            loadPage(settings, sidebar.settingsItem, false)
+            Qt.callLater(() => {
+                             const settingsPage = pageManager.currentItem
+                             if (settingsPage && settingsPage.loadSettingsPage)
+                             settingsPage.loadSettingsPage(
+                                 settingsPage.lutePage,
+                                 settingsPage.settingsSidebar.luteItem)
+                         })
+        }
+    }
 
     minimumHeight: 400
     minimumWidth: 650
