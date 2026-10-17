@@ -324,6 +324,10 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Phase 9 (final freeze, round 45) — final portable build smoke-tested (reader
+  with the Polish library, screenshot produced); C13 marked done, all C1-C13
+  now have evidence.
+
 - Phase 8/7 (acceptance) — C8 and C9 marked done: tags/families, TSV and
   Anki export/import, backup and restore each have a controller log or gtest;
   only the physical mouse click in the popup is not measurable headless.
@@ -347,7 +351,9 @@ Newest entries first; each entry: what changed, evidence, commit.
 | C10 PDF integration | done | PDF words/quads, popup on click, phrase drag, status overlay, import to Lute |
 | C11 zero-config | done | `--lute-db`, settings DB picker, language fallback, template DB creation |
 | C12 tests | done | 32 gtest cases green |
-| C13 packaging/docs | mostly | portable package 169.7 MB + smoke tests, LUTE.md, goal file; final acceptance pass open |
+| C13 packaging/docs | done | portable package 169.7 MB (final build) smoke-tested against the Polish library, LUTE.md, C1-C13 status |
 
-Remaining before closing: mouse-click QA of the popup actions, final screenshot set,
-and a last packaged build after the remaining fixes.
+All criteria have evidence. Known limitation: the physical mouse click inside
+the popup cannot be automated headless, so the QA used controller-level
+invocations plus screenshots of the rendered popup; the UI event wiring is the
+standard `onClicked` path.
