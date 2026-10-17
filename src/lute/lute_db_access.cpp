@@ -219,6 +219,60 @@ std::optional<LuteLanguage> LuteDbAccess::languageById(int languageId)
     return language;
 }
 
+bool LuteDbAccess::importTermsTsv(const QString& path, int languageId,
+                                 int* imported, QString* error)
+{
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        if(error)
+            *error = file.errorString();
+        return false;
+    }
+
+    const QString content = QString::fromUtf8(file.readAll());
+    file.close();
+
+    int count = 0;
+    const QStringList lines = content.split(QLatin1Char('\n'));
+    for(const QString& rawLine : lines)
+    {
+        const QString line = rawLine.trimmed();
+        if(line.isEmpty())
+            continue;
+
+        const QStringList columns = line.split(QLatin1Char('\t'));
+        if(columns.size() < 1)
+            continue;
+        if(columns.at(0).compare(QStringLiteral("WoText"), Qt::CaseInsensitive) == 0)
+            continue;
+
+        LuteTerm term;
+        term.languageId = languageId;
+        term.text = columns.at(0).trimmed();
+        if(term.text.isEmpty())
+            continue;
+        term.translation = columns.size() > 1 ? columns.at(1) : QString();
+        term.status = columns.size() > 2 ? columns.at(2).toInt() : 0;
+        term.tokenCount = columns.size() > 3 ? columns.at(3).toInt() : 1;
+        if(term.tokenCount <= 0)
+            term.tokenCount = 1;
+
+        QString saveError;
+        if(!saveTerm(term, &saveError))
+        {
+            if(error)
+                *error = QStringLiteral("Line %1: %2").arg(count + 1).arg(saveError);
+            return false;
+        }
+        ++count;
+    }
+
+    if(imported)
+        *imported = count;
+    return true;
+}
+
 bool LuteDbAccess::backupTo(const QString& path, QString* error)
 {
     if(!m_impl->db.isOpen())

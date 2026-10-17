@@ -35,9 +35,10 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Database backup** – Settings → Lute copies the open `lute.db` with
   SQLite's `VACUUM INTO`, producing a consistent snapshot while the database
   stays in use.
-* **Term export** – the Terms page exports the vocabulary of the selected
-  language as TSV (`WoText`, `WoTranslation`, `WoStatus`, `WoTokenCount`) for
-  Lute/Anki import.
+* **Term export/import** – the Terms page exports the vocabulary of the
+  selected language as TSV (`WoText`, `WoTranslation`, `WoStatus`,
+  `WoTokenCount`) and imports the same format back (header optional), for
+  Lute/Anki round trips.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.

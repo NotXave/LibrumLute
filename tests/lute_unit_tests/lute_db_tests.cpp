@@ -365,3 +365,55 @@ TEST(LuteDatabase, BacksUpTheDatabase)
     ASSERT_TRUE(restored.has_value());
     EXPECT_EQ(restored->status, 3);
 }
+
+
+TEST(LuteDatabase, ImportsTermsFromTsv)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm harbor;
+    harbor.languageId = english->id;
+    harbor.text = QStringLiteral("harbor");
+    harbor.status = 3;
+    harbor.translation = QStringLiteral("Hafen");
+    harbor.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(harbor, &error));
+
+    LuteTerm phrase;
+    phrase.languageId = english->id;
+    phrase.text = QStringLiteral("run out of");
+    phrase.status = 1;
+    phrase.tokenCount = 3;
+    ASSERT_TRUE(database.saveTerm(phrase, &error));
+
+    const QString tsvPath = directory.filePath(QStringLiteral("terms.tsv"));
+    ASSERT_TRUE(database.exportTermsTsv(tsvPath, english->id, &error));
+
+    // Remove the terms, then import the file again.
+    ASSERT_TRUE(database.deleteTerm(harbor.id, &error));
+    ASSERT_TRUE(database.deleteTerm(phrase.id, &error));
+    EXPECT_EQ(database.terms(english->id, QString(), 0).size(), 0);
+
+    int imported = 0;
+    ASSERT_TRUE(database.importTermsTsv(tsvPath, english->id, &imported, &error))
+        << error.toStdString();
+    EXPECT_EQ(imported, 2);
+
+    const auto restored = database.getTermByText(QStringLiteral("harbor"),
+                                                 english->id);
+    ASSERT_TRUE(restored.has_value());
+    EXPECT_EQ(restored->status, 3);
+    EXPECT_EQ(restored->translation, QStringLiteral("Hafen"));
+    const auto restoredPhrase =
+        database.getTermByText(QStringLiteral("run out of"), english->id);
+    ASSERT_TRUE(restoredPhrase.has_value());
+    EXPECT_EQ(restoredPhrase->tokenCount, 3);
+}

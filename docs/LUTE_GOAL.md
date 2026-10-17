@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (continued) — TSV term import: `importTermsTsv()` parses the export
+  format (optional header, tabs, status/token count), the Terms page has an
+  "Import TSV" picker and the controller refreshes list/stats. gtest exports
+  two terms, deletes them, reimports and checks word + phrase rows; 26 tests
+  green. Anki specs still open.
+
 - Phase 7 (continued) — database backup: `LuteDbAccess::backupTo()` uses
   `VACUUM INTO` for a consistent snapshot, the controller reports the result
   and Settings → Lute has a "Back up…" save dialog. gtest opens the backup and

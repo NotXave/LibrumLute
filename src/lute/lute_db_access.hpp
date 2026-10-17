@@ -45,6 +45,9 @@ public:
     /// token count) for Lute/Anki import.
     bool exportTermsTsv(const QString& path, int languageId,
                         QString* error = nullptr);
+    /// Imports a TSV written by exportTermsTsv (header optional).
+    bool importTermsTsv(const QString& path, int languageId, int* imported = nullptr,
+                        QString* error = nullptr);
 
     /// Consistent copy of the database via SQLite's VACUUM INTO.
     bool backupTo(const QString& path, QString* error = nullptr);

@@ -130,6 +130,19 @@ Page {
                 backgroundColor: "transparent"
                 textColor: Style.colorText
                 fontSize: Fonts.size10
+                text: qsTr("Import TSV")
+
+                onClicked: importDialog.open()
+            }
+
+            MButton {
+                Layout.preferredHeight: 34
+                horizontalMargins: 12
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size10
                 text: qsTr("Export TSV")
 
                 onClicked: exportDialog.open()
@@ -239,6 +252,16 @@ Page {
                 font.pointSize: Fonts.size11
             }
         }
+    }
+
+    FileDialog {
+        id: importDialog
+        title: qsTr("Import terms from TSV")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("TSV files (*.tsv *.txt)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.importTerms(
+                        root.toLocalPath(selectedFile))
     }
 
     FileDialog {
