@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 9 (packaging) — portable build rebuilt with all current features
+  (`dist/LibrumLute-0.1.0-win64`, 169.7 MB, windowed, windeployqt) and smoke
+  tested: the packaged exe opened the Lute hub with the user's Polish library
+  (`--lute-demo-hub` on a DB copy) and wrote the screenshot. C13 remains open
+  for final docs/checksum and C10–C12 acceptance.
+
 - Phase 8 (started) — tag manager: `LuteTag`, `LuteDbAccess::tags/saveTag/
   deleteTag`, controller list/CRUD plus a Tag page in the hub (add with
   comment, delete, live count) and a `--lute-demo-tags` helper. gtest covers
