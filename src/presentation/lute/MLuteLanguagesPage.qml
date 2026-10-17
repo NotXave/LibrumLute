@@ -99,6 +99,68 @@ Page {
             }
         }
 
+        Pane {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 200
+            Layout.topMargin: 14
+            padding: 12
+            background: Rectangle {
+                color: Style.colorContainerBackground
+                border.width: 1
+                border.color: Style.colorContainerBorder
+                radius: 4
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 6
+
+                Label {
+                    text: qsTr("Dictionaries for %1").arg(LuteController.languageName)
+                    color: Style.colorText
+                    font.pointSize: Fonts.size11
+                    font.weight: Font.DemiBold
+                }
+
+                ListView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    model: LuteController.dictionaries
+
+                    delegate: RowLayout {
+                        required property var modelData
+                        width: ListView.view.width
+                        spacing: 8
+
+                        CheckBox {
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                            checked: modelData.active
+
+                            onToggled: LuteController.setDictionaryActive(
+                                          modelData.id, checked)
+                        }
+
+                        Label {
+                            Layout.preferredWidth: 70
+                            text: modelData.useFor
+                            color: Style.colorPageSubtitle
+                            font.pointSize: Fonts.size9
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: modelData.uri
+                            color: Style.colorText
+                            font.pointSize: Fonts.size9
+                            elide: Text.ElideMiddle
+                        }
+                    }
+                }
+            }
+        }
+
         ListView {
             id: languageList
             Layout.fillWidth: true

@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5 (dictionaries) — the Languages page now lists the current
+  language's dictionaries (use-for, URI, checkbox); toggling a checkbox calls
+  `setDictionaryActive()` and reloads the list. Demo ran without QML warnings.
+
+
 - Phase 5 (dictionaries) — activation support: `setDictionaryActive()` writes
   `languagedicts.LdIsActive`, the controller reloads the list; gtest toggles a
   dictionary off and back on (31 tests green). The checkbox UI on the Languages
