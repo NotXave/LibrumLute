@@ -99,7 +99,8 @@ librum.exe --lute-selftest book.pdf          # extract words, print, exit
 librum.exe book.pdf --lute-demo --out r.png   # seed statuses, open popup, screenshot
 librum.exe book.pdf --lute-demo-click --out c.png  # click a word through the real event path
 librum.exe book.pdf --lute-demo-phrase --out p.png # drag over "run out of", store it as a phrase
-librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via a mock Ollama server on :11888
+python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
+librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png
 librum.exe book.pdf --lute-demo-stats --out t.png
 librum.exe --lute-demo-login --out l.png
