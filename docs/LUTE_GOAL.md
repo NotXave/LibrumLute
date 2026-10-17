@@ -68,6 +68,14 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
+
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
   external reader renders this book's pages blank in our test build, while
@@ -299,6 +307,14 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
+
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
   external reader renders this book's pages blank in our test build, while
@@ -317,6 +333,14 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
+
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
   external reader renders this book's pages blank in our test build, while
@@ -331,6 +355,14 @@ Newest entries first; each entry: what changed, evidence, commit.
   languages, statistics, tags (all in `docs/lute/`).
 
 ## Phase log
+
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
 
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
@@ -348,6 +380,14 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
+
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
   external reader renders this book's pages blank in our test build, while
@@ -363,6 +403,14 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
+
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
   external reader renders this book's pages blank in our test build, while
@@ -377,6 +425,14 @@ Newest entries first; each entry: what changed, evidence, commit.
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
 ## Phase log
+
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
 
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the
@@ -399,6 +455,14 @@ Newest entries first; each entry: what changed, evidence, commit.
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
 ## Phase log
+
+- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
+  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
+  one huge page; the Lute reader shows it with status colours (screenshot
+  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
+  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
+  until the library-rendered EPUB overlay is confirmed.
+
 
 - EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
   MuPDF extracts words (multi-page, Polish) and the app opens it, but the

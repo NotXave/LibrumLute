@@ -480,7 +480,7 @@ Page {
                                 backgroundColor: "transparent"
                                 textColor: Style.colorText
                                 fontSize: Fonts.size11
-                                text: qsTr("Add a PDF…")
+                                text: qsTr("Add a book…")
 
                                 onClicked: addPdfDialog.open()
                             }
@@ -518,7 +518,7 @@ Page {
         id: addPdfDialog
         title: qsTr("Add a PDF to the Lute library")
         fileMode: FileDialog.OpenFile
-        nameFilters: [qsTr("PDF documents (*.pdf)"), qsTr("All files (*)")]
+        nameFilters: [qsTr("Books (*.pdf *.epub *.mobi *.fb2 *.cbz)"), qsTr("All files (*)")]
 
         onAccepted: LuteController.addPdfToLuteLibrary(
                         root.toLocalPath(selectedFile))

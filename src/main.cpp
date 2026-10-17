@@ -139,6 +139,22 @@ int main(int argc, char* argv[])
                              app.arguments().at(luteDbIndex + 1));
     }
 
+    if(app.arguments().contains("--lute-import"))
+    {
+        const int index = app.arguments().indexOf("--lute-import");
+        if(index + 1 < app.arguments().size())
+        {
+            lute::LuteController controller;
+            controller.initialize();
+            const QString path = app.arguments().at(index + 1);
+            if(!controller.setDocumentPath(path))
+                return 4;
+            const bool imported = controller.addPdfToLuteLibrary(path);
+            qInfo() << "lute import:" << path << imported
+                    << "pages" << controller.pageCount();
+            return imported ? 0 : 5;
+        }
+    }
     if(app.arguments().contains("--lute-selftest"))
     {
         const int index = app.arguments().indexOf("--lute-selftest");

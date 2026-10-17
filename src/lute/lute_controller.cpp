@@ -2037,14 +2037,25 @@ bool LuteController::importDocument(LuteWordExtractor& extractor,
             return false;
         }
 
-        if(m_database.createText(bookId, 1, text, wordCount, &error) <= 0)
+        // Paginate like Lute instead of storing one huge page: EPUBs easily
+        // reach tens of thousands of words.
+        const QVector<QString> pages =
+            LutePaginator::paginate(text, *m_parser, 250, false);
+        int order = 1;
+        for(const QString& page : pages)
         {
-            setMessage(error.isEmpty()
-                           ? QStringLiteral("Could not add the text")
-                           : error,
-                       true);
-            return false;
+            const int pageWords = m_parser->words(page).size();
+            if(m_database.createText(bookId, order, page, pageWords, &error) <= 0)
+            {
+                setMessage(error.isEmpty()
+                               ? QStringLiteral("Could not add the text")
+                               : error,
+                           true);
+                return false;
+            }
+            ++order;
         }
+        Q_UNUSED(wordCount);
     }
 
     ++m_libraryRevision;
