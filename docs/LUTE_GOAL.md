@@ -68,6 +68,13 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
+
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
   one huge page; the Lute reader shows it with status colours (screenshot
@@ -307,6 +314,13 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
+
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
   one huge page; the Lute reader shows it with status colours (screenshot
@@ -333,6 +347,13 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
+
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
   one huge page; the Lute reader shows it with status colours (screenshot
@@ -355,6 +376,13 @@ Newest entries first; each entry: what changed, evidence, commit.
   languages, statistics, tags (all in `docs/lute/`).
 
 ## Phase log
+
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
 
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
@@ -380,6 +408,13 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
+
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
   one huge page; the Lute reader shows it with status colours (screenshot
@@ -403,6 +438,13 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
+
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
   one huge page; the Lute reader shows it with status colours (screenshot
@@ -425,6 +467,13 @@ Newest entries first; each entry: what changed, evidence, commit.
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
 ## Phase log
+
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
 
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
@@ -455,6 +504,13 @@ Newest entries first; each entry: what changed, evidence, commit.
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
 ## Phase log
+
+- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
+  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
+  uses the same layout, so pages render and word coordinates match. Verified
+  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
+  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
+
 
 - EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
   Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of

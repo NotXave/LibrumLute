@@ -2,6 +2,7 @@
 #include <qfontdatabase.h>
 #include <qqml.h>
 #include <QApplication>
+#include <QWheelEvent>
 #include <QDateTime>
 #include <QFile>
 #include <QGuiApplication>
@@ -462,8 +463,14 @@ int main(int argc, char* argv[])
             window->requestActivate();
             for(int i = 0; i < page; ++i)
             {
-                QKeyEvent press(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
-                QCoreApplication::sendEvent(window, &press);
+                QTimer::singleShot(i * 60, window, [window]() {
+                    const QPointF pos(window->width() / 2.0,
+                                      window->height() / 2.0);
+                    QWheelEvent event(pos, window->mapToGlobal(pos), QPoint(),
+                                      QPoint(0, -120), Qt::NoButton,
+                                      Qt::NoModifier, Qt::NoScrollPhase, false);
+                    QCoreApplication::sendEvent(window, &event);
+                });
             }
         });
         QTimer::singleShot(25000, &engine, [&engine, outputPath]() {

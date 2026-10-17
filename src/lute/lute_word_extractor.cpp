@@ -173,6 +173,15 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
         return false;
     }
 
+    fz_try(context)
+    {
+        if(fz_is_document_reflowable(context, document))
+            fz_layout_document(context, document, 450.f, 650.f, 11.f);
+    }
+    fz_catch(context)
+    {
+    }
+
     m_impl->context = context;
     m_impl->document = document;
     m_impl->buffer = data;

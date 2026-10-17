@@ -15,6 +15,7 @@ import "DocumentNavigation.js" as NavigationLogic
   */
 Pane {
     id: root
+    objectName: "documentView"
     property var lastSelectedPage
     signal clicked
     signal zoomFactorChanged(real factor)
