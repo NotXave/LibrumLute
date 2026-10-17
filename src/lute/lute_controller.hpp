@@ -223,6 +223,7 @@ public slots:
     void openLanguages();
     void openLuteStatistics();
     bool exportTerms(const QString& path);
+    bool exportAnki(const QString& path);
     bool backupDatabase(const QString& path);
     bool restoreDatabase(const QString& path);
     bool importTerms(const QString& path);

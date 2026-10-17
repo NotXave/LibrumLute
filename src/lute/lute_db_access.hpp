@@ -46,6 +46,9 @@ public:
     /// token count) for Lute/Anki import.
     bool exportTermsTsv(const QString& path, int languageId,
                         QString* error = nullptr);
+    /// Anki-friendly TSV: text, translation, comma separated tags, status.
+    bool exportAnkiTsv(const QString& path, int languageId,
+                       QString* error = nullptr);
     /// Imports a TSV written by exportTermsTsv (header optional).
     bool importTermsTsv(const QString& path, int languageId, int* imported = nullptr,
                         QString* error = nullptr);

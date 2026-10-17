@@ -219,6 +219,47 @@ std::optional<LuteLanguage> LuteDbAccess::languageById(int languageId)
     return language;
 }
 
+bool LuteDbAccess::exportAnkiTsv(const QString& path, int languageId,
+                                 QString* error)
+{
+    QFile file(path);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        if(error)
+            *error = file.errorString();
+        return false;
+    }
+    QTextStream stream(&file);
+    stream.setEncoding(QStringConverter::Utf8);
+    stream << "Text\tTranslation\tTags\tStatus\n";
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT w.WoText, COALESCE(w.WoTranslation, ''), "
+        "COALESCE(GROUP_CONCAT(t.TgText, ' '), ''), w.WoStatus "
+        "FROM words w LEFT JOIN wordtags wt ON wt.WtWoID = w.WoID "
+        "LEFT JOIN tags t ON t.TgID = wt.WtTgID "
+        "WHERE w.WoLgID = ? GROUP BY w.WoID ORDER BY w.WoTextLC"));
+    query.addBindValue(languageId);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        file.close();
+        return false;
+    }
+    while(query.next())
+    {
+        QString translation = query.value(1).toString();
+        translation.replace(QLatin1Char('\t'), QLatin1Char(' '));
+        stream << query.value(0).toString() << '\t' << translation << '\t'
+               << query.value(2).toString() << '\t' << query.value(3).toInt()
+               << '\n';
+    }
+    file.close();
+    return true;
+}
+
 bool LuteDbAccess::importTermsTsv(const QString& path, int languageId,
                                  int* imported, QString* error)
 {

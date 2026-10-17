@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (Anki) — `exportAnkiTsv()` writes an Anki-friendly file (Text,
+  Translation, Tags via wordtags GROUP_CONCAT, Status); the Terms page has an
+  "Export Anki" save dialog. Build green; a pytest/gtest row check follows.
+
+
 - Phase 5 (dictionaries QA) — screenshot check showed Polish has zero
   `languagedicts` rows (the template's 24 rows belong to other language ids),
   so the empty 200px panel was hidden when the list is empty.

@@ -156,6 +156,19 @@ Page {
                 backgroundColor: "transparent"
                 textColor: Style.colorText
                 fontSize: Fonts.size10
+                text: qsTr("Export Anki")
+
+                onClicked: ankiDialog.open()
+            }
+
+            MButton {
+                Layout.preferredHeight: 34
+                horizontalMargins: 12
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size10
                 text: qsTr("Refresh")
 
                 onClicked: root.reload()
@@ -266,6 +279,17 @@ Page {
                 font.pointSize: Fonts.size11
             }
         }
+    }
+
+    FileDialog {
+        id: ankiDialog
+        title: qsTr("Export terms for Anki")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "txt"
+        nameFilters: [qsTr("TSV files (*.txt *.tsv)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.exportAnki(
+                        root.toLocalPath(selectedFile))
     }
 
     FileDialog {

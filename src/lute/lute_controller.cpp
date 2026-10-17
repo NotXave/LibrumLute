@@ -928,6 +928,25 @@ bool LuteController::backupDatabase(const QString& path)
     return true;
 }
 
+bool LuteController::exportAnki(const QString& path)
+{
+    if(!m_database.isOpen() || m_languageId <= 0)
+    {
+        setMessage(QStringLiteral("Open a lute.db first"), true);
+        return false;
+    }
+    QString error;
+    if(!m_database.exportAnkiTsv(path, m_languageId, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not export terms")
+                                   : error,
+                   true);
+        return false;
+    }
+    setMessage(QStringLiteral("Anki TSV exported to %1").arg(path));
+    return true;
+}
+
 bool LuteController::exportTerms(const QString& path)
 {
     if(!m_database.isOpen() || m_languageId <= 0)
