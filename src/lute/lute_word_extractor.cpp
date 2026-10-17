@@ -123,8 +123,23 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
                                 reinterpret_cast<const unsigned char*>(
                                     data.constData()),
                                 size_t(data.size()));
-        document = fz_open_document_with_stream(context, "application/pdf",
-                                                stream);
+        // MuPDF supports more than PDFs: the user's EPUBs/MOBIs must be
+        // opened with the matching magic or text extraction and the Lute
+        // overlay stay empty for them.
+        QString mimeType = QStringLiteral("application/pdf");
+        const QString suffix = QFileInfo(filePath).suffix().toLower();
+        if(suffix == QStringLiteral("epub"))
+            mimeType = QStringLiteral("application/epub+zip");
+        else if(suffix == QStringLiteral("mobi"))
+            mimeType = QStringLiteral("application/x-mobipocket-ebook");
+        else if(suffix == QStringLiteral("fb2"))
+            mimeType = QStringLiteral("application/x-fictionbook+xml");
+        else if(suffix == QStringLiteral("cbz"))
+            mimeType = QStringLiteral("application/vnd.comicbook+zip");
+        else if(suffix == QStringLiteral("html") || suffix == QStringLiteral("xhtml"))
+            mimeType = QStringLiteral("text/html");
+        document = fz_open_document_with_stream(
+            context, mimeType.toUtf8().constData(), stream);
     }
     fz_always(context)
     {

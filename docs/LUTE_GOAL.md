@@ -335,6 +335,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 - Phase 3 (bulk QA) — gtest bulk-updates "har" to 99 and status 5 to 1,
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
+## Phase log
+
+- Phase 2 (EPUB fix) — `LuteWordExtractor::open()` passed
+  `application/pdf` to MuPDF for every file, so EPUBs failed to open and the
+  Lute colours never appeared. It now detects EPUB/MOBI/FB2/CBZ/HTML and opens
+  the matching format; verified with a generated Polish EPUB: the external
+  reader shows green/orange status colours (`docs/lute/epub.png`, demo
+  `--lute-demo-external`).
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
