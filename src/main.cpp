@@ -131,6 +131,14 @@ int main(int argc, char* argv[])
     qInstallMessageHandler(logging::messageHandler);
     setupGlobalSettings();
 
+    // Fork: allow pointing the Lute layer at a specific lute.db.
+    const int luteDbIndex = app.arguments().indexOf(QStringLiteral("--lute-db"));
+    if(luteDbIndex >= 0 && luteDbIndex + 1 < app.arguments().size())
+    {
+        QSettings().setValue(QStringLiteral("lute/databasePath"),
+                             app.arguments().at(luteDbIndex + 1));
+    }
+
     if(app.arguments().contains("--lute-selftest"))
     {
         const int index = app.arguments().indexOf("--lute-selftest");
@@ -347,6 +355,7 @@ int main(int argc, char* argv[])
     // --lute-demo and --out do not count as book paths.
     QStringList positionalArguments;
     QString demoOutputPath;
+    QString demoLibraryPath;
     for(int i = 1; i < app.arguments().size(); ++i)
     {
         const QString argument = app.arguments().at(i);
@@ -354,6 +363,18 @@ int main(int argc, char* argv[])
         {
             if(i + 1 < app.arguments().size())
                 demoOutputPath = app.arguments().at(++i);
+            continue;
+        }
+        if(argument == "--lute-demo-library")
+        {
+            if(i + 1 < app.arguments().size())
+                demoLibraryPath = app.arguments().at(++i);
+            continue;
+        }
+        if(argument == "--lute-db")
+        {
+            if(i + 1 < app.arguments().size())
+                ++i;
             continue;
         }
         if(argument.startsWith("--"))
@@ -718,6 +739,26 @@ int main(int argc, char* argv[])
             else
                 settings.remove(QStringLiteral("lute/aiBaseUrl"));
 
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-library` adds a PDF to the Lute library
+    // without opening it, then shows the settings page with the result banner.
+    if(app.arguments().contains("--lute-demo-library"))
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(2500, &app, [luteController = luteController.get(), demoLibraryPath]() {
+            qInfo() << "lute library demo: adding" << demoLibraryPath
+                    << luteController->addPdfToLuteLibrary(demoLibraryPath);
+        });
+        QTimer::singleShot(3500, &app, [luteController = luteController.get()]() {
+            luteController->openSettings();
+        });
+        QTimer::singleShot(5200, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
             QCoreApplication::quit();
         });
     }

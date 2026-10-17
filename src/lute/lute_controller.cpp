@@ -266,21 +266,12 @@ void LuteController::initialize()
         return;
     }
 
-    const int wanted =
-        settings.value(QStringLiteral("lute/languageId"), 0).toInt();
-    bool found = false;
-    for(const LuteLanguage& language : m_languages)
-    {
-        if(language.id == wanted)
-        {
-            found = true;
-            break;
-        }
-    }
-    if(found)
-        selectLanguage(wanted);
-    else
-        selectLanguageByName(QStringLiteral("English"));
+    // Language ids are only unique inside one lute.db, so the stored name is
+    // the reliable key when the user switches databases.
+    const QString wantedName =
+        settings.value(QStringLiteral("lute/languageName")).toString();
+    if(wantedName.isEmpty() || !selectLanguageByName(wantedName))
+        selectFallbackLanguage();
 
     m_ai->setConfig([this]() {
         QSettings aiSettings;
@@ -325,7 +316,7 @@ bool LuteController::openDatabase(const QString& path)
     }
 
     QSettings().setValue(QStringLiteral("lute/databasePath"), path);
-    const int previousLanguage = m_languageId;
+    const QString previousLanguageName = languageName();
     loadLanguages();
     if(m_languages.isEmpty())
     {
@@ -335,19 +326,9 @@ bool LuteController::openDatabase(const QString& path)
     }
 
     m_languageId = 0;
-    bool found = false;
-    for(const LuteLanguage& language : m_languages)
-    {
-        if(language.id == previousLanguage)
-        {
-            found = true;
-            break;
-        }
-    }
-    if(found)
-        selectLanguage(previousLanguage);
-    else
-        selectLanguageByName(QStringLiteral("English"));
+    if(previousLanguageName.isEmpty()
+       || !selectLanguageByName(previousLanguageName))
+        selectFallbackLanguage();
 
     emit databaseChanged();
     rebuildDocumentVocabulary();
@@ -400,6 +381,7 @@ void LuteController::selectLanguage(int languageId)
 
     m_languageId = languageId;
     QSettings().setValue(QStringLiteral("lute/languageId"), languageId);
+    QSettings().setValue(QStringLiteral("lute/languageName"), language->name);
 
     if(m_extractor)
         m_extractor->setLanguage(*language);
@@ -412,16 +394,28 @@ void LuteController::selectLanguage(int languageId)
     refreshStats();
 }
 
-void LuteController::selectLanguageByName(const QString& name)
+bool LuteController::selectLanguageByName(const QString& name)
 {
     for(const LuteLanguage& language : m_languages)
     {
         if(language.name.compare(name, Qt::CaseInsensitive) == 0)
         {
             selectLanguage(language.id);
-            return;
+            return true;
         }
     }
+    return false;
+}
+
+void LuteController::selectFallbackLanguage()
+{
+    // A Lute database does not have to contain English (the user's own
+    // library might only have Polish); fall back to the first language so the
+    // learning features are usable immediately.
+    if(selectLanguageByName(QStringLiteral("English")))
+        return;
+    if(!m_languages.isEmpty())
+        selectLanguage(m_languages.first().id);
 }
 
 bool LuteController::setDocumentPath(const QString& path)
@@ -1089,47 +1083,107 @@ void LuteController::refreshStats()
     emit statsChanged();
 }
 
+bool LuteController::importDocument(LuteWordExtractor& extractor,
+                                   const QString& path)
+{
+    QString title = extractor.title().trimmed();
+    if(title.isEmpty())
+        title = QFileInfo(path).completeBaseName();
+
+    QString error;
+    const qint64 bookId = m_database.findOrCreateBook(title, path, m_languageId,
+                                                     &error);
+    if(bookId <= 0)
+    {
+        setMessage(error.isEmpty()
+                       ? QStringLiteral("Could not add \"%1\"").arg(title)
+                       : error,
+                   true);
+        return false;
+    }
+
+    if(!m_database.findTextForBook(bookId))
+    {
+        QString text;
+        int wordCount = 0;
+        for(int page = 0; page < extractor.pageCount(); ++page)
+        {
+            const QString pageText = extractor.pageText(page).trimmed();
+            if(pageText.isEmpty())
+                continue;
+            text += pageText + QStringLiteral("\n\n");
+            wordCount += extractor.words(page).size();
+        }
+
+        if(text.trimmed().isEmpty())
+        {
+            setMessage(QStringLiteral("\"%1\" contains no extractable text")
+                           .arg(title),
+                       true);
+            return false;
+        }
+
+        if(m_database.createText(bookId, 1, text, wordCount, &error) <= 0)
+        {
+            setMessage(error.isEmpty()
+                           ? QStringLiteral("Could not add the text")
+                           : error,
+                       true);
+            return false;
+        }
+    }
+
+    ++m_libraryRevision;
+    emit libraryChanged();
+    setMessage(QStringLiteral("\"%1\" is now in the Lute library").arg(title));
+    return true;
+}
+
 void LuteController::addDocumentToLuteLibrary()
 {
     if(!documentOpen() || !m_database.isOpen() || m_languageId <= 0)
     {
-        setMessage(QStringLiteral("Open a lute.db and a PDF first"), true);
+        setMessage(QStringLiteral("Open a PDF first"), true);
         return;
     }
 
-    QString error;
-    const qint64 bookId = m_database.findOrCreateBook(
-        documentTitle(), m_documentPath, m_languageId, &error);
-    if(bookId <= 0)
-    {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not add the book")
-                                   : error,
-                   true);
+    if(!importDocument(*m_extractor, m_documentPath))
         return;
-    }
-    if(!m_database.findTextForBook(bookId))
-    {
-        QString text;
-        for(int page = 0; page < m_pageCount; ++page)
-        {
-            const QString pageText = m_extractor->pageText(page).trimmed();
-            if(!pageText.isEmpty())
-                text += pageText + QStringLiteral("\n\n");
-        }
-        const qint64 textId = m_database.createText(
-            bookId, 1, text, m_documentTokenCount, &error);
-        if(textId <= 0)
-        {
-            setMessage(error.isEmpty() ? QStringLiteral("Could not add the text")
-                                       : error,
-                       true);
-            return;
-        }
-    }
+
     m_documentRegistered = true;
     emit documentChanged();
-    setMessage(QStringLiteral("\"%1\" is now part of the Lute library")
-                   .arg(documentTitle()));
+}
+
+bool LuteController::addPdfToLuteLibrary(const QString& path)
+{
+    if(!m_database.isOpen() || m_languageId <= 0)
+    {
+        setMessage(QStringLiteral("Open a lute.db and select a language first"),
+                   true);
+        return false;
+    }
+
+    QString error;
+    LuteWordExtractor extractor;
+    if(!extractor.open(path, &error))
+    {
+        setMessage(error, true);
+        return false;
+    }
+    if(const auto language = currentLanguage())
+        extractor.setLanguage(*language);
+
+    if(!importDocument(extractor, path))
+        return false;
+
+    if(!m_documentPath.isEmpty()
+       && QFileInfo(path).absoluteFilePath()
+              == QFileInfo(m_documentPath).absoluteFilePath())
+    {
+        m_documentRegistered = true;
+        emit documentChanged();
+    }
+    return true;
 }
 
 void LuteController::messageShown()

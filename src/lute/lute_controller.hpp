@@ -46,6 +46,7 @@ class LuteController : public QObject
     Q_PROPERTY(int pageCount READ pageCount NOTIFY documentChanged)
     Q_PROPERTY(QString documentTitle READ documentTitle NOTIFY documentChanged)
     Q_PROPERTY(bool documentRegistered READ documentRegistered NOTIFY documentChanged)
+    Q_PROPERTY(int libraryRevision READ libraryRevision NOTIFY libraryChanged)
 
     Q_PROPERTY(bool wordPopupVisible READ wordPopupVisible NOTIFY wordPopupChanged)
     Q_PROPERTY(QVariantMap activeWord READ activeWord NOTIFY wordPopupChanged)
@@ -76,6 +77,7 @@ public:
     int pageCount() const;
     QString documentTitle() const;
     bool documentRegistered() const;
+    int libraryRevision() const { return m_libraryRevision; }
 
     bool wordPopupVisible() const;
     QVariantMap activeWord() const;
@@ -112,7 +114,7 @@ public slots:
     void closeDocument();
 
     void selectLanguage(int languageId);
-    void selectLanguageByName(const QString& name);
+    bool selectLanguageByName(const QString& name);
 
     /// All highlighted words of a page (cached) for the overlay.
     QVariantList highlightsForPage(int pageIndex);
@@ -145,6 +147,10 @@ public slots:
     void refreshStats();
     void addDocumentToLuteLibrary();
 
+    /// Adds an arbitrary PDF to the Lute library, even when no document is
+    /// open in the reader.
+    bool addPdfToLuteLibrary(const QString& path);
+
     /// Ask the shell to open the Lute statistics / settings page.
     void openStatistics();
     void openSettings();
@@ -170,6 +176,7 @@ signals:
     void showStatisticsRequested();
     void showSettingsRequested();
     void showReaderRequested();
+    void libraryChanged();
 
 private:
     void loadLanguages();
@@ -183,6 +190,8 @@ private:
                          int lastIndex, bool isPhrase);
     void refreshActiveTerm();
     const QVector<PhraseMatch>& phraseMatches(int pageIndex);
+    bool importDocument(LuteWordExtractor& extractor, const QString& path);
+    void selectFallbackLanguage();
 
     LuteDbAccess m_database;
     std::unique_ptr<LuteWordExtractor> m_extractor;
@@ -196,6 +205,7 @@ private:
     QString m_documentPath;
     int m_pageCount = 0;
     bool m_documentRegistered = false;
+    int m_libraryRevision = 0;
 
     QSet<int> m_visitedPages;
     QHash<int, QVariantList> m_highlightCache;

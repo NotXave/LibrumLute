@@ -82,6 +82,47 @@ Page {
         width: parent.width
         spacing: 0
 
+        Pane {
+            id: messageBanner
+            Layout.fillWidth: true
+            Layout.topMargin: 12
+            Layout.preferredHeight: messageLabel.implicitHeight + 24
+            visible: LuteController.lastMessage.length > 0
+            padding: 0
+            background: Rectangle {
+                color: Style.colorContainerBackground
+                border.width: 1
+                border.color: LuteController.lastMessageIsError
+                              ? Style.colorErrorBorder : Style.colorContainerBorder
+                radius: 4
+            }
+
+            Label {
+                id: messageLabel
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 12
+                text: LuteController.lastMessage
+                color: LuteController.lastMessageIsError
+                       ? Style.colorErrorText : Style.colorGreenText
+                font.pointSize: Fonts.size11
+                wrapMode: Text.WordWrap
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: LuteController.messageShown()
+            }
+        }
+
+        Timer {
+            interval: 7000
+            running: LuteController.lastMessage.length > 0
+            onTriggered: LuteController.messageShown()
+        }
+
         MButton {
             Layout.topMargin: 12
             Layout.preferredHeight: 30
@@ -376,36 +417,64 @@ Page {
                         Label {
                             Layout.fillWidth: true
                             Layout.topMargin: 6
-                            text: LuteController.documentOpen
-                                  ? qsTr("“%1” is open. Adding it creates the book and its text in lute.db.").arg(LuteController.documentTitle)
-                                  : qsTr("Open a PDF to add it to the Lute library.")
+                            text: LuteController.documentRegistered
+                                  ? qsTr("“%1” is already in the Lute library.").arg(LuteController.documentTitle)
+                                  : LuteController.documentOpen
+                                    ? qsTr("“%1” is open. Add it to the Lute library, or pick another PDF.").arg(LuteController.documentTitle)
+                                    : qsTr("Add any PDF to your Lute library. Its text becomes readable in Lute.")
                             font.pointSize: Fonts.size11
                             color: Style.colorPageSubtitle
                             wrapMode: Text.WordWrap
                         }
 
-                        MButton {
-                            Layout.preferredHeight: 32
+                        RowLayout {
                             Layout.topMargin: 16
-                            horizontalMargins: 14
-                            borderWidth: 1
-                            borderColor: Style.colorButtonBorder
-                            backgroundColor: "transparent"
-                            textColor: LuteController.documentRegistered
-                                        ? Style.colorGreenText : Style.colorText
-                            fontSize: Fonts.size11
-                            text: LuteController.documentRegistered
-                                  ? qsTr("Already in the Lute library")
-                                  : qsTr("Add current document to the Lute library")
-                            enabled: LuteController.documentOpen
-                                    && !LuteController.documentRegistered
+                            spacing: 10
 
-                            onClicked: LuteController.addDocumentToLuteLibrary()
+                            MButton {
+                                Layout.preferredHeight: 32
+                                horizontalMargins: 14
+                                borderWidth: 1
+                                borderColor: Style.colorButtonBorder
+                                backgroundColor: "transparent"
+                                textColor: Style.colorText
+                                fontSize: Fonts.size11
+                                visible: LuteController.documentOpen
+                                         && !LuteController.documentRegistered
+                                text: qsTr("Add current document")
+
+                                onClicked: LuteController.addDocumentToLuteLibrary()
+                            }
+
+                            MButton {
+                                Layout.preferredHeight: 32
+                                horizontalMargins: 14
+                                borderWidth: 1
+                                borderColor: Style.colorButtonBorder
+                                backgroundColor: "transparent"
+                                textColor: Style.colorText
+                                fontSize: Fonts.size11
+                                text: qsTr("Add a PDF…")
+
+                                onClicked: addPdfDialog.open()
+                            }
+
+                            Item { Layout.fillWidth: true }
                         }
                     }
                 }
             }
         }
+    }
+
+    FileDialog {
+        id: addPdfDialog
+        title: qsTr("Add a PDF to the Lute library")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("PDF documents (*.pdf)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.addPdfToLuteLibrary(
+                        root.toLocalPath(selectedFile))
     }
 
     FileDialog {

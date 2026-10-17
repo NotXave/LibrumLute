@@ -86,10 +86,15 @@ Notes on the Windows build in this fork:
 ## Running
 
 * `librum.exe` – start page; use *Open a PDF without an account* to read.
+* `librum.exe --lute-db C:\path\lute.db` – use a specific Lute database.
 * `librum.exe C:\path\book.pdf` – opens the reader directly.
 * The Lute database defaults to
-  `%APPDATA%\Librum-Reader\Librum\lute.db`. Change it in *Settings → Lute*.
-* *Settings → Lute* also selects the learning language and configures the AI.
+  `%APPDATA%\Librum-Reader\Librum\lute.db`. Change it in *Settings → Lute*
+  or with `--lute-db`. The learning language is matched by name, so a database
+  containing only e.g. Polish selects Polish instead of failing.
+* *Settings → Lute* also selects the learning language, configures the AI and
+  adds PDFs to the Lute library ("Add a PDF…" works without an open document;
+  the result is shown in a banner).
 * The word popup supports `1`–`5`, `W` (well-known), `I` (ignored) and `Esc`.
 
 ### QA helpers
