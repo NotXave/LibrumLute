@@ -722,6 +722,25 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-back` opens the Lute settings from the
+    // reader and returns with the "Back to reading" action.
+    if(app.arguments().contains("--lute-demo-back"))
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(3000, &app, [luteController = luteController.get()]() {
+            luteController->openSettings();
+        });
+        QTimer::singleShot(4500, &app, [luteController = luteController.get()]() {
+            luteController->openReader();
+        });
+        QTimer::singleShot(5600, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-settings` / `--lute-demo-stats` open the
     // Lute settings or statistics page and save a screenshot of the window.
     const bool demoSettings = app.arguments().contains("--lute-demo-settings");

@@ -1,0 +1,1 @@
+Add a QA helper for the settings -> reader navigation
