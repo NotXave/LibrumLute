@@ -762,6 +762,45 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-tag-toggle` opens a word popup and toggles
+    // its first tag through the controller, logging the result.
+    if(app.arguments().contains("--lute-demo-tag-toggle"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+            luteController->refreshTags();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            const QVariantList books = luteController->books();
+            if(books.isEmpty())
+                return;
+            if(luteController->openBook(books.first().toMap().value("id").toLongLong()))
+                luteController->showReader();
+        });
+        QTimer::singleShot(4600, &app, [luteController = luteController.get()]() {
+            luteController->selectTextWord(12);
+            luteController->refreshTags();
+        });
+        QTimer::singleShot(5200, &app, [luteController = luteController.get()]() {
+            const QVariantList tags = luteController->tags();
+            if(tags.isEmpty())
+            {
+                qInfo() << "lute tag toggle demo: no tags";
+                return;
+            }
+            const qint64 tagId = tags.first().toMap().value("id").toLongLong();
+            qInfo() << "lute tag toggle demo:" << tagId
+                    << luteController->toggleActiveTag(tagId)
+                    << luteController->activeWord().value("tags");
+        });
+        QTimer::singleShot(6400, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-tags` opens the tag manager.
     if(app.arguments().contains("--lute-demo-tags"))
     {

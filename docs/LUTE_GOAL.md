@@ -68,6 +68,10 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (QA) — tag toggle verified through the controller: the new
+  `--lute-demo-tag-toggle` helper selected a word, toggled tag 1 and logged
+  `toggleActiveTag true` with activeWord.tags = ["noun"] (wordtags written,
+  popup state updated). Screenshot `shot-tagtoggle.png`.
 - Phase 8 (QA) — tag chips verified in the real popup: a tag was seeded into
   the user's DB copy and appears in the KRAJOWY popup under the headword
   (screenshot `docs/lute/tags-popup.png`). Toggle click-through still to do.
