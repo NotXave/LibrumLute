@@ -8,6 +8,7 @@ import Librum.style
 import Librum.icons
 import Librum.fonts
 import Librum.controllers
+import Librum.lute 1.0
 import Librum.globals
 import Librum.models
 import Librum.globalSettings
@@ -853,6 +854,10 @@ Page {
                 bookMultiSelectOptionsPopup.close()
 
             BookController.setUp(Globals.selectedBook.uuid)
+            // Give Lute the same file so library EPUBs/PDFs get the word
+            // colours and popup as well.
+            if (BookController.getFilePath().length > 0)
+                LuteController.setDocumentPath(BookController.getFilePath())
 
             LibraryController.refreshLastOpenedFlag(Globals.selectedBook.uuid)
             loadPage(readingPage)
