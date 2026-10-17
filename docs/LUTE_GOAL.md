@@ -68,6 +68,15 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
+
 - Phase 7 (Anki QA) — gtest exports a term with translation and tag, checks the
   header and the row `harbor\tHafen\tnoun\t3`; 32 tests green.
 
@@ -290,6 +299,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
+
 - Phase 9 (packaging refresh, round 41) — packaged exe rebuilt with
   dictionary URI editing; smoke test opened the Languages page (69 languages)
   against the Polish DB copy.
@@ -299,11 +317,29 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
+
 - Phase 9 (screenshots) — final screenshot set recaptured from the packaged
   feature state against the user's Polish DB copy: library, reader, terms,
   languages, statistics, tags (all in `docs/lute/`).
 
 ## Phase log
+
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
 
 - Phase 2 (popup QA) — `--lute-demo-status` selected word 12, called
   `setActiveStatus(3)` and logged `status 3 / "Learning (3)"`, i.e. the popup
@@ -312,17 +348,44 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
+
 - Phase 5 (dictionaries) — URI editing: `setDictionaryUri()` updates
   `languagedicts.LdDictURI`; the Languages panel's URI fields are editable and
   save on editing finished, closing the dictionary part of C6.
 
 ## Phase log
 
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
+
 - Phase 3 (bulk) — "Mark filtered known" bulk-updates the terms matching the
   current search and status filter to 99 (`setStatusForTerms`, refuses without
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
 ## Phase log
+
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
 
 - Phase 9 (final freeze, round 45) — final portable build smoke-tested (reader
   with the Polish library, screenshot produced); C13 marked done, all C1-C13
@@ -336,6 +399,15 @@ Newest entries first; each entry: what changed, evidence, commit.
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
 ## Phase log
+
+- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
+  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
+  external reader renders this book's pages blank in our test build, while
+  library opening is the likely route. The library hook now passes
+  `BookController.getFilePath()` to Lute and failures are logged
+  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
+  folder carries the fix and diagnostics for a user-side verification.
+
 
 - Phase 2 (EPUB fix) — `LuteWordExtractor::open()` passed
   `application/pdf` to MuPDF for every file, so EPUBs failed to open and the
