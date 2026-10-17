@@ -23,7 +23,6 @@ void BookService::setUp(std::unique_ptr<IBookGetter> bookGetter)
     auto book = m_bookGetter->getBook();
     auto stdFilePath = book->getFilePath().toStdString();
     m_fzDocument = std::make_unique<mupdf::FzDocument>(stdFilePath.c_str());
-
     m_bookSearcher = std::make_unique<BookSearcher>(m_fzDocument.get());
 }
 
