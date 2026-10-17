@@ -575,6 +575,22 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+bool LuteController::deleteTermById(qint64 id)
+{
+    QString error;
+    if(!m_database.deleteTerm(id, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the term")
+                                   : error,
+                   true);
+        return false;
+    }
+    if(m_termsLoaded)
+        refreshTerms(m_termSearch, m_termStatus);
+    refreshStats();
+    return true;
+}
+
 void LuteController::refreshTags()
 {
     m_tags.clear();

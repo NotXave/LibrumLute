@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 3 (term list) — direct delete action per term row
+  (`deleteTermById`, refreshes list and statistics); covers the bulk-less
+  single-term cleanup part of C5.
+
+
 - Phase 9 (packaging refresh) — portable package updated with the latest
   reader (slider), tags/families and statistics features: 169.7 MB, 1,405
   files; smoke test opened the Lute reader with the Polish library copy and

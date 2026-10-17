@@ -232,6 +232,20 @@ Page {
                         color: Style.colorBasePurple
                         font.pointSize: Fonts.size9
                     }
+
+                    MButton {
+                        Layout.preferredHeight: 28
+                        horizontalMargins: 10
+                        borderWidth: 1
+                        borderColor: Style.colorErrorBorder
+                        backgroundColor: "transparent"
+                        textColor: Style.colorErrorText
+                        fontSize: Fonts.size9
+                        text: qsTr("Delete")
+
+                        onClicked: LuteController.deleteTermById(
+                                       termRow.modelData.id)
+                    }
                 }
 
                 MouseArea {

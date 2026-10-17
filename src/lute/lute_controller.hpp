@@ -225,6 +225,7 @@ public slots:
     void refreshTags();
     bool saveTag(qint64 id, const QString& text, const QString& comment);
     bool deleteTag(qint64 id);
+    bool deleteTermById(qint64 id);
     bool toggleActiveTag(qint64 tagId);
     bool linkActiveParent(const QString& parentText);
     bool unlinkActiveParent(qint64 parentId);
