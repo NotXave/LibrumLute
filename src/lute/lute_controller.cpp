@@ -575,6 +575,41 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+void LuteController::loadBookmarks()
+{
+    m_bookmarks.clear();
+    if(m_currentBook.id > 0 && !m_database.path().isEmpty())
+    {
+        QSettings settings;
+        const QString key = QStringLiteral("lute/bookmarks/%1/%2")
+                                .arg(m_database.path())
+                                .arg(m_currentBook.id);
+        const QStringList pages = settings.value(key).toStringList();
+        for(const QString& page : pages)
+            m_bookmarks.append(page.toInt());
+    }
+    emit bookmarksChanged();
+}
+
+bool LuteController::toggleBookmark(int page)
+{
+    if(m_currentBook.id <= 0 || m_database.path().isEmpty() || page < 1)
+        return false;
+    QSettings settings;
+    const QString key = QStringLiteral("lute/bookmarks/%1/%2")
+                            .arg(m_database.path())
+                            .arg(m_currentBook.id);
+    QStringList pages = settings.value(key).toStringList();
+    const QString value = QString::number(page);
+    if(pages.contains(value))
+        pages.removeAll(value);
+    else
+        pages.append(value);
+    settings.setValue(key, pages);
+    loadBookmarks();
+    return true;
+}
+
 bool LuteController::deleteTermById(qint64 id)
 {
     QString error;

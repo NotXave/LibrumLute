@@ -154,6 +154,38 @@ Page {
                     }
                 }
 
+                MButton {
+                    Layout.preferredHeight: 28
+                    horizontalMargins: 10
+                    borderWidth: 1
+                    borderColor: Style.colorButtonBorder
+                    backgroundColor: "transparent"
+                    textColor: LuteController.bookmarks.indexOf(
+                                   LuteController.readerPage) !== -1
+                               ? Style.colorBasePurple : Style.colorText
+                    fontSize: Fonts.size10
+                    text: LuteController.bookmarks.indexOf(
+                              LuteController.readerPage) !== -1
+                          ? qsTr("★ Bookmarked") : qsTr("☆ Bookmark")
+
+                    onClicked: LuteController.toggleBookmark(
+                                   LuteController.readerPage)
+                }
+
+                ComboBox {
+                    Layout.preferredWidth: 96
+                    Layout.preferredHeight: 28
+                    visible: LuteController.bookmarks.length > 0
+                    model: LuteController.bookmarks
+                    font.pointSize: Fonts.size9
+
+                    onActivated: index => {
+                                     LuteController.openPage(
+                                         LuteController.bookmarks[index])
+                                     currentIndex = -1
+                                 }
+                }
+
                 Item { Layout.fillWidth: true }
 
                 Label {

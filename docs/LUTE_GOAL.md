@@ -68,6 +68,14 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (reader polish) — bookmarks: "Bookmark/Bookmarked" toggles the
+  current page for the open book (stored per lute.db path and book id in
+  QSettings), a picker jumps to a bookmark; loaded on `openBook`. Verified in
+  the reading demo without QML warnings
+  (`docs/lute/reader-bookmark.png`). Lute's own `textbookmarks` table is not
+  written yet.
+
+
 - Phase 2 (reader polish) — "go to page" input next to the slider: accepts a
   number (validated 1..pageCount), Enter or Go calls `openPage()`; verified in
   the reading demo without QML warnings

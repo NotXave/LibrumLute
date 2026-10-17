@@ -62,6 +62,7 @@ class LuteController : public QObject
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
     Q_PROPERTY(QVariantList tags READ tags NOTIFY tagsChanged)
+    Q_PROPERTY(QVariantList bookmarks READ bookmarks NOTIFY bookmarksChanged)
     Q_PROPERTY(QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
@@ -106,6 +107,7 @@ public:
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }
     QVariantList tags() const { return m_tags; }
+    QVariantList bookmarks() const { return m_bookmarks; }
     QVariantList learnedSeries() const { return m_learnedSeries; }
     QVariantList createdSeries() const { return m_createdSeries; }
     QVariantMap currentBook() const { return m_currentBookMap; }
@@ -226,6 +228,7 @@ public slots:
     bool saveTag(qint64 id, const QString& text, const QString& comment);
     bool deleteTag(qint64 id);
     bool deleteTermById(qint64 id);
+    bool toggleBookmark(int page);
     bool toggleActiveTag(qint64 tagId);
     bool linkActiveParent(const QString& parentText);
     bool unlinkActiveParent(qint64 parentId);
@@ -256,6 +259,7 @@ signals:
     void showLanguagesRequested();
     void showStatisticsPageRequested();
     void tagsChanged();
+    void bookmarksChanged();
     void showTagsRequested();
     void readerChanged();
     void showLibraryRequested();
@@ -273,6 +277,7 @@ private:
                          int lastIndex, bool isPhrase);
     void refreshActiveTerm();
     void refreshActiveFamily();
+    void loadBookmarks();
     const QVector<PhraseMatch>& phraseMatches(int pageIndex);
     bool importDocument(LuteWordExtractor& extractor, const QString& path);
     void selectFallbackLanguage();
@@ -295,6 +300,7 @@ private:
     QVariantList m_books;
     QVariantList m_terms;
     QVariantList m_tags;
+    QVariantList m_bookmarks;
     QVariantList m_learnedSeries;
     QVariantList m_createdSeries;
     bool m_termsLoaded = false;
