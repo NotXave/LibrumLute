@@ -287,3 +287,24 @@ Newest entries first; each entry: what changed, evidence, commit.
 - Phase 0 (started) — consolidation done: standalone frozen into
   `attic/standalone/`, root README/FORK.md rewritten, this checklist added.
   Next in Phase 0: the Lute library page (C2/C3) in Phase 2.
+
+## Status summary (round 36)
+
+| Criterion | State | Evidence |
+| --- | --- | --- |
+| C1 fork merged | done | Librum fork builds Lute inside; commits 0dbb266..3fa0076 |
+| C2 Lute hub | done | Texts/Terms/Statistics/Languages/Tags sections, sidebar entry, Ctrl+6 |
+| C3 library | done | 271 books of the user DB listed, create/import text + PDF, delete-free read |
+| C4 reader | done | rich text per page, status colours, click popup, slider, page jump, bookmarks (`textbookmarks`), shortcuts, mark read |
+| C5 terms | mostly | 14,358 terms, search, status filter, edit popup, delete, TSV export/import, Anki export |
+| C6 languages/dicts | mostly | 69 languages CRUD, parser fields, dictionaries list + activation |
+| C7 statistics | done | cards, 14-day series, status distribution |
+| C8 tags/families | mostly | tag CRUD, term assignment + toggle, parent link/unlink, popup chips |
+| C9 import/export/backup | mostly | text/PDF import, TSV export/import, Anki export, VACUUM INTO backup + verified restore |
+| C10 PDF integration | done | PDF words/quads, popup on click, phrase drag, status overlay, import to Lute |
+| C11 zero-config | done | `--lute-db`, settings DB picker, language fallback, template DB creation |
+| C12 tests | done | 32 gtest cases green |
+| C13 packaging/docs | mostly | portable package 169.7 MB + smoke tests, LUTE.md, goal file; final acceptance pass open |
+
+Remaining before closing: mouse-click QA of the popup actions, final screenshot set,
+and a last packaged build after the remaining fixes.
