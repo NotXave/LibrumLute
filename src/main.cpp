@@ -762,6 +762,36 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-status` opens a word and sets status 3.
+    if(app.arguments().contains("--lute-demo-status"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            const QVariantList books = luteController->books();
+            if(books.isEmpty())
+                return;
+            if(luteController->openBook(books.first().toMap().value("id").toLongLong()))
+                luteController->showReader();
+        });
+        QTimer::singleShot(4600, &app, [luteController = luteController.get()]() {
+            luteController->selectTextWord(12);
+        });
+        QTimer::singleShot(5200, &app, [luteController = luteController.get()]() {
+            luteController->setActiveStatus(3);
+            qInfo() << "lute status demo:"
+                    << luteController->activeWord().value("status")
+                    << luteController->activeWord().value("statusLabel");
+        });
+        QTimer::singleShot(6400, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-family` links and unlinks a parent term in
     // the open word popup and logs both results.
     if(app.arguments().contains("--lute-demo-family"))

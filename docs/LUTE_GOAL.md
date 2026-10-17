@@ -300,6 +300,13 @@ Newest entries first; each entry: what changed, evidence, commit.
   feature state against the user's Polish DB copy: library, reader, terms,
   languages, statistics, tags (all in `docs/lute/`).
 
+## Phase log
+
+- Phase 2 (popup QA) — `--lute-demo-status` selected word 12, called
+  `setActiveStatus(3)` and logged `status 3 / "Learning (3)"`, i.e. the popup
+  state and the term update path work; the physical mouse click remains the
+  only unmeasured bit.
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
