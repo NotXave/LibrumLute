@@ -68,6 +68,9 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (continued) — restore verified end-to-end with `--lute-demo-restore`:
+  backup returned true, restore returned true, the database reopened with 69
+  languages and the book list (1 book) — evidence in the app log.
 - Phase 7 (continued) — database restore: `LuteController::restoreDatabase()`
   replaces the current lute.db with a chosen backup, reinitialises the
   connection (languages, library, terms, stats) and reports the result;

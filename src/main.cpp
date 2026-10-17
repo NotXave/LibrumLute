@@ -743,6 +743,25 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-restore` backs up the open lute.db and
+    // restores it again, logging both results.
+    if(app.arguments().contains("--lute-demo-restore"))
+    {
+        const QString backupPath = demoOutputPath + QStringLiteral(".backup.db");
+        QTimer::singleShot(2000, &app, [luteController = luteController.get(), backupPath]() {
+            const bool backedUp = luteController->backupDatabase(backupPath);
+            qInfo() << "lute restore demo: backup" << backedUp
+                    << luteController->lastMessage();
+            const bool restored = luteController->restoreDatabase(backupPath);
+            qInfo() << "lute restore demo: restore" << restored
+                    << luteController->lastMessage()
+                    << "databaseOpen" << luteController->databaseOpen()
+                    << "languages" << luteController->languages().size()
+                    << "books" << luteController->books().size();
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-tags` opens the tag manager.
     if(app.arguments().contains("--lute-demo-tags"))
     {
