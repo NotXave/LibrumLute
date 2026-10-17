@@ -955,6 +955,11 @@ void LuteController::openSettings()
     emit showSettingsRequested();
 }
 
+void LuteController::openReader()
+{
+    emit showReaderRequested();
+}
+
 void LuteController::saveAiConfiguration(const QString& provider,
                                          const QString& model,
                                          const QString& baseUrl,

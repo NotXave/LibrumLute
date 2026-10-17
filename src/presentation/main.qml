@@ -39,6 +39,13 @@ ApplicationWindow {
             loadPage(statisticsPage, sidebar.statisticsItem)
         }
 
+        function onShowReaderRequested() {
+            if (baseRoot.externalBookMode)
+                loadPage(externalReadingPage, undefined, false)
+            else
+                loadPage(readingPage, undefined, false)
+        }
+
         function onShowSettingsRequested() {
             loadPage(settings, sidebar.settingsItem, false)
             Qt.callLater(() => {

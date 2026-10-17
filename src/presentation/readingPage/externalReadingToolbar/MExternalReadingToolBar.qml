@@ -7,6 +7,7 @@ import Librum.style
 import Librum.icons
 import Librum.controllers
 import Librum.fonts
+import Librum.lute 1.0
 
 Pane {
     id: root
@@ -265,6 +266,32 @@ Pane {
                             0, zoomComboBox.text.length - 1) / 100
                 zoomAssignment.start() // Force rebinding
             }
+        }
+
+        MButton {
+            id: luteSettingsButton
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 32
+            backgroundColor: Style.colorReadingViewButtonBackground
+            borderWidth: 0
+            imagePath: Icons.settingsSidebarLute
+            imageSize: 20
+            opacityOnPressed: 0.7
+
+            onClicked: LuteController.openSettings()
+        }
+
+        MButton {
+            id: luteStatisticsButton
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 32
+            backgroundColor: Style.colorReadingViewButtonBackground
+            borderWidth: 0
+            imagePath: Icons.sidebarPieChart
+            imageSize: 18
+            opacityOnPressed: 0.7
+
+            onClicked: LuteController.openStatistics()
         }
 
         MButton {

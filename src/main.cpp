@@ -696,6 +696,10 @@ int main(int argc, char* argv[])
                                           previousProvider, previousModel, previousBaseUrl]() {
             qInfo() << "lute ai: suggestion" << luteController->aiSuggestion()
                     << "error" << luteController->aiError();
+            if(!luteController->aiSuggestion().isEmpty())
+                luteController->applyAiSuggestion();
+            qInfo() << "lute ai: stored translation"
+                    << luteController->activeWord().value("translation").toString();
 
             if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
                 window->grabWindow().save(outputPath);

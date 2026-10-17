@@ -149,6 +149,9 @@ public slots:
     void openStatistics();
     void openSettings();
 
+    /// Ask the shell to go back to the document that is being read.
+    void openReader();
+
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
                              const QString& targetLanguage);
@@ -166,6 +169,7 @@ signals:
     void lastMessageChanged();
     void showStatisticsRequested();
     void showSettingsRequested();
+    void showReaderRequested();
 
 private:
     void loadLanguages();

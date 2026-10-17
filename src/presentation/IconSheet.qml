@@ -471,8 +471,14 @@ Item {
             PropertyChanges {
                 target: iconSheet
                 settingsSidebarSupportUsSelected: "/resources/images/light_mode/settings_sidebar/support_us_selected_icon.svg"
-    settingsSidebarLute: "/resources/images/light_mode/settings_sidebar/lute_icon.svg"
-    settingsSidebarLuteSelected: "/resources/images/light_mode/settings_sidebar/lute_selected_icon.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                settingsSidebarLute: "/resources/images/light_mode/settings_sidebar/lute_icon.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                settingsSidebarLuteSelected: "/resources/images/light_mode/settings_sidebar/lute_selected_icon.svg"
             }
             PropertyChanges {
                 target: iconSheet
@@ -920,6 +926,14 @@ Item {
             PropertyChanges {
                 target: iconSheet
                 settingsSidebarSupportUsSelected: "/resources/images/dark_mode/settings_sidebar/support_us_selected_icon.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                settingsSidebarLute: "/resources/images/dark_mode/settings_sidebar/lute_icon.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                settingsSidebarLuteSelected: "/resources/images/dark_mode/settings_sidebar/lute_selected_icon.svg"
             }
             PropertyChanges {
                 target: iconSheet

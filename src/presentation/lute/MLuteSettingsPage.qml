@@ -82,8 +82,23 @@ Page {
         width: parent.width
         spacing: 0
 
+        MButton {
+            Layout.topMargin: 12
+            Layout.preferredHeight: 30
+            horizontalMargins: 12
+            borderWidth: 1
+            borderColor: Style.colorButtonBorder
+            backgroundColor: "transparent"
+            textColor: Style.colorText
+            fontSize: Fonts.size11
+            visible: LuteController.documentOpen
+            text: qsTr("← Back to reading")
+
+            onClicked: LuteController.openReader()
+        }
+
         MTitle {
-            Layout.topMargin: 64
+            Layout.topMargin: 40
             titleText: qsTr("Lute")
             descriptionText: qsTr("Language learning with your own lute.db")
             titleSize: Fonts.size25

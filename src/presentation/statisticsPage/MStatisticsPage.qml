@@ -32,7 +32,7 @@ Page {
             spacing: 0
 
             MTitle {
-                Layout.topMargin: 64
+                Layout.topMargin: 40
                 titleText: qsTr("Statistics")
                 descriptionText: qsTr("Your vocabulary in %1").arg(LuteController.languageName)
                 titleSize: Fonts.size25
@@ -53,6 +53,22 @@ Page {
                 text: qsTr("Refresh")
 
                 onClicked: LuteController.refreshStats()
+            }
+
+            MButton {
+                Layout.preferredHeight: 38
+                Layout.leftMargin: 10
+                Layout.alignment: Qt.AlignBottom
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                horizontalMargins: 14
+                fontSize: Fonts.size12
+                visible: LuteController.documentOpen
+                text: qsTr("Back to reading")
+
+                onClicked: LuteController.openReader()
             }
         }
 

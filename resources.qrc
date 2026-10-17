@@ -156,6 +156,8 @@
         <file>resources/images/dark_mode/settings_sidebar/updates_icon.svg</file>
         <file>resources/images/dark_mode/settings_sidebar/support_us_selected_icon.svg</file>
         <file>resources/images/dark_mode/settings_sidebar/support_us_icon.svg</file>
+    <file>resources/images/dark_mode/settings_sidebar/lute_icon.svg</file>
+    <file>resources/images/dark_mode/settings_sidebar/lute_selected_icon.svg</file>
         <file>resources/images/dark_mode/settings_sidebar/storage_selected_icon.svg</file>
         <file>resources/images/dark_mode/settings_sidebar/storage_icon.svg</file>
         <file>resources/images/dark_mode/settings_sidebar/shortcuts_selected_icon.svg</file>
