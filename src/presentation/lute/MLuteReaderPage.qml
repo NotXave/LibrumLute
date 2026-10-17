@@ -112,6 +112,48 @@ Page {
                     }
                 }
 
+                TextField {
+                    id: pageInput
+                    Layout.preferredWidth: 54
+                    Layout.preferredHeight: 28
+                    leftPadding: 8
+                    horizontalAlignment: TextInput.AlignHCenter
+                    background: Rectangle {
+                        color: Style.colorReadingViewButtonBackground
+                        radius: 4
+                    }
+                    color: Style.colorText
+                    font.pointSize: Fonts.size10
+                    placeholderText: qsTr("#")
+                    placeholderTextColor: Style.colorLightText
+                    validator: IntValidator {
+                        bottom: 1
+                        top: Math.max(1, LuteController.readerPageCount)
+                    }
+                    onAccepted: {
+                        if (text.length > 0)
+                            LuteController.openPage(parseInt(text))
+                        text = ""
+                    }
+                }
+
+                MButton {
+                    Layout.preferredHeight: 28
+                    horizontalMargins: 10
+                    borderWidth: 1
+                    borderColor: Style.colorButtonBorder
+                    backgroundColor: "transparent"
+                    textColor: Style.colorText
+                    fontSize: Fonts.size9
+                    text: qsTr("Go")
+
+                    onClicked: {
+                        if (pageInput.text.length > 0)
+                            LuteController.openPage(parseInt(pageInput.text))
+                        pageInput.text = ""
+                    }
+                }
+
                 Item { Layout.fillWidth: true }
 
                 Label {

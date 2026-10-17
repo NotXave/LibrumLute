@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (reader polish) — "go to page" input next to the slider: accepts a
+  number (validated 1..pageCount), Enter or Go calls `openPage()`; verified in
+  the reading demo without QML warnings
+  (`docs/lute/reader-pagejump.png`).
+
+
 - Phase 3 (term list) — direct delete action per term row
   (`deleteTermById`, refreshes list and statistics); covers the bulk-less
   single-term cleanup part of C5.
