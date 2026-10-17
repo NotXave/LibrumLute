@@ -101,8 +101,9 @@ Page {
 
         Pane {
             Layout.fillWidth: true
-            Layout.preferredHeight: 200
-            Layout.topMargin: 14
+            Layout.preferredHeight: visible ? 200 : 0
+            Layout.topMargin: visible ? 14 : 0
+            visible: LuteController.dictionaries.length > 0
             padding: 12
             background: Rectangle {
                 color: Style.colorContainerBackground

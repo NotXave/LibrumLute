@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5 (dictionaries QA) — screenshot check showed Polish has zero
+  `languagedicts` rows (the template's 24 rows belong to other language ids),
+  so the empty 200px panel was hidden when the list is empty.
+
+
 - Phase 5 (dictionaries) — the Languages page now lists the current
   language's dictionaries (use-for, URI, checkbox); toggling a checkbox calls
   `setDictionaryActive()` and reloads the list. Demo ran without QML warnings.
