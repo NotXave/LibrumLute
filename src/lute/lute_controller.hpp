@@ -220,6 +220,7 @@ public slots:
     void openLuteStatistics();
     bool exportTerms(const QString& path);
     bool backupDatabase(const QString& path);
+    bool restoreDatabase(const QString& path);
     bool importTerms(const QString& path);
     void refreshTags();
     bool saveTag(qint64 id, const QString& text, const QString& comment);

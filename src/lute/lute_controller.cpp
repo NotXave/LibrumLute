@@ -631,6 +631,35 @@ void LuteController::openTags()
     emit showTagsRequested();
 }
 
+bool LuteController::restoreDatabase(const QString& path)
+{
+    if(!QFileInfo::exists(path))
+    {
+        setMessage(QStringLiteral("'%1' does not exist").arg(path), true);
+        return false;
+    }
+    const QString current = m_database.path();
+    if(current.isEmpty())
+    {
+        setMessage(QStringLiteral("Open a lute.db first"), true);
+        return false;
+    }
+
+    m_database.close();
+    if(!QFile::remove(current) || !QFile::copy(path, current))
+    {
+        setMessage(QStringLiteral("Could not replace %1").arg(current), true);
+        initialize();
+        return false;
+    }
+    initialize();
+    refreshLibrary();
+    if(m_termsLoaded)
+        refreshTerms(m_termSearch, m_termStatus);
+    setMessage(QStringLiteral("lute.db restored from %1").arg(path));
+    return true;
+}
+
 bool LuteController::importTerms(const QString& path)
 {
     if(!m_database.isOpen() || m_languageId <= 0)

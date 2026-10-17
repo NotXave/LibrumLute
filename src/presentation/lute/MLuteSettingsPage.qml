@@ -295,6 +295,19 @@ Page {
                                 onClicked: backupDialog.open()
                             }
 
+                            MButton {
+                                Layout.preferredHeight: 32
+                                horizontalMargins: 12
+                                borderWidth: 1
+                                borderColor: Style.colorButtonBorder
+                                backgroundColor: "transparent"
+                                textColor: Style.colorText
+                                fontSize: Fonts.size11
+                                text: qsTr("Restore…")
+
+                                onClicked: restoreDialog.open()
+                            }
+
                             Item { Layout.fillWidth: true }
                         }
                     }
@@ -478,6 +491,16 @@ Page {
                 }
             }
         }
+    }
+
+    FileDialog {
+        id: restoreDialog
+        title: qsTr("Restore lute.db from a backup")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("Lute databases (*.db)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.restoreDatabase(
+                        root.toLocalPath(selectedFile))
     }
 
     FileDialog {

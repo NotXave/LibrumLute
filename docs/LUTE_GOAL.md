@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (continued) — database restore: `LuteController::restoreDatabase()`
+  replaces the current lute.db with a chosen backup, reinitialises the
+  connection (languages, library, terms, stats) and reports the result;
+  Settings → Lute has a "Restore…" picker next to Backup. Backup format is
+  covered by gtest; the restore path uses the same file and is UI-wired.
+
 - Phase 9 (packaging) — portable build rebuilt with all current features
   (`dist/LibrumLute-0.1.0-win64`, 169.7 MB, windowed, windeployqt) and smoke
   tested: the packaged exe opened the Lute hub with the user's Polish library
