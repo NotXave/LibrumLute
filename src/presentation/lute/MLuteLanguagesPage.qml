@@ -150,12 +150,20 @@ Page {
                             font.pointSize: Fonts.size9
                         }
 
-                        Label {
+                        TextField {
                             Layout.fillWidth: true
-                            text: modelData.uri
+                            Layout.preferredHeight: 24
+                            leftPadding: 6
+                            background: Rectangle {
+                                color: "transparent"
+                                border.width: 0
+                            }
                             color: Style.colorText
                             font.pointSize: Fonts.size9
-                            elide: Text.ElideMiddle
+                            text: modelData.uri
+                            selectByMouse: true
+                            onEditingFinished: LuteController.setDictionaryUri(
+                                                   modelData.id, text)
                         }
                     }
                 }

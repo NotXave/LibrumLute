@@ -658,6 +658,18 @@ bool LuteController::setDictionaryActive(qint64 id, bool active)
     return true;
 }
 
+bool LuteController::setDictionaryUri(qint64 id, const QString& uri)
+{
+    QString error;
+    if(!m_database.setDictionaryUri(id, uri, &error))
+    {
+        setMessage(error, true);
+        return false;
+    }
+    loadDictionaries();
+    return true;
+}
+
 bool LuteController::copyActiveWord()
 {
     const QString word = m_activeWord.value(QStringLiteral("word")).toString();

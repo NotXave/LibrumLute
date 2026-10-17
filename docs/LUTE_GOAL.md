@@ -307,6 +307,12 @@ Newest entries first; each entry: what changed, evidence, commit.
   state and the term update path work; the physical mouse click remains the
   only unmeasured bit.
 
+## Phase log
+
+- Phase 5 (dictionaries) — URI editing: `setDictionaryUri()` updates
+  `languagedicts.LdDictURI`; the Languages panel's URI fields are editable and
+  save on editing finished, closing the dictionary part of C6.
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |

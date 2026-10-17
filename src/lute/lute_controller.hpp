@@ -233,6 +233,7 @@ public slots:
     bool deleteTermById(qint64 id);
     bool toggleBookmark(int page);
     bool setDictionaryActive(qint64 id, bool active);
+    bool setDictionaryUri(qint64 id, const QString& uri);
     bool copyActiveWord();
     bool toggleActiveTag(qint64 tagId);
     bool linkActiveParent(const QString& parentText);

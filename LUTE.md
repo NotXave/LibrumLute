@@ -30,8 +30,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
   substitutions, word characters, parser type, RTL, romanization); new
   languages and guarded deletion included; the page header also shows how
   many dictionaries (`languagedicts`) the selected language has;
-  `setDictionaryActive()` toggles a dictionary's `LdIsActive` flag; the
-  Languages page lists them with checkboxes and their URI.
+  `setDictionaryActive()` toggles a dictionary's `LdIsActive` flag and
+  `setDictionaryUri()` edits its URI; the Languages page lists them with
+  checkboxes and editable URI fields.
 * **Lute statistics** – the hub's *Statistics* section shows terms/learning/
   known/words read, 14-day "terms created" and "status changes" bar charts and
   the full status distribution, straight from `lute.db`.
