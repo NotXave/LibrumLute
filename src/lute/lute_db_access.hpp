@@ -46,6 +46,9 @@ public:
     bool exportTermsTsv(const QString& path, int languageId,
                         QString* error = nullptr);
 
+    /// Consistent copy of the database via SQLite's VACUUM INTO.
+    bool backupTo(const QString& path, QString* error = nullptr);
+
     bool saveLanguage(LuteLanguage& language, QString* error = nullptr);
     bool deleteLanguage(int languageId, QString* error = nullptr);
 

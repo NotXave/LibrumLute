@@ -217,6 +217,7 @@ public slots:
     void openLanguages();
     void openLuteStatistics();
     bool exportTerms(const QString& path);
+    bool backupDatabase(const QString& path);
 
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,

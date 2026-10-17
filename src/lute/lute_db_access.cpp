@@ -219,6 +219,27 @@ std::optional<LuteLanguage> LuteDbAccess::languageById(int languageId)
     return language;
 }
 
+bool LuteDbAccess::backupTo(const QString& path, QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    // VACUUM INTO writes a consistent copy while the database stays open.
+    QFile::remove(path);
+    QString escaped = path;
+    escaped.replace(QLatin1Char('\''), QLatin1String("''"));
+
+    QSqlQuery query(m_impl->db);
+    if(!query.exec(QStringLiteral("VACUUM INTO '") + escaped
+                   + QLatin1Char('\'')))
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 bool LuteDbAccess::exportTermsTsv(const QString& path, int languageId,
                                  QString* error)
 {

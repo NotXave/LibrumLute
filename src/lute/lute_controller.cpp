@@ -575,6 +575,24 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+bool LuteController::backupDatabase(const QString& path)
+{
+    if(!m_database.isOpen())
+    {
+        setMessage(QStringLiteral("Open a lute.db first"), true);
+        return false;
+    }
+    QString error;
+    if(!m_database.backupTo(path, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Backup failed") : error,
+                   true);
+        return false;
+    }
+    setMessage(QStringLiteral("lute.db backed up to %1").arg(path));
+    return true;
+}
+
 bool LuteController::exportTerms(const QString& path)
 {
     if(!m_database.isOpen() || m_languageId <= 0)

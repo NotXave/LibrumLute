@@ -333,3 +333,35 @@ TEST(LuteDatabase, ExportsTermsAsTsv)
     EXPECT_TRUE(content.contains(QStringLiteral("harbor\tHafen\t3\t1")));
     EXPECT_TRUE(content.contains(QStringLiteral("run out of\t\t1\t3")));
 }
+
+
+TEST(LuteDatabase, BacksUpTheDatabase)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm term;
+    term.languageId = english->id;
+    term.text = QStringLiteral("harbor");
+    term.status = 3;
+    term.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(term, &error));
+
+    const QString backupPath = directory.filePath(QStringLiteral("backup.db"));
+    ASSERT_TRUE(database.backupTo(backupPath, &error)) << error.toStdString();
+    ASSERT_TRUE(QFileInfo::exists(backupPath));
+
+    LuteDbAccess copy;
+    ASSERT_TRUE(copy.open(backupPath, &error)) << error.toStdString();
+    const auto restored = copy.getTermByText(QStringLiteral("harbor"),
+                                             english->id);
+    ASSERT_TRUE(restored.has_value());
+    EXPECT_EQ(restored->status, 3);
+}

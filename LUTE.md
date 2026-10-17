@@ -32,6 +32,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Lute statistics** – the hub's *Statistics* section shows terms/learning/
   known/words read, 14-day "terms created" and "status changes" bar charts and
   the full status distribution, straight from `lute.db`.
+* **Database backup** – Settings → Lute copies the open `lute.db` with
+  SQLite's `VACUUM INTO`, producing a consistent snapshot while the database
+  stays in use.
 * **Term export** – the Terms page exports the vocabulary of the selected
   language as TSV (`WoText`, `WoTranslation`, `WoStatus`, `WoTokenCount`) for
   Lute/Anki import.

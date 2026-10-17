@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (continued) — database backup: `LuteDbAccess::backupTo()` uses
+  `VACUUM INTO` for a consistent snapshot, the controller reports the result
+  and Settings → Lute has a "Back up…" save dialog. gtest opens the backup and
+  finds the saved term; 25 tests green. Restore UI and Anki specs still open.
+
 - Phase 7 (started) — term export: `LuteDbAccess::exportTermsTsv()` writes a
   UTF-8 TSV with text, translation, status and token count; the Terms page has
   an "Export TSV" save dialog and the controller reports success/failure.
