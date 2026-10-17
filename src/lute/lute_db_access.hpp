@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lute_book.hpp"
 #include "lute_language.hpp"
 #include "lute_stats.hpp"
 #include "lute_term.hpp"
@@ -74,6 +75,18 @@ public:
     bool recordWordsRead(int languageId, int wordCount, qint64 textId = 0);
 
     // ---- library (books/texts) --------------------------------------------
+    /// All books of a language, newest first, with page count and current page.
+    QVector<LuteBook> books(int languageId, bool includeArchived = true);
+    std::optional<LuteBook> book(qint64 bookId);
+
+    /// The pages of a book, in reading order (without the text contents).
+    QVector<LuteText> texts(qint64 bookId);
+    /// One page including its text.
+    std::optional<LuteText> text(qint64 bookId, int order);
+
+    bool setBookCurrentPage(qint64 bookId, int page);
+    bool markTextRead(qint64 textId);
+
     std::optional<qint64> findBookBySource(const QString& sourceUri, int languageId);
     qint64 findOrCreateBook(const QString& title, const QString& sourceUri, int languageId,
                             QString* error = nullptr);

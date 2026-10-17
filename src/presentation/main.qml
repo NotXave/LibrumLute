@@ -18,6 +18,7 @@ import "statisticsPage"
 import "toolsPage"
 import "forgotPasswordPage"
 import "readingPage"
+import "lute"
 
 ApplicationWindow {
     id: baseRoot
@@ -37,6 +38,14 @@ ApplicationWindow {
 
         function onShowStatisticsRequested() {
             loadPage(statisticsPage, sidebar.statisticsItem)
+        }
+
+        function onShowLibraryRequested() {
+            loadPage(luteHubPage, sidebar.luteItem, false)
+        }
+
+        function onShowLuteReaderRequested() {
+            loadPage(luteReaderPage, undefined, false)
         }
 
         function onShowReaderRequested() {
@@ -193,6 +202,14 @@ ApplicationWindow {
     Component {
         id: toolsPage
         MToolsPage {}
+    }
+    Component {
+        id: luteHubPage
+        MLuteHubPage {}
+    }
+    Component {
+        id: luteReaderPage
+        MLuteReaderPage {}
     }
     Component {
         id: statisticsPage

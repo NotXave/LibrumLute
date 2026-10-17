@@ -11,6 +11,7 @@
 #include <memory>
 #include <optional>
 
+#include "lute_book.hpp"
 #include "lute_db_access.hpp"
 #include "lute_language.hpp"
 #include "lute_term.hpp"
@@ -58,6 +59,15 @@ class LuteController : public QObject
     Q_PROPERTY(QString aiError READ aiError NOTIFY aiChanged)
     Q_PROPERTY(QVariantMap aiConfig READ aiConfig NOTIFY aiConfigChanged)
 
+    Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
+    Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
+    Q_PROPERTY(bool readerOpen READ readerOpen NOTIFY readerChanged)
+    Q_PROPERTY(QString readerHtml READ readerHtml NOTIFY readerChanged)
+    Q_PROPERTY(QString readerTitle READ readerTitle NOTIFY readerChanged)
+    Q_PROPERTY(int readerPage READ readerPage NOTIFY readerChanged)
+    Q_PROPERTY(int readerPageCount READ readerPageCount NOTIFY readerChanged)
+    Q_PROPERTY(bool readerPageRead READ readerPageRead NOTIFY readerChanged)
+
     Q_PROPERTY(QString lastMessage READ lastMessage NOTIFY lastMessageChanged)
     Q_PROPERTY(bool lastMessageIsError READ lastMessageIsError NOTIFY
                    lastMessageChanged)
@@ -88,6 +98,15 @@ public:
     bool aiBusy() const;
     QString aiError() const;
     QVariantMap aiConfig() const;
+
+    QVariantList books() const { return m_books; }
+    QVariantMap currentBook() const { return m_currentBookMap; }
+    bool readerOpen() const { return m_readerOpen; }
+    QString readerHtml() const { return m_readerHtml; }
+    QString readerTitle() const { return m_currentBook.title; }
+    int readerPage() const { return m_readerPage; }
+    int readerPageCount() const { return m_readerPageCount; }
+    bool readerPageRead() const { return m_readerPageRead; }
 
     QString lastMessage() const;
     bool lastMessageIsError() const;
@@ -158,6 +177,21 @@ public slots:
     /// Ask the shell to go back to the document that is being read.
     void openReader();
 
+    // ---- Lute library and text reader ---------------------------------
+    /// Reloads the book list of the selected language.
+    void refreshLibrary();
+    bool openBook(qint64 bookId);
+    bool openPage(int page);
+    void nextPage();
+    void previousPage();
+    void markPageRead();
+    void closeBook();
+    /// Opens the word popup for the n-th token of the current text page.
+    bool selectTextWord(int index);
+    /// Ask the shell to show the Lute library / the Lute text reader.
+    void openLibrary();
+    void showReader();
+
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
                              const QString& targetLanguage);
@@ -177,6 +211,10 @@ signals:
     void showSettingsRequested();
     void showReaderRequested();
     void libraryChanged();
+    void booksChanged();
+    void readerChanged();
+    void showLibraryRequested();
+    void showLuteReaderRequested();
 
 private:
     void loadLanguages();
@@ -192,6 +230,7 @@ private:
     const QVector<PhraseMatch>& phraseMatches(int pageIndex);
     bool importDocument(LuteWordExtractor& extractor, const QString& path);
     void selectFallbackLanguage();
+    QString buildReaderHtml(const QString& text);
 
     LuteDbAccess m_database;
     std::unique_ptr<LuteWordExtractor> m_extractor;
@@ -206,6 +245,18 @@ private:
     int m_pageCount = 0;
     bool m_documentRegistered = false;
     int m_libraryRevision = 0;
+
+    QVariantList m_books;
+    LuteBook m_currentBook;
+    QVariantMap m_currentBookMap;
+    bool m_readerOpen = false;
+    qint64 m_readerTextId = 0;
+    int m_readerPage = 1;
+    int m_readerPageCount = 0;
+    bool m_readerPageRead = false;
+    QString m_readerHtml;
+    QString m_readerText;
+    QVector<ParsedWord> m_textTokens;
 
     QSet<int> m_visitedPages;
     QHash<int, QVariantList> m_highlightCache;

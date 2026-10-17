@@ -13,6 +13,7 @@ Item {
     id: root
     property alias freeBooksItem: freeBooksItem
     property alias homeItem: homeItem
+    property alias luteItem: luteItem
     property alias statisticsItem: statisticsItem
     property alias toolsItem: toolsItem
     property alias settingsItem: settingsItem
@@ -36,6 +37,10 @@ Item {
     Shortcut {
         sequence: "Ctrl+3"
         onActivated: loadPage(statisticsPage, root.statisticsItem)
+    }
+    Shortcut {
+        sequence: "Ctrl+6"
+        onActivated: loadPage(luteHubPage, root.luteItem)
     }
     Shortcut {
         sequence: "Ctrl+4"
@@ -138,6 +143,17 @@ Item {
                     text: qsTr("Home")
 
                     onClicked: loadPage(homePage, root.homeItem)
+                }
+
+                MSidebarItem {
+                    id: luteItem
+                    Layout.topMargin: 13
+                    Layout.leftMargin: 10
+                    imageWidth: 26
+                    image: Icons.settingsSidebarLute
+                    text: qsTr("Lute")
+
+                    onClicked: loadPage(luteHubPage, root.luteItem)
                 }
 
                 MSidebarItem {

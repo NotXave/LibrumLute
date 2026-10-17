@@ -160,3 +160,53 @@ TEST(LuteDatabase, CreatesAndFindsBooksAndTexts)
     ASSERT_GT(textId, 0) << error.toStdString();
     EXPECT_TRUE(database.findTextForBook(bookId).has_value());
 }
+
+
+TEST(LuteDatabase, ListsBooksAndReadsTextPages)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    const qint64 bookId = database.findOrCreateBook(
+        QStringLiteral("A book"), QStringLiteral("file:///tmp/a.pdf"),
+        english->id, &error);
+    ASSERT_GT(bookId, 0) << error.toStdString();
+    ASSERT_GT(database.createText(bookId, 1, QStringLiteral("Page one."), 2,
+                                  &error),
+              0);
+    const qint64 secondPage = database.createText(
+        bookId, 2, QStringLiteral("Page two."), 2, &error);
+    ASSERT_GT(secondPage, 0);
+
+    const QVector<LuteBook> books = database.books(english->id, true);
+    ASSERT_EQ(books.size(), 1);
+    EXPECT_EQ(books.first().title, QStringLiteral("A book"));
+    EXPECT_EQ(books.first().pageCount, 2);
+    EXPECT_EQ(books.first().currentPage, 1);
+
+    const QVector<LuteText> texts = database.texts(bookId);
+    ASSERT_EQ(texts.size(), 2);
+    EXPECT_EQ(texts.first().order, 1);
+    EXPECT_FALSE(texts.first().read);
+
+    const auto second = database.text(bookId, 2);
+    ASSERT_TRUE(second.has_value());
+    EXPECT_EQ(second->text, QStringLiteral("Page two."));
+
+    ASSERT_TRUE(database.setBookCurrentPage(bookId, 2));
+    const auto updated = database.book(bookId);
+    ASSERT_TRUE(updated.has_value());
+    EXPECT_EQ(updated->currentPage, 2);
+
+    ASSERT_TRUE(database.markTextRead(second->id));
+    const QVector<LuteText> after = database.texts(bookId);
+    ASSERT_EQ(after.size(), 2);
+    EXPECT_TRUE(after.at(1).read);
+}

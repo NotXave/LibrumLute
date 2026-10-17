@@ -98,6 +98,9 @@
         <file>lute/MLutePageOverlay.qml</file>
         <file>lute/MLuteWordPopup.qml</file>
         <file>lute/MLuteSettingsPage.qml</file>
+        <file>lute/MLuteReaderPage.qml</file>
+        <file>lute/MLuteTextsPage.qml</file>
+        <file>lute/MLuteHubPage.qml</file>
         <file>readingPage/MBookmarkItem.qml</file>
         <file>readingPage/MExplanationPopup.qml</file>
         <file>TranslationsModel.qml</file>

@@ -3,6 +3,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 # Lute language-learning slice: database access, word extraction, the
 # controller exposed to QML and the AI translation client.
 set(lute_SRC
+    lute_book.hpp
     lute_ai_access.cpp
     lute_ai_access.hpp
     lute_controller.cpp

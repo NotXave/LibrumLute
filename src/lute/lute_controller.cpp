@@ -390,6 +390,7 @@ void LuteController::selectLanguage(int languageId)
 
     invalidateHighlights();
     emit languageChanged();
+    refreshLibrary();
     rebuildDocumentVocabulary();
     refreshStats();
 }
@@ -416,6 +417,195 @@ void LuteController::selectFallbackLanguage()
         return;
     if(!m_languages.isEmpty())
         selectLanguage(m_languages.first().id);
+}
+
+void LuteController::refreshLibrary()
+{
+    m_books.clear();
+    if(m_database.isOpen() && m_languageId > 0)
+    {
+        const QVector<LuteBook> books =
+            m_database.books(m_languageId, true);
+        for(const LuteBook& book : books)
+        {
+            QVariantMap map;
+            map.insert(QStringLiteral("id"), book.id);
+            map.insert(QStringLiteral("title"), book.title);
+            map.insert(QStringLiteral("pages"), book.pageCount);
+            map.insert(QStringLiteral("currentPage"), book.currentPage);
+            map.insert(QStringLiteral("archived"), book.archived);
+            map.insert(QStringLiteral("language"), book.languageName);
+            map.insert(QStringLiteral("source"), book.sourceUri);
+            m_books.append(map);
+        }
+    }
+    emit booksChanged();
+}
+
+bool LuteController::openBook(qint64 bookId)
+{
+    if(!m_database.isOpen())
+        return false;
+
+    const auto book = m_database.book(bookId);
+    if(!book)
+    {
+        setMessage(QStringLiteral("Book %1 could not be opened").arg(bookId),
+                   true);
+        return false;
+    }
+
+    m_currentBook = *book;
+    m_currentBookMap.clear();
+    m_currentBookMap.insert(QStringLiteral("id"), book->id);
+    m_currentBookMap.insert(QStringLiteral("title"), book->title);
+    m_currentBookMap.insert(QStringLiteral("pages"), book->pageCount);
+    m_currentBookMap.insert(QStringLiteral("currentPage"), book->currentPage);
+    m_currentBookMap.insert(QStringLiteral("language"), book->languageName);
+
+    m_readerPageCount = m_database.texts(bookId).size();
+    m_readerOpen = true;
+    if(!openPage(book->currentPage))
+    {
+        m_readerOpen = false;
+        emit readerChanged();
+        return false;
+    }
+    emit readerChanged();
+    return true;
+}
+
+bool LuteController::openPage(int page)
+{
+    if(!m_currentBook.isValid() || !m_database.isOpen())
+        return false;
+
+    if(page < 1)
+        page = 1;
+    if(m_readerPageCount > 0 && page > m_readerPageCount)
+        page = m_readerPageCount;
+
+    const auto text = m_database.text(m_currentBook.id, page);
+    if(!text)
+        return false;
+
+    m_readerPage = page;
+    m_readerTextId = text->id;
+    m_readerText = text->text;
+    m_readerPageRead = text->read;
+    m_readerHtml = buildReaderHtml(m_readerText);
+    m_database.setBookCurrentPage(m_currentBook.id, page);
+    m_currentBook.currentPage = page;
+    emit readerChanged();
+    return true;
+}
+
+void LuteController::nextPage()
+{
+    if(m_readerOpen && m_readerPage < m_readerPageCount)
+        openPage(m_readerPage + 1);
+}
+
+void LuteController::previousPage()
+{
+    if(m_readerOpen && m_readerPage > 1)
+        openPage(m_readerPage - 1);
+}
+
+void LuteController::markPageRead()
+{
+    if(!m_readerOpen || m_readerTextId <= 0)
+        return;
+    if(m_database.markTextRead(m_readerTextId))
+    {
+        m_readerPageRead = true;
+        emit readerChanged();
+    }
+}
+
+void LuteController::closeBook()
+{
+    m_readerOpen = false;
+    m_readerTextId = 0;
+    m_readerText.clear();
+    m_readerHtml.clear();
+    m_textTokens.clear();
+    emit readerChanged();
+}
+
+bool LuteController::selectTextWord(int index)
+{
+    if(!m_readerOpen || !m_parser || index < 0
+       || index >= m_textTokens.size())
+        return false;
+
+    const ParsedWord& token = m_textTokens.at(index);
+    WordQuad word;
+    word.word = token.text;
+    word.sentence = m_parser->sentenceAt(m_readerText, token.start);
+    word.page = m_readerPage;
+    word.index = index;
+    word.rect = QRectF();
+    buildActiveWord(m_readerPage, word, index, index, false);
+    return true;
+}
+
+void LuteController::openLibrary()
+{
+    if(m_database.isOpen())
+        refreshLibrary();
+    emit showLibraryRequested();
+}
+
+void LuteController::showReader()
+{
+    emit showLuteReaderRequested();
+}
+
+QString LuteController::buildReaderHtml(const QString& text)
+{
+    m_textTokens.clear();
+    if(!m_parser)
+        return text.toHtmlEscaped().replace(QLatin1Char('\n'),
+                                            QStringLiteral("<br/>"));
+
+    m_textTokens = m_parser->words(text);
+
+    QStringList keys;
+    keys.reserve(m_textTokens.size());
+    for(const ParsedWord& token : m_textTokens)
+        keys.append(m_parser->lowercase(token.text));
+
+    const QHash<QString, int> statuses =
+        m_database.getTermsForPage(keys, m_languageId);
+
+    QString html;
+    int last = 0;
+    for(int i = 0; i < m_textTokens.size(); ++i)
+    {
+        const ParsedWord& token = m_textTokens.at(i);
+        if(token.start > last)
+            html += text.mid(last, token.start - last).toHtmlEscaped();
+
+        const QString wordText = text.mid(token.start, token.end - token.start);
+        const int status =
+            statuses.value(m_parser->lowercase(wordText), 0);
+        const QString color = status != 0 ? statusColor(status).name()
+                                         : QStringLiteral("#D5D5D5");
+        QString style = QStringLiteral("color:%1;text-decoration:none").arg(color);
+        if(status != 0)
+            style += QStringLiteral(";text-decoration:underline");
+
+        html += QStringLiteral("<a href=\"w:%1\" style=\"%2\">%3</a>")
+                    .arg(i)
+                    .arg(style, wordText.toHtmlEscaped());
+        last = token.end;
+    }
+    if(last < text.size())
+        html += text.mid(last).toHtmlEscaped();
+
+    html.replace(QLatin1Char('\n'), QStringLiteral("<br/>"));
+    return html;
 }
 
 bool LuteController::setDocumentPath(const QString& path)
@@ -696,8 +886,9 @@ void LuteController::buildActiveWord(int pageIndex, const WordQuad& word,
                term ? term->translation : QString());
     map.insert(QStringLiteral("romanization"),
                term ? term->romanization : QString());
+    const auto language = currentLanguage();
     map.insert(QStringLiteral("showRomanization"),
-               m_extractor ? m_extractor->language().showRomanization : false);
+               language ? language->showRomanization : false);
     map.insert(QStringLiteral("aiSuggestion"), QString());
 
     m_activeWord = map;
@@ -823,6 +1014,8 @@ void LuteController::setActiveStatus(int status)
     invalidateHighlights();
     refreshActiveTerm();
     refreshStats();
+    if(m_readerOpen)
+        openPage(m_readerPage);
 }
 
 void LuteController::setActiveTranslation(const QString& text)

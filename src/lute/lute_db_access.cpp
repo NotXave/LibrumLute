@@ -735,6 +735,173 @@ bool LuteDbAccess::recordWordsRead(int languageId, int wordCount, qint64 textId)
     return true;
 }
 
+QVector<LuteBook> LuteDbAccess::books(int languageId, bool includeArchived)
+{
+    QVector<LuteBook> result;
+    if(!m_impl->db.isOpen())
+        return result;
+
+    QSqlQuery query(m_impl->db);
+    const QString archivedFilter =
+        includeArchived ? QString()
+                        : QStringLiteral(" AND COALESCE(b.BkArchived, 0) = 0");
+    query.prepare(QStringLiteral(
+                      "SELECT b.BkID, b.BkTitle, b.BkLgID, "
+                      "COALESCE(b.BkSourceURI, ''), COALESCE(b.BkArchived, 0), "
+                      "(SELECT COUNT(*) FROM texts t WHERE t.TxBkID = b.BkID), "
+                      "(SELECT t2.TxOrder FROM texts t2 WHERE t2.TxID = b.BkCurrentTxID), "
+                      "COALESCE(l.LgName, '') "
+                      "FROM books b LEFT JOIN languages l ON l.LgID = b.BkLgID "
+                      "WHERE b.BkLgID = ?%1 ORDER BY b.BkID DESC")
+                      .arg(archivedFilter));
+    query.addBindValue(languageId);
+    if(!query.exec())
+    {
+        m_impl->lastError = query.lastError().text();
+        return result;
+    }
+    while(query.next())
+    {
+        LuteBook book;
+        book.id = query.value(0).toLongLong();
+        book.title = query.value(1).toString();
+        book.languageId = query.value(2).toInt();
+        book.sourceUri = query.value(3).toString();
+        book.archived = query.value(4).toInt() != 0;
+        book.pageCount = query.value(5).toInt();
+        book.currentPage = query.value(6).toInt();
+        if(book.currentPage <= 0)
+            book.currentPage = 1;
+        book.languageName = query.value(7).toString();
+        result.append(book);
+    }
+    return result;
+}
+
+std::optional<LuteBook> LuteDbAccess::book(qint64 bookId)
+{
+    if(!m_impl->db.isOpen())
+        return std::nullopt;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT b.BkID, b.BkTitle, b.BkLgID, COALESCE(b.BkSourceURI, ''), "
+        "COALESCE(b.BkArchived, 0), "
+        "(SELECT COUNT(*) FROM texts t WHERE t.TxBkID = b.BkID), "
+        "(SELECT t2.TxOrder FROM texts t2 WHERE t2.TxID = b.BkCurrentTxID), "
+        "COALESCE(l.LgName, '') "
+        "FROM books b LEFT JOIN languages l ON l.LgID = b.BkLgID WHERE b.BkID = ?"));
+    query.addBindValue(bookId);
+    if(!query.exec() || !query.next())
+        return std::nullopt;
+
+    LuteBook result;
+    result.id = query.value(0).toLongLong();
+    result.title = query.value(1).toString();
+    result.languageId = query.value(2).toInt();
+    result.sourceUri = query.value(3).toString();
+    result.archived = query.value(4).toInt() != 0;
+    result.pageCount = query.value(5).toInt();
+    result.currentPage = query.value(6).toInt();
+    if(result.currentPage <= 0)
+        result.currentPage = 1;
+    result.languageName = query.value(7).toString();
+    return result;
+}
+
+QVector<LuteText> LuteDbAccess::texts(qint64 bookId)
+{
+    QVector<LuteText> result;
+    if(!m_impl->db.isOpen())
+        return result;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT TxID, TxBkID, TxOrder, COALESCE(TxWordCount, 0), "
+        "CASE WHEN TxReadDate IS NULL THEN 0 ELSE 1 END "
+        "FROM texts WHERE TxBkID = ? ORDER BY TxOrder"));
+    query.addBindValue(bookId);
+    if(!query.exec())
+    {
+        m_impl->lastError = query.lastError().text();
+        return result;
+    }
+    while(query.next())
+    {
+        LuteText text;
+        text.id = query.value(0).toLongLong();
+        text.bookId = query.value(1).toLongLong();
+        text.order = query.value(2).toInt();
+        text.wordCount = query.value(3).toInt();
+        text.read = query.value(4).toInt() != 0;
+        result.append(text);
+    }
+    return result;
+}
+
+std::optional<LuteText> LuteDbAccess::text(qint64 bookId, int order)
+{
+    if(!m_impl->db.isOpen())
+        return std::nullopt;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT TxID, TxBkID, TxOrder, COALESCE(TxWordCount, 0), "
+        "CASE WHEN TxReadDate IS NULL THEN 0 ELSE 1 END, COALESCE(TxText, '') "
+        "FROM texts WHERE TxBkID = ? AND TxOrder = ?"));
+    query.addBindValue(bookId);
+    query.addBindValue(order);
+    if(!query.exec() || !query.next())
+        return std::nullopt;
+
+    LuteText result;
+    result.id = query.value(0).toLongLong();
+    result.bookId = query.value(1).toLongLong();
+    result.order = query.value(2).toInt();
+    result.wordCount = query.value(3).toInt();
+    result.read = query.value(4).toInt() != 0;
+    result.text = query.value(5).toString();
+    return result;
+}
+
+bool LuteDbAccess::setBookCurrentPage(qint64 bookId, int page)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "UPDATE books SET BkCurrentTxID = "
+        "(SELECT TxID FROM texts WHERE TxBkID = ? AND TxOrder = ?) "
+        "WHERE BkID = ?"));
+    query.addBindValue(bookId);
+    query.addBindValue(page);
+    query.addBindValue(bookId);
+    if(!query.exec())
+    {
+        m_impl->lastError = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool LuteDbAccess::markTextRead(qint64 textId)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "UPDATE texts SET TxReadDate = datetime('now') WHERE TxID = ?"));
+    query.addBindValue(textId);
+    if(!query.exec())
+    {
+        m_impl->lastError = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 std::optional<qint64> LuteDbAccess::findBookBySource(const QString& sourceUri, int languageId)
 {
     if (!isOpen() || languageId <= 0 || sourceUri.isEmpty())

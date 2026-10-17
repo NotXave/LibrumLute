@@ -743,6 +743,70 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-hub` opens the Lute library page.
+    if(app.arguments().contains("--lute-demo-hub"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(4500, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-word` opens a Lute text and selects a word
+    // so the word popup renders above the text.
+    if(app.arguments().contains("--lute-demo-word"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            const QVariantList books = luteController->books();
+            if(books.isEmpty())
+                return;
+            const qint64 bookId = books.first().toMap().value(QStringLiteral("id")).toLongLong();
+            if(!luteController->openBook(bookId))
+                return;
+            luteController->showReader();
+        });
+        QTimer::singleShot(4600, &app, [luteController = luteController.get()]() {
+            luteController->selectTextWord(12);
+        });
+        QTimer::singleShot(6200, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-reading` opens the Lute library and the
+    // first book in the Lute text reader.
+    if(app.arguments().contains("--lute-demo-reading"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            const QVariantList books = luteController->books();
+            if(books.isEmpty())
+                return;
+            const qint64 bookId = books.first().toMap().value(QStringLiteral("id")).toLongLong();
+            if(luteController->openBook(bookId))
+                luteController->showReader();
+        });
+        QTimer::singleShot(5600, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-library` adds a PDF to the Lute library
     // without opening it, then shows the settings page with the result banner.
     if(app.arguments().contains("--lute-demo-library"))

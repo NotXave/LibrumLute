@@ -68,6 +68,20 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (started) — the Lute library and text reader exist: the sidebar entry
+  *Lute* shows the books of the selected language from the real `lute.db` with
+  page count/current page/search, and opens them in a Lute reader that renders
+  a page as rich text, one link per word, coloured by status, with page
+  navigation and "mark page read". Word clicks reuse the Lute popup. Verified
+  against a copy of the user's Polish database: 271 books listed, book
+  "Ostatnie życzenie…" open with 262 pages and coloured words (evidence:
+  `docs/lute/library.png`, `docs/lute/reader.png`, demos
+  `--lute-demo-hub/--lute-demo-reading/--lute-demo-word`). C2/C3/C4 remain open
+  for text creation, terms/languages pages and bookmarks.
+- Phase 1 (started) — data layer for the library: `LuteBook`/`LuteText`,
+  `books/book/texts/text/setBookCurrentPage/markTextRead` in `LuteDbAccess`,
+  17 gtest cases green.
+
 Newest entries first; each entry: what changed, evidence, commit.
 
 - Phase 0 (in progress) — the "Lute library" action is functional without an
