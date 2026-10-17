@@ -575,6 +575,25 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+bool LuteController::exportTerms(const QString& path)
+{
+    if(!m_database.isOpen() || m_languageId <= 0)
+    {
+        setMessage(QStringLiteral("Open a lute.db first"), true);
+        return false;
+    }
+    QString error;
+    if(!m_database.exportTermsTsv(path, m_languageId, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not export terms")
+                                   : error,
+                   true);
+        return false;
+    }
+    setMessage(QStringLiteral("Terms exported to %1").arg(path));
+    return true;
+}
+
 void LuteController::openLuteStatistics()
 {
     refreshStats();

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import CustomComponents
 import Librum.style
 import Librum.icons
@@ -129,6 +130,19 @@ Page {
                 backgroundColor: "transparent"
                 textColor: Style.colorText
                 fontSize: Fonts.size10
+                text: qsTr("Export TSV")
+
+                onClicked: exportDialog.open()
+            }
+
+            MButton {
+                Layout.preferredHeight: 34
+                horizontalMargins: 12
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size10
                 text: qsTr("Refresh")
 
                 onClicked: root.reload()
@@ -225,6 +239,26 @@ Page {
                 font.pointSize: Fonts.size11
             }
         }
+    }
+
+    FileDialog {
+        id: exportDialog
+        title: qsTr("Export terms as TSV")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "tsv"
+        nameFilters: [qsTr("TSV files (*.tsv)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.exportTerms(
+                        root.toLocalPath(selectedFile))
+    }
+
+    function toLocalPath(url) {
+        let path = decodeURIComponent(url.toString());
+        if (path.startsWith("file:///"))
+            path = path.substring(8);
+        else if (path.startsWith("file://"))
+            path = path.substring(7);
+        return path;
     }
 
     MLuteWordPopup {

@@ -41,6 +41,11 @@ public:
     std::optional<LuteLanguage> languageById(int languageId);
     std::optional<LuteLanguage> languageByName(const QString& name);
 
+    /// Writes all terms of a language as TSV (text, translation, status,
+    /// token count) for Lute/Anki import.
+    bool exportTermsTsv(const QString& path, int languageId,
+                        QString* error = nullptr);
+
     bool saveLanguage(LuteLanguage& language, QString* error = nullptr);
     bool deleteLanguage(int languageId, QString* error = nullptr);
 

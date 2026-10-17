@@ -32,6 +32,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Lute statistics** – the hub's *Statistics* section shows terms/learning/
   known/words read, 14-day "terms created" and "status changes" bar charts and
   the full status distribution, straight from `lute.db`.
+* **Term export** – the Terms page exports the vocabulary of the selected
+  language as TSV (`WoText`, `WoTranslation`, `WoStatus`, `WoTokenCount`) for
+  Lute/Anki import.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.

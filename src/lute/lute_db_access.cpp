@@ -1,5 +1,8 @@
 #include "lute_db_access.hpp"
 
+#include <QFile>
+#include <QTextStream>
+
 #include "lute_text_parser.hpp"
 #include "lute_schema.hpp"
 
@@ -214,6 +217,34 @@ std::optional<LuteLanguage> LuteDbAccess::languageById(int languageId)
     language.parserType = query.value(8).toString();
     m_impl->languageCache.insert(language.id, language);
     return language;
+}
+
+bool LuteDbAccess::exportTermsTsv(const QString& path, int languageId,
+                                 QString* error)
+{
+    QFile file(path);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        if(error)
+            *error = file.errorString();
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream.setEncoding(QStringConverter::Utf8);
+    stream << "WoText\tWoTranslation\tWoStatus\tWoTokenCount\n";
+
+    const QVector<LuteTerm> all = terms(languageId, QString(), 0, 100000);
+    for(const LuteTerm& term : all)
+    {
+        QString translation = term.translation;
+        translation.replace(QLatin1Char('\t'), QLatin1Char(' '));
+        translation.replace(QLatin1Char('\n'), QLatin1Char(' '));
+        stream << term.text << '\t' << translation << '\t' << term.status
+               << '\t' << term.tokenCount << '\n';
+    }
+    file.close();
+    return true;
 }
 
 bool LuteDbAccess::saveLanguage(LuteLanguage& language, QString* error)

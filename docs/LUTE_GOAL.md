@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 7 (started) — term export: `LuteDbAccess::exportTermsTsv()` writes a
+  UTF-8 TSV with text, translation, status and token count; the Terms page has
+  an "Export TSV" save dialog and the controller reports success/failure.
+  Covered by a gtest (header + single word + phrase row) — 24 tests green.
+  Term import, Anki specs and backup still open.
+
 - Phase 6 (started) — Lute statistics page in the hub: cards (terms, learning,
   known, words read), 14-day series for created terms and status changes (from
   `createdPerDay`/`statusChangesPerDay` exposed as `createdSeries`/

@@ -216,6 +216,7 @@ public slots:
     bool deleteLanguage(int languageId);
     void openLanguages();
     void openLuteStatistics();
+    bool exportTerms(const QString& path);
 
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
