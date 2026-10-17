@@ -99,6 +99,8 @@ static int runLuteSelfTest(const QString& filePath)
     qInfo() << "lute selftest: language" << controller.languageName();
     qInfo() << "lute selftest: pages" << controller.pageCount();
     qInfo() << "lute selftest: title" << controller.documentTitle();
+    controller.addDocumentToLuteLibrary();
+    qInfo() << "lute selftest: registered" << controller.documentRegistered();
     for(int page = 0; page < controller.pageCount(); ++page)
     {
         const auto words = controller.pageWords(page);
