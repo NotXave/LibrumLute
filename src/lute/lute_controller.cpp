@@ -113,6 +113,17 @@ QVariantList LuteController::languages() const
         entry.insert(QStringLiteral("id"), language.id);
         entry.insert(QStringLiteral("name"), language.name);
         entry.insert(QStringLiteral("parserType"), language.parserType);
+        entry.insert(QStringLiteral("characterSubstitutions"),
+                     language.characterSubstitutions);
+        entry.insert(QStringLiteral("regexpSplitSentences"),
+                     language.regexpSplitSentences);
+        entry.insert(QStringLiteral("exceptionsSplitSentences"),
+                     language.exceptionsSplitSentences);
+        entry.insert(QStringLiteral("regexpWordCharacters"),
+                     language.regexpWordCharacters);
+        entry.insert(QStringLiteral("rightToLeft"), language.rightToLeft);
+        entry.insert(QStringLiteral("showRomanization"),
+                     language.showRomanization);
         entry.insert(QStringLiteral("supported"),
                      LuteLanguage::isSupportedParserType(language.parserType));
         list.append(entry);
@@ -477,6 +488,91 @@ void LuteController::openTerms()
 {
     refreshTerms(m_termSearch, m_termStatus);
     emit showTermsRequested();
+}
+
+bool LuteController::saveLanguage(const QVariantMap& values)
+{
+    if(!m_database.isOpen())
+    {
+        setMessage(QStringLiteral("Open a lute.db first"), true);
+        return false;
+    }
+
+    LuteLanguage language;
+    language.id = values.value(QStringLiteral("id")).toInt();
+    language.name = values.value(QStringLiteral("name")).toString().trimmed();
+    if(language.name.isEmpty())
+    {
+        setMessage(QStringLiteral("The language needs a name"), true);
+        return false;
+    }
+    language.characterSubstitutions =
+        values.value(QStringLiteral("characterSubstitutions")).toString();
+    language.regexpSplitSentences =
+        values.value(QStringLiteral("regexpSplitSentences")).toString();
+    language.exceptionsSplitSentences =
+        values.value(QStringLiteral("exceptionsSplitSentences")).toString();
+    language.regexpWordCharacters =
+        values.value(QStringLiteral("regexpWordCharacters")).toString();
+    language.rightToLeft = values.value(QStringLiteral("rightToLeft")).toBool();
+    language.showRomanization =
+        values.value(QStringLiteral("showRomanization")).toBool();
+    language.parserType =
+        values.value(QStringLiteral("parserType")).toString();
+    if(language.parserType.isEmpty())
+        language.parserType = QStringLiteral("spacedel");
+
+    QString error;
+    if(!m_database.saveLanguage(language, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not save the language")
+                                   : error,
+                   true);
+        return false;
+    }
+
+    const int editedId = language.id;
+    loadLanguages();
+    if(m_languageId == editedId)
+    {
+        m_languageId = 0;
+        selectLanguage(editedId);
+    }
+    else
+    {
+        emit languageChanged();
+    }
+    refreshLibrary();
+    setMessage(QStringLiteral("Language \"%1\" saved").arg(language.name));
+    return true;
+}
+
+bool LuteController::deleteLanguage(int languageId)
+{
+    QString error;
+    if(!m_database.deleteLanguage(languageId, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the language")
+                                   : error,
+                   true);
+        return false;
+    }
+    const bool wasCurrent = m_languageId == languageId;
+    if(wasCurrent)
+        m_languageId = 0;
+    loadLanguages();
+    if(wasCurrent)
+        selectFallbackLanguage();
+    else
+        emit languageChanged();
+    refreshLibrary();
+    setMessage(QStringLiteral("Language deleted"));
+    return true;
+}
+
+void LuteController::openLanguages()
+{
+    emit showLanguagesRequested();
 }
 
 bool LuteController::selectTerm(qint64 termId)

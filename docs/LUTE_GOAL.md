@@ -68,6 +68,14 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5 (started) — language manager: the hub's Languages section lists all
+  languages of the open lute.db with parser type/RTL/romanization flags and
+  edits every parser column via `LuteDbAccess::saveLanguage`; new languages and
+  guarded deletion (`deleteLanguage` refuses while terms/books exist). The
+  `languages` QVariant entries now carry all parser fields. Verified on a
+  69-language template DB (screenshot `docs/lute/languages.png`,
+  `--lute-demo-languages`). Dictionaries still open.
+
 - Phase 3 (started) — the Lute hub now switches between Texts and Terms; the
   term list reads the real `words` table (search by text, status filter,
   status colours, phrase badge, translation) and clicking a term opens the Lute

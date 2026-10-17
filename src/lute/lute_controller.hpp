@@ -207,6 +207,11 @@ public slots:
     /// Opens the Lute popup for a stored term (used by the term list).
     bool selectTerm(qint64 termId);
 
+    /// Creates or updates a language (keys of `languages()` entries).
+    bool saveLanguage(const QVariantMap& language);
+    bool deleteLanguage(int languageId);
+    void openLanguages();
+
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
                              const QString& targetLanguage);
@@ -229,6 +234,7 @@ signals:
     void booksChanged();
     void termsChanged();
     void showTermsRequested();
+    void showLanguagesRequested();
     void readerChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();

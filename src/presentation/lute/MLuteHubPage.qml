@@ -23,6 +23,10 @@ Page {
         function onShowTermsRequested() {
             root.currentSection = 1
         }
+
+        function onShowLanguagesRequested() {
+            root.currentSection = 3
+        }
     }
 
     background: Rectangle {
@@ -136,13 +140,15 @@ Page {
                     Layout.preferredWidth: 236
                     Layout.topMargin: 4
                     Layout.leftMargin: 1
-                    opacity: 0.4
+                    selected: root.currentSection === 3
                     imageLeftMargin: 26
                     imageWidth: 16
                     labelLeftMargin: 10
                     textContent: qsTr("Languages")
                     defaultIcon: Icons.settingsSidebarSettings
                     selectedIcon: Icons.settingsSidebarSettingsSelected
+
+                    onClicked: root.currentSection = 3
                 }
 
                 Label {
@@ -202,6 +208,8 @@ Page {
 
             MLuteTextsPage {}
             MLuteTermsPage {}
+            Item {}
+            MLuteLanguagesPage {}
         }
     }
 }

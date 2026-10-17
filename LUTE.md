@@ -24,6 +24,11 @@ page are Librum's own QML, and the Lute features were added on top of it.
   selected language with search, status filter and status colours; clicking a
   term opens the Lute popup for editing. Your own 14k-term Polish database is
   shown as-is.
+* **Language manager** – the Lute hub's *Languages* page lists every language
+  of the open `lute.db` with its parser type and RTL/romanization flags, and
+  edits all parser fields Lute stores (name, split characters, exceptions,
+  substitutions, word characters, parser type, RTL, romanization); new
+  languages and guarded deletion included.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
@@ -123,6 +128,7 @@ librum.exe --lute-db lute.db --lute-demo-reading --out read.png # open the first
 librum.exe --lute-db lute.db --lute-demo-word --out word.png   # reader + word popup
 librum.exe --lute-db lute.db --lute-demo-create --out new.png  # create a book from text
 librum.exe --lute-db lute.db --lute-demo-terms --out terms.png # term list
+librum.exe --lute-db lute.db --lute-demo-languages --out langs.png # language manager
 python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
 librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png

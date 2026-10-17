@@ -216,6 +216,85 @@ std::optional<LuteLanguage> LuteDbAccess::languageById(int languageId)
     return language;
 }
 
+bool LuteDbAccess::saveLanguage(LuteLanguage& language, QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    QSqlQuery query(m_impl->db);
+    if(language.id > 0)
+    {
+        query.prepare(QStringLiteral(
+            "UPDATE languages SET LgName = ?, LgCharacterSubstitutions = ?, "
+            "LgRegexpSplitSentences = ?, LgExceptionsSplitSentences = ?, "
+            "LgRegexpWordCharacters = ?, LgRightToLeft = ?, "
+            "LgShowRomanization = ?, LgParserType = ? WHERE LgID = ?"));
+    }
+    else
+    {
+        query.prepare(QStringLiteral(
+            "INSERT INTO languages (LgName, LgCharacterSubstitutions, "
+            "LgRegexpSplitSentences, LgExceptionsSplitSentences, "
+            "LgRegexpWordCharacters, LgRightToLeft, LgShowRomanization, "
+            "LgParserType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
+    }
+
+    query.addBindValue(language.name);
+    query.addBindValue(language.characterSubstitutions);
+    query.addBindValue(language.regexpSplitSentences);
+    query.addBindValue(language.exceptionsSplitSentences);
+    query.addBindValue(language.regexpWordCharacters);
+    query.addBindValue(language.rightToLeft ? 1 : 0);
+    query.addBindValue(language.showRomanization ? 1 : 0);
+    query.addBindValue(language.parserType);
+    if(language.id > 0)
+        query.addBindValue(language.id);
+
+    if(!query.exec())
+    {
+        const QString message = query.lastError().text();
+        if(error)
+            *error = message;
+        m_impl->lastError = message;
+        return false;
+    }
+    if(language.id <= 0)
+        language.id = query.lastInsertId().toInt();
+    m_impl->languageCache.clear();
+    return true;
+}
+
+bool LuteDbAccess::deleteLanguage(int languageId, QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    QSqlQuery usage(m_impl->db);
+    usage.prepare(QStringLiteral(
+        "SELECT (SELECT COUNT(*) FROM words WHERE WoLgID = ?) + "
+        "(SELECT COUNT(*) FROM books WHERE BkLgID = ?)"));
+    usage.addBindValue(languageId);
+    usage.addBindValue(languageId);
+    if(usage.exec() && usage.next() && usage.value(0).toInt() > 0)
+    {
+        if(error)
+            *error = QStringLiteral("The language still has terms or books");
+        return false;
+    }
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral("DELETE FROM languages WHERE LgID = ?"));
+    query.addBindValue(languageId);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    m_impl->languageCache.clear();
+    return true;
+}
+
 std::optional<LuteLanguage> LuteDbAccess::languageByName(const QString& name)
 {
     if (!isOpen())

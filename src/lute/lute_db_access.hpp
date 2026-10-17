@@ -41,6 +41,9 @@ public:
     std::optional<LuteLanguage> languageById(int languageId);
     std::optional<LuteLanguage> languageByName(const QString& name);
 
+    bool saveLanguage(LuteLanguage& language, QString* error = nullptr);
+    bool deleteLanguage(int languageId, QString* error = nullptr);
+
     // ---- terms ------------------------------------------------------------
     /// `getTermByText` from the plan: single case-insensitive lookup.
     std::optional<LuteTerm> getTermByText(const QString& word, int languageId);
