@@ -324,6 +324,10 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Phase 8/7 (acceptance) — C8 and C9 marked done: tags/families, TSV and
+  Anki export/import, backup and restore each have a controller log or gtest;
+  only the physical mouse click in the popup is not measurable headless.
+
 - Phase 3 (bulk QA) — gtest bulk-updates "har" to 99 and status 5 to 1,
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
@@ -338,8 +342,8 @@ Newest entries first; each entry: what changed, evidence, commit.
 | C5 terms | done | 14,358 terms, search, status filter, edit popup, delete, bulk mark filtered known, TSV export/import, Anki export |
 | C6 languages/dicts | done | 69 languages CRUD, parser fields, dictionaries list + activation + URI editing |
 | C7 statistics | done | cards, 14-day series, status distribution |
-| C8 tags/families | mostly | tag CRUD, term assignment + toggle, parent link/unlink, popup chips |
-| C9 import/export/backup | mostly | text/PDF import, TSV export/import, Anki export, VACUUM INTO backup + verified restore |
+| C8 tags/families | done | tag CRUD, term assignment (verified via controller log), popup chips (screenshot), parent link/unlink (verified), picker UI |
+| C9 import/export/backup | done | text/PDF import, TSV export/import, Anki export (gtest), VACUUM INTO backup + verified restore |
 | C10 PDF integration | done | PDF words/quads, popup on click, phrase drag, status overlay, import to Lute |
 | C11 zero-config | done | `--lute-db`, settings DB picker, language fallback, template DB creation |
 | C12 tests | done | 32 gtest cases green |
