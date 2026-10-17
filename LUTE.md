@@ -43,7 +43,8 @@ page are Librum's own QML, and the Lute features were added on top of it.
   selected language as TSV (`WoText`, `WoTranslation`, `WoStatus`,
   `WoTokenCount`) and imports the same format back (header optional); a
   separate "Export Anki" writes text, translation, space separated tags and
-  status for direct Anki import.
+  status for direct Anki import; "Mark filtered known" bulk-sets the current
+  search/status filter to well-known.
 * **Tags** – the hub's *Tags* page manages Lute's `tags` table (add with
   comment, delete, live list); tags can be assigned to terms
   (`setTermTags`/`tagsForTerm` on Lute's `wordtags` table); the word popup

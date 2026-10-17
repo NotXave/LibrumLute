@@ -156,6 +156,19 @@ Page {
                 backgroundColor: "transparent"
                 textColor: Style.colorText
                 fontSize: Fonts.size10
+                text: qsTr("Mark filtered known")
+
+                onClicked: LuteController.markFilteredAsWellKnown()
+            }
+
+            MButton {
+                Layout.preferredHeight: 34
+                horizontalMargins: 12
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size10
                 text: qsTr("Export Anki")
 
                 onClicked: ankiDialog.open()

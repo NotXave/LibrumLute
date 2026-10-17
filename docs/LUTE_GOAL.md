@@ -316,6 +316,12 @@ Newest entries first; each entry: what changed, evidence, commit.
   `languagedicts.LdDictURI`; the Languages panel's URI fields are editable and
   save on editing finished, closing the dictionary part of C6.
 
+## Phase log
+
+- Phase 3 (bulk) — "Mark filtered known" bulk-updates the terms matching the
+  current search and status filter to 99 (`setStatusForTerms`, refuses without
+  a filter), then refreshes list and statistics. Closes the bulk part of C5.
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |

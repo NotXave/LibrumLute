@@ -231,6 +231,7 @@ public slots:
     bool saveTag(qint64 id, const QString& text, const QString& comment);
     bool deleteTag(qint64 id);
     bool deleteTermById(qint64 id);
+    bool markFilteredAsWellKnown();
     bool toggleBookmark(int page);
     bool setDictionaryActive(qint64 id, bool active);
     bool setDictionaryUri(qint64 id, const QString& uri);

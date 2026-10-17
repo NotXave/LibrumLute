@@ -681,6 +681,28 @@ bool LuteController::copyActiveWord()
     return true;
 }
 
+bool LuteController::markFilteredAsWellKnown()
+{
+    if(m_termSearch.trimmed().isEmpty() && m_termStatus <= 0)
+    {
+        setMessage(QStringLiteral("Filter the term list first"), true);
+        return false;
+    }
+    QString error;
+    const int changed = m_database.setStatusForTerms(
+        m_languageId, m_termSearch, m_termStatus, 99, &error);
+    if(changed < 0)
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Bulk update failed") : error,
+                   true);
+        return false;
+    }
+    refreshTerms(m_termSearch, m_termStatus);
+    refreshStats();
+    setMessage(QStringLiteral("%1 terms marked as well known").arg(changed));
+    return true;
+}
+
 bool LuteController::deleteTermById(qint64 id)
 {
     QString error;

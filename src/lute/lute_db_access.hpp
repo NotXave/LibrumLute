@@ -98,6 +98,9 @@ public:
                         QString* error = nullptr);
     bool setTermTags(qint64 termId, const QVector<qint64>& tagIds,
                      QString* error = nullptr);
+    int setStatusForTerms(int languageId, const QString& search,
+                          int statusFilter, int newStatus,
+                          QString* error = nullptr);
 
     // ---- statistics -------------------------------------------------------
     QHash<int, int> statusCounts(int languageId);

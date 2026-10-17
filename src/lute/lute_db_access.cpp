@@ -953,6 +953,36 @@ bool LuteDbAccess::saveTag(LuteTag& tag, QString* error)
     return true;
 }
 
+int LuteDbAccess::setStatusForTerms(int languageId, const QString& search,
+                                    int statusFilter, int newStatus,
+                                    QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return -1;
+
+    QString sql = QStringLiteral("UPDATE words SET WoStatus = ? WHERE WoLgID = ?");
+    if(!search.trimmed().isEmpty())
+        sql += QStringLiteral(" AND WoTextLC LIKE ?");
+    if(statusFilter > 0)
+        sql += QStringLiteral(" AND WoStatus = ?");
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(sql);
+    query.addBindValue(newStatus);
+    query.addBindValue(languageId);
+    if(!search.trimmed().isEmpty())
+        query.addBindValue(QStringLiteral("%%1%").arg(search.trimmed().toLower()));
+    if(statusFilter > 0)
+        query.addBindValue(statusFilter);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return -1;
+    }
+    return query.numRowsAffected();
+}
+
 QVector<LuteTerm> LuteDbAccess::parentsForTerm(qint64 termId)
 {
     QVector<LuteTerm> result;
