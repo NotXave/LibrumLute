@@ -68,6 +68,13 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (QA) — word family verified through the controller:
+  `--lute-demo-family` linked "dom" (id 1662) to the open word
+  (`linkActiveParent true`, parents list contains it) and unlinked it again
+  (`unlinkActiveParent true`, parents list empty). Screenshot
+  `shot-family.png`; click-through with the mouse still open.
+
+
 - Phase 8 (continued) — parent picker: `linkActiveParent(text)` finds or
   creates the parent term and appends the link, `unlinkActiveParent(id)`
   removes it; the popup has a "Link a parent term…" field and clickable family

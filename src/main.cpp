@@ -762,6 +762,48 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-family` links and unlinks a parent term in
+    // the open word popup and logs both results.
+    if(app.arguments().contains("--lute-demo-family"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            const QVariantList books = luteController->books();
+            if(books.isEmpty())
+                return;
+            if(luteController->openBook(books.first().toMap().value("id").toLongLong()))
+                luteController->showReader();
+        });
+        QTimer::singleShot(4600, &app, [luteController = luteController.get()]() {
+            luteController->selectTextWord(12);
+        });
+        QTimer::singleShot(5200, &app, [luteController = luteController.get()]() {
+            const bool linked = luteController->linkActiveParent(QStringLiteral("dom"));
+            qInfo() << "lute family demo: link" << linked
+                    << luteController->activeWord().value("parents");
+        });
+        QTimer::singleShot(5800, &app, [luteController = luteController.get()]() {
+            const QVariantList parents = luteController->activeWord().value("parents").toList();
+            if(parents.isEmpty())
+            {
+                qInfo() << "lute family demo: no parents";
+                return;
+            }
+            const qint64 parentId = parents.first().toMap().value("id").toLongLong();
+            qInfo() << "lute family demo: unlink" << parentId
+                    << luteController->unlinkActiveParent(parentId)
+                    << luteController->activeWord().value("parents");
+        });
+        QTimer::singleShot(6800, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-tag-toggle` opens a word popup and toggles
     // its first tag through the controller, logging the result.
     if(app.arguments().contains("--lute-demo-tag-toggle"))
