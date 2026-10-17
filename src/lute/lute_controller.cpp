@@ -1,5 +1,8 @@
 #include "lute_controller.hpp"
 
+#include <QClipboard>
+#include <QGuiApplication>
+
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
@@ -620,6 +623,17 @@ bool LuteController::toggleBookmark(int page)
         }
     }
     loadBookmarks();
+    return true;
+}
+
+bool LuteController::copyActiveWord()
+{
+    const QString word = m_activeWord.value(QStringLiteral("word")).toString();
+    if(word.isEmpty())
+        return false;
+    if(auto* clipboard = QGuiApplication::clipboard())
+        clipboard->setText(word);
+    setMessage(QStringLiteral("Copied \"%1\"").arg(word));
     return true;
 }
 

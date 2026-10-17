@@ -68,6 +68,10 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (popup polish) — "Copy" button copies the active headword to the
+  clipboard (`copyActiveWord`) and reports it in the message banner.
+
+
 - Phase 9 (packaging refresh) — packaged exe rebuilt with the Lute-table
   bookmarks and reader controls; smoke test opened the reader with the Polish
   library copy (screenshot 100 KB). Package remains 169.7 MB.

@@ -229,6 +229,7 @@ public slots:
     bool deleteTag(qint64 id);
     bool deleteTermById(qint64 id);
     bool toggleBookmark(int page);
+    bool copyActiveWord();
     bool toggleActiveTag(qint64 tagId);
     bool linkActiveParent(const QString& parentText);
     bool unlinkActiveParent(qint64 parentId);
