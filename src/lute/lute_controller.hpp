@@ -192,6 +192,13 @@ public slots:
     void openLibrary();
     void showReader();
 
+    /// Creates a new Lute book from pasted/imported text using Lute's
+    /// pagination rules.
+    bool createBook(const QString& title, const QString& text,
+                    bool splitBySentences = false);
+    /// Imports a UTF-8 text file as a new Lute book.
+    bool importTextFile(const QString& path);
+
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
                              const QString& targetLanguage);

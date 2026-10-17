@@ -11,6 +11,8 @@ set(lute_SRC
     lute_db_access.cpp
     lute_db_access.hpp
     lute_language.hpp
+    lute_paginator.cpp
+    lute_paginator.hpp
     lute_schema.cpp
     lute_schema.hpp
     lute_stats.hpp

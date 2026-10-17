@@ -65,11 +65,39 @@ Page {
                 Layout.preferredHeight: 36
                 Layout.alignment: Qt.AlignBottom
                 horizontalMargins: 14
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size11
+                text: qsTr("Import .txt")
+
+                onClicked: importTextDialog.open()
+            }
+
+            MButton {
+                Layout.preferredHeight: 36
+                Layout.alignment: Qt.AlignBottom
+                horizontalMargins: 14
                 borderWidth: 0
                 backgroundColor: Style.colorBasePurple
                 textColor: Style.colorFocusedButtonText
                 fontSize: Fonts.size11
                 fontWeight: Font.Bold
+                text: qsTr("New text")
+
+                onClicked: newTextPopup.open()
+            }
+
+            MButton {
+                Layout.preferredHeight: 36
+                Layout.alignment: Qt.AlignBottom
+                horizontalMargins: 14
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size11
                 text: qsTr("Add a PDF")
 
                 onClicked: addPdfDialog.open()
@@ -229,6 +257,142 @@ Page {
     function openBook(bookId) {
         if (LuteController.openBook(bookId))
             LuteController.showReader();
+    }
+
+    Popup {
+        id: newTextPopup
+        width: 580
+        height: 470
+        x: Math.round((root.width - width) / 2)
+        y: 70
+        modal: true
+        dim: true
+        padding: 22
+        background: Rectangle {
+            color: Style.colorPopupBackground
+            radius: 6
+            border.width: 1
+            border.color: Style.colorContainerBorder
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
+
+            Label {
+                text: qsTr("New Lute text")
+                color: Style.colorText
+                font.pointSize: Fonts.size17
+                font.weight: Font.DemiBold
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("The text is split into Lute pages of about 250 words; a line with --- starts a new page.")
+                color: Style.colorPageSubtitle
+                font.pointSize: Fonts.size10
+                wrapMode: Text.WordWrap
+            }
+
+            MLabeledInputBox {
+                id: titleInput
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                headerText: qsTr("Title")
+                placeholderContent: qsTr("My text")
+            }
+
+            Pane {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 220
+                padding: 0
+                background: Rectangle {
+                    color: Style.colorControlBackground
+                    border.width: 1
+                    border.color: Style.colorContainerBorder
+                    radius: 5
+                }
+
+                ScrollView {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    clip: true
+
+                    TextArea {
+                        id: textInput
+                        placeholderText: qsTr("Paste the text here…")
+                        placeholderTextColor: Style.colorPlaceholderText
+                        color: Style.colorBaseInputText
+                        font.pointSize: Fonts.size11
+                        wrapMode: TextArea.Wrap
+                        selectByMouse: true
+                        background: Item {}
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                MCheckBox {
+                    id: splitSentences
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                }
+
+                Label {
+                    text: qsTr("Split at sentence boundaries")
+                    color: Style.colorText
+                    font.pointSize: Fonts.size10
+                }
+
+                Item { Layout.fillWidth: true }
+
+                MButton {
+                    Layout.preferredHeight: 32
+                    horizontalMargins: 14
+                    borderWidth: 1
+                    borderColor: Style.colorButtonBorder
+                    backgroundColor: "transparent"
+                    textColor: Style.colorText
+                    fontSize: Fonts.size11
+                    text: qsTr("Cancel")
+
+                    onClicked: newTextPopup.close()
+                }
+
+                MButton {
+                    Layout.preferredHeight: 32
+                    horizontalMargins: 14
+                    borderWidth: 0
+                    backgroundColor: Style.colorBasePurple
+                    textColor: Style.colorFocusedButtonText
+                    fontSize: Fonts.size11
+                    text: qsTr("Create")
+
+                    onClicked: {
+                        if (LuteController.createBook(titleInput.text,
+                                                      textInput.text,
+                                                      splitSentences.checked)) {
+                            newTextPopup.close()
+                            titleInput.text = ""
+                            textInput.text = ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    FileDialog {
+        id: importTextDialog
+        title: qsTr("Import a text file")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("Text files (*.txt)"), qsTr("All files (*)")]
+
+        onAccepted: LuteController.importTextFile(
+                        root.toLocalPath(selectedFile))
     }
 
     FileDialog {

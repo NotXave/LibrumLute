@@ -68,6 +68,15 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (continued) — texts can be created/imported: "New text" (paste),
+  "Import .txt" and "Add a PDF" in the Lute library; new books are paginated
+  with Lute's rules (`LutePaginator`: 250-token threshold, optional sentence
+  boundaries, `---` page breaks) and stored as `books` + `texts`.
+  Verified: "Harbor demo" created from generated text → 4 pages
+  (250/70/250/70 words, 640 words total), visible in the library. 21 gtest
+  cases green (4 new paginator tests). Evidence: `docs/lute/new-text.png`,
+  `--lute-demo-create`.
+
 - Phase 2 (started) — the Lute library and text reader exist: the sidebar entry
   *Lute* shows the books of the selected language from the real `lute.db` with
   page count/current page/search, and opens them in a Lute reader that renders

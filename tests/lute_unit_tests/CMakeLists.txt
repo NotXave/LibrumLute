@@ -4,6 +4,7 @@ add_executable(lute_unit_tests
                     lute_text_parser_tests.cpp
                     lute_db_tests.cpp
                     lute_phrase_tests.cpp
+                    lute_paginator_tests.cpp
 )
 
 target_include_directories(lute_unit_tests

@@ -743,6 +743,30 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-create` creates a Lute book from text and
+    // shows it in the library.
+    if(app.arguments().contains("--lute-demo-create"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            QString text;
+            for(int i = 0; i < 40; ++i)
+                text += QStringLiteral("The quiet harbor was full of small boats. ");
+            text += QStringLiteral("\n\n---\n\n");
+            for(int i = 0; i < 40; ++i)
+                text += QStringLiteral("Winter changed the old harbor and the lighthouse. ");
+            qInfo() << "lute create demo:"
+                    << luteController->createBook(QStringLiteral("Harbor demo"),
+                                                  text, false);
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(4800, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-hub` opens the Lute library page.
     if(app.arguments().contains("--lute-demo-hub"))
     {

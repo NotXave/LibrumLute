@@ -10,6 +10,11 @@ page are Librum's own QML, and the Lute features were added on top of it.
 
 ## What was added
 
+* **Create and import texts** – "New text" pastes a text into a new Lute book,
+  "Import .txt" reads a text file, "Add a PDF" converts a PDF into a Lute book.
+  Imported texts are paginated with Lute's rules (about 250 tokens per page,
+  optional sentence splitting, `---` starts a new page) and become readable in
+  the Lute reader.
 * **Lute library and text reader** – the sidebar entry *Lute* (Ctrl+6) opens
   the books of the selected language from the real `lute.db` (the user's own
   library and progress), and opens them in a Lute text reader: pages as rich
@@ -112,6 +117,7 @@ librum.exe book.pdf --lute-demo-phrase --out p.png # drag over "run out of", sto
 librum.exe --lute-db lute.db --lute-demo-hub --out lib.png     # Lute book library
 librum.exe --lute-db lute.db --lute-demo-reading --out read.png # open the first book
 librum.exe --lute-db lute.db --lute-demo-word --out word.png   # reader + word popup
+librum.exe --lute-db lute.db --lute-demo-create --out new.png  # create a book from text
 python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
 librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png

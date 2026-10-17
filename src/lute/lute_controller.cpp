@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include "lute_ai_access.hpp"
+#include "lute_paginator.hpp"
 #include "lute_schema.hpp"
 #include "lute_status.hpp"
 #include "lute_text_parser.hpp"
@@ -560,6 +561,90 @@ void LuteController::openLibrary()
 void LuteController::showReader()
 {
     emit showLuteReaderRequested();
+}
+
+bool LuteController::createBook(const QString& title, const QString& text,
+                               bool splitBySentences)
+{
+    if(!m_database.isOpen() || m_languageId <= 0 || !m_parser)
+    {
+        setMessage(QStringLiteral("Open a lute.db and select a language first"),
+                   true);
+        return false;
+    }
+
+    const QString cleanTitle = title.trimmed();
+    if(cleanTitle.isEmpty())
+    {
+        setMessage(QStringLiteral("Please enter a title"), true);
+        return false;
+    }
+    if(text.trimmed().isEmpty())
+    {
+        setMessage(QStringLiteral("Please enter some text"), true);
+        return false;
+    }
+
+    const QVector<QString> pages =
+        LutePaginator::paginate(text, *m_parser, 250, splitBySentences);
+    if(pages.isEmpty())
+    {
+        setMessage(QStringLiteral("The text contains no words"), true);
+        return false;
+    }
+
+    QString error;
+    const qint64 bookId =
+        m_database.findOrCreateBook(cleanTitle, QString(), m_languageId, &error);
+    if(bookId <= 0)
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not create the book")
+                                   : error,
+                   true);
+        return false;
+    }
+    if(m_database.findTextForBook(bookId))
+    {
+        setMessage(QStringLiteral("A book called \"%1\" already exists")
+                       .arg(cleanTitle),
+                   true);
+        return false;
+    }
+
+    int order = 1;
+    for(const QString& page : pages)
+    {
+        const int wordCount = m_parser->words(page).size();
+        if(m_database.createText(bookId, order, page, wordCount, &error) <= 0)
+        {
+            setMessage(error.isEmpty() ? QStringLiteral("Could not add the page")
+                                       : error,
+                       true);
+            return false;
+        }
+        ++order;
+    }
+
+    refreshLibrary();
+    setMessage(QStringLiteral("\"%1\" was added with %2 pages")
+                   .arg(cleanTitle)
+                   .arg(pages.size()));
+    return true;
+}
+
+bool LuteController::importTextFile(const QString& path)
+{
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        setMessage(QStringLiteral("Cannot read \"%1\": %2")
+                       .arg(path, file.errorString()),
+                   true);
+        return false;
+    }
+    const QString text = QString::fromUtf8(file.readAll());
+    file.close();
+    return createBook(QFileInfo(path).completeBaseName(), text, false);
 }
 
 QString LuteController::buildReaderHtml(const QString& text)
