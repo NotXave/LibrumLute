@@ -1274,6 +1274,13 @@ void LuteController::buildActiveWord(int pageIndex, const WordQuad& word,
     map.insert(QStringLiteral("showRomanization"),
                language ? language->showRomanization : false);
     map.insert(QStringLiteral("aiSuggestion"), QString());
+    QVariantList tagNames;
+    if(term)
+    {
+        for(const LuteTag& tag : m_database.tagsForTerm(term->id))
+            tagNames.append(tag.text);
+    }
+    map.insert(QStringLiteral("tags"), tagNames);
 
     m_activeWord = map;
     m_popupVisible = true;

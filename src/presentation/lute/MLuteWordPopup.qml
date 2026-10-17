@@ -93,6 +93,38 @@ Popup {
             }
         }
 
+        // ---- tags -------------------------------------------------------
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            spacing: 6
+            visible: LuteController.activeWord.tags !== undefined
+                     && LuteController.activeWord.tags.length > 0
+
+            Repeater {
+                model: LuteController.activeWord.tags !== undefined
+                       ? LuteController.activeWord.tags : []
+
+                delegate: Rectangle {
+                    required property var modelData
+                    Layout.preferredHeight: 22
+                    Layout.preferredWidth: tagLabel.implicitWidth + 16
+                    radius: 11
+                    color: Style.colorControlBackground
+                    border.width: 1
+                    border.color: Style.colorContainerBorder
+
+                    Label {
+                        id: tagLabel
+                        anchors.centerIn: parent
+                        text: modelData
+                        color: Style.colorBasePurple
+                        font.pointSize: Fonts.size9
+                    }
+                }
+            }
+        }
+
         // ---- sentence context -------------------------------------------
         Pane {
             Layout.fillWidth: true

@@ -444,3 +444,35 @@ TEST(LuteDatabase, ManagesTags)
     ASSERT_TRUE(database.deleteTag(tag.id, &error));
     EXPECT_TRUE(database.tags().isEmpty());
 }
+
+
+TEST(LuteDatabase, AssignsTagsToTerms)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm term;
+    term.languageId = english->id;
+    term.text = QStringLiteral("harbor");
+    term.status = 3;
+    term.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(term, &error));
+
+    LuteTag tag;
+    tag.text = QStringLiteral("noun");
+    ASSERT_TRUE(database.saveTag(tag, &error));
+
+    ASSERT_TRUE(database.setTermTags(term.id, {tag.id}, &error));
+    EXPECT_EQ(database.tagsForTerm(term.id).size(), 1);
+    EXPECT_EQ(database.tagsForTerm(term.id).first().text, QStringLiteral("noun"));
+
+    ASSERT_TRUE(database.setTermTags(term.id, {}, &error));
+    EXPECT_TRUE(database.tagsForTerm(term.id).isEmpty());
+}

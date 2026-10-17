@@ -89,6 +89,9 @@ public:
     QVector<LuteTag> tags();
     bool saveTag(LuteTag& tag, QString* error = nullptr);
     bool deleteTag(qint64 tagId, QString* error = nullptr);
+    QVector<LuteTag> tagsForTerm(qint64 termId);
+    bool setTermTags(qint64 termId, const QVector<qint64>& tagIds,
+                     QString* error = nullptr);
 
     // ---- statistics -------------------------------------------------------
     QHash<int, int> statusCounts(int languageId);

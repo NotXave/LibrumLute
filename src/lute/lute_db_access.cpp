@@ -884,6 +884,12 @@ bool LuteDbAccess::saveTag(LuteTag& tag, QString* error)
     if(!m_impl->db.isOpen())
         return false;
 
+    // Lute's tag columns are NOT NULL; null QStrings would be bound as NULL.
+    if(tag.text.isNull())
+        tag.text = QStringLiteral("");
+    if(tag.comment.isNull())
+        tag.comment = QStringLiteral("");
+
     QSqlQuery query(m_impl->db);
     if(tag.id > 0)
         query.prepare(QStringLiteral(
@@ -903,6 +909,61 @@ bool LuteDbAccess::saveTag(LuteTag& tag, QString* error)
     }
     if(tag.id <= 0)
         tag.id = query.lastInsertId().toLongLong();
+    return true;
+}
+
+QVector<LuteTag> LuteDbAccess::tagsForTerm(qint64 termId)
+{
+    QVector<LuteTag> result;
+    if(!m_impl->db.isOpen())
+        return result;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT t.TgID, COALESCE(t.TgText, ''), COALESCE(t.TgComment, '') "
+        "FROM tags t JOIN wordtags wt ON wt.WtTgID = t.TgID "
+        "WHERE wt.WtWoID = ? ORDER BY t.TgText"));
+    query.addBindValue(termId);
+    if(!query.exec())
+        return result;
+    while(query.next())
+    {
+        LuteTag tag;
+        tag.id = query.value(0).toLongLong();
+        tag.text = query.value(1).toString();
+        tag.comment = query.value(2).toString();
+        result.append(tag);
+    }
+    return result;
+}
+
+bool LuteDbAccess::setTermTags(qint64 termId, const QVector<qint64>& tagIds,
+                              QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+    QSqlQuery clear(m_impl->db);
+    clear.prepare(QStringLiteral("DELETE FROM wordtags WHERE WtWoID = ?"));
+    clear.addBindValue(termId);
+    if(!clear.exec())
+    {
+        if(error)
+            *error = clear.lastError().text();
+        return false;
+    }
+    for(qint64 tagId : tagIds)
+    {
+        QSqlQuery insert(m_impl->db);
+        insert.prepare(QStringLiteral(
+            "INSERT INTO wordtags (WtWoID, WtTgID) VALUES (?, ?)"));
+        insert.addBindValue(termId);
+        insert.addBindValue(tagId);
+        if(!insert.exec())
+        {
+            if(error)
+                *error = insert.lastError().text();
+            return false;
+        }
+    }
     return true;
 }
 

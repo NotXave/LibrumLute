@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (continued) — term tags: `tagsForTerm()`/`setTermTags()` write Lute's
+  `wordtags` join table, the controller adds the assigned tag names to the
+  active word and the popup renders them as chips. gtest assigns and clears a
+  tag on a term; 28 tests green. Fixed a NULL-binding bug in `saveTag`
+  (TgComment is NOT NULL), which the test caught.
+
 - Phase 7 (continued) — restore verified end-to-end with `--lute-demo-restore`:
   backup returned true, restore returned true, the database reopened with 69
   languages and the book list (1 book) — evidence in the app log.
