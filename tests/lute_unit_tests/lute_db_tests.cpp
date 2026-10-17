@@ -617,3 +617,48 @@ TEST(LuteDatabase, ExportsAnkiTsvWithTags)
     EXPECT_TRUE(content.contains(
         QStringLiteral("harbor\tHafen\tnoun\t3")));
 }
+
+
+TEST(LuteDatabase, BulkUpdatesFilteredTermStatus)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm harbor;
+    harbor.languageId = english->id;
+    harbor.text = QStringLiteral("harbor");
+    harbor.status = 3;
+    harbor.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(harbor, &error));
+
+    LuteTerm hills;
+    hills.languageId = english->id;
+    hills.text = QStringLiteral("hills");
+    hills.status = 5;
+    hills.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(hills, &error));
+
+    int changed = database.setStatusForTerms(english->id,
+                                             QStringLiteral("har"), 0, 99,
+                                             &error);
+    ASSERT_EQ(changed, 1) << error.toStdString();
+    EXPECT_EQ(database.getTermByText(QStringLiteral("harbor"), english->id)
+                  ->status,
+              99);
+    EXPECT_EQ(database.getTermByText(QStringLiteral("hills"), english->id)
+                  ->status,
+              5);
+
+    changed = database.setStatusForTerms(english->id, QString(), 5, 1, &error);
+    ASSERT_EQ(changed, 1);
+    EXPECT_EQ(database.getTermByText(QStringLiteral("hills"), english->id)
+                  ->status,
+              1);
+}

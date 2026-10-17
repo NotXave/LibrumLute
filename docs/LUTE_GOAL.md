@@ -322,6 +322,11 @@ Newest entries first; each entry: what changed, evidence, commit.
   current search and status filter to 99 (`setStatusForTerms`, refuses without
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
+## Phase log
+
+- Phase 3 (bulk QA) — gtest bulk-updates "har" to 99 and status 5 to 1,
+  checking that only the filtered rows change; 33 tests green. C5 marked done.
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
@@ -330,7 +335,7 @@ Newest entries first; each entry: what changed, evidence, commit.
 | C2 Lute hub | done | Texts/Terms/Statistics/Languages/Tags sections, sidebar entry, Ctrl+6 |
 | C3 library | done | 271 books of the user DB listed, create/import text + PDF, delete-free read |
 | C4 reader | done | rich text per page, status colours, click popup, slider, page jump, bookmarks (`textbookmarks`), shortcuts, mark read |
-| C5 terms | mostly | 14,358 terms, search, status filter, edit popup, delete, TSV export/import, Anki export |
+| C5 terms | done | 14,358 terms, search, status filter, edit popup, delete, bulk mark filtered known, TSV export/import, Anki export |
 | C6 languages/dicts | done | 69 languages CRUD, parser fields, dictionaries list + activation + URI editing |
 | C7 statistics | done | cards, 14-day series, status distribution |
 | C8 tags/families | mostly | tag CRUD, term assignment + toggle, parent link/unlink, popup chips |
