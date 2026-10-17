@@ -27,6 +27,10 @@ Page {
         function onShowLanguagesRequested() {
             root.currentSection = 3
         }
+
+        function onShowStatisticsPageRequested() {
+            root.currentSection = 2
+        }
     }
 
     background: Rectangle {
@@ -126,13 +130,15 @@ Page {
                     Layout.preferredWidth: 236
                     Layout.topMargin: 4
                     Layout.leftMargin: 1
-                    opacity: 0.4
+                    selected: root.currentSection === 2
                     imageLeftMargin: 26
                     imageWidth: 16
                     labelLeftMargin: 10
                     textContent: qsTr("Statistics")
                     defaultIcon: Icons.sidebarPieChart
                     selectedIcon: Icons.sidebarPieChart
+
+                    onClicked: root.currentSection = 2
                 }
 
                 MSettingsSidebarItem {
@@ -208,7 +214,7 @@ Page {
 
             MLuteTextsPage {}
             MLuteTermsPage {}
-            Item {}
+            MLuteStatisticsPage {}
             MLuteLanguagesPage {}
         }
     }

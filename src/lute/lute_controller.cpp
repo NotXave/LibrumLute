@@ -575,6 +575,12 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+void LuteController::openLuteStatistics()
+{
+    refreshStats();
+    emit showStatisticsPageRequested();
+}
+
 bool LuteController::selectTerm(qint64 termId)
 {
     const auto term = m_database.termById(termId);
@@ -1509,6 +1515,25 @@ void LuteController::refreshStats()
             ? 100.0 * double(m_documentKnownTokens) / double(m_documentTokenCount)
             : 0.0;
     map.insert(QStringLiteral("coverage"), coverage);
+
+    m_learnedSeries.clear();
+    m_createdSeries.clear();
+    if(m_database.isOpen() && m_languageId > 0)
+    {
+        auto toSeries = [](const QVector<DailyCount>& days) {
+            QVariantList list;
+            for(const DailyCount& day : days)
+            {
+                QVariantMap entry;
+                entry.insert(QStringLiteral("day"), day.date.toString(QStringLiteral("MM-dd")));
+                entry.insert(QStringLiteral("count"), day.count);
+                list.append(entry);
+            }
+            return list;
+        };
+        m_learnedSeries = toSeries(m_database.statusChangesPerDay(m_languageId, 14));
+        m_createdSeries = toSeries(m_database.createdPerDay(m_languageId, 14));
+    }
 
     m_stats = map;
     emit statsChanged();

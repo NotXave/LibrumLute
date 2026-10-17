@@ -68,6 +68,13 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 6 (started) — Lute statistics page in the hub: cards (terms, learning,
+  known, words read), 14-day series for created terms and status changes (from
+  `createdPerDay`/`statusChangesPerDay` exposed as `createdSeries`/
+  `learnedSeries`), status distribution. Verified on the user's Polish DB:
+  14,358 terms, 6,493 learning, 6,983 known, 172,894 words read; screenshot
+  `docs/lute/statistics.png`, demo `--lute-demo-hub-stats`.
+
 - Phase 5/3 (tests) — language manager and term filters covered by gtest:
   save/insert/update language (all parser columns, NULL-safety), guarded
   deletion while terms exist, deletion after cleanup; term search/status

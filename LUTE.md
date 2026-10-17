@@ -29,6 +29,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
   edits all parser fields Lute stores (name, split characters, exceptions,
   substitutions, word characters, parser type, RTL, romanization); new
   languages and guarded deletion included.
+* **Lute statistics** – the hub's *Statistics* section shows terms/learning/
+  known/words read, 14-day "terms created" and "status changes" bar charts and
+  the full status distribution, straight from `lute.db`.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
@@ -129,6 +132,7 @@ librum.exe --lute-db lute.db --lute-demo-word --out word.png   # reader + word p
 librum.exe --lute-db lute.db --lute-demo-create --out new.png  # create a book from text
 librum.exe --lute-db lute.db --lute-demo-terms --out terms.png # term list
 librum.exe --lute-db lute.db --lute-demo-languages --out langs.png # language manager
+librum.exe --lute-db lute.db --lute-demo-hub-stats --out stats.png # Lute statistics
 python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
 librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png

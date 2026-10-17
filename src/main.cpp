@@ -743,6 +743,23 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-hub-stats` opens the Lute hub statistics.
+    if(app.arguments().contains("--lute-demo-hub-stats"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            luteController->openLuteStatistics();
+        });
+        QTimer::singleShot(5000, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-languages` opens the language manager.
     if(app.arguments().contains("--lute-demo-languages"))
     {

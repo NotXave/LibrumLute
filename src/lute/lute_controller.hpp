@@ -61,6 +61,8 @@ class LuteController : public QObject
 
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
+    Q_PROPERTY(QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
+    Q_PROPERTY(QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
     Q_PROPERTY(bool readerOpen READ readerOpen NOTIFY readerChanged)
     Q_PROPERTY(QString readerHtml READ readerHtml NOTIFY readerChanged)
@@ -102,6 +104,8 @@ public:
 
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }
+    QVariantList learnedSeries() const { return m_learnedSeries; }
+    QVariantList createdSeries() const { return m_createdSeries; }
     QVariantMap currentBook() const { return m_currentBookMap; }
     bool readerOpen() const { return m_readerOpen; }
     QString readerHtml() const { return m_readerHtml; }
@@ -211,6 +215,7 @@ public slots:
     bool saveLanguage(const QVariantMap& language);
     bool deleteLanguage(int languageId);
     void openLanguages();
+    void openLuteStatistics();
 
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
@@ -235,6 +240,7 @@ signals:
     void termsChanged();
     void showTermsRequested();
     void showLanguagesRequested();
+    void showStatisticsPageRequested();
     void readerChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();
@@ -271,6 +277,8 @@ private:
 
     QVariantList m_books;
     QVariantList m_terms;
+    QVariantList m_learnedSeries;
+    QVariantList m_createdSeries;
     bool m_termsLoaded = false;
     QString m_termSearch;
     int m_termStatus = 0;
