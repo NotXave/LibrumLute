@@ -21,6 +21,13 @@ struct LuteBook
 };
 
 /// One row of Lute's `texts` table: a single readable page of a book.
+struct LuteBookmark {
+    qint64 id = 0;
+    qint64 textId = 0;
+    int page = 0;
+    QString title;
+};
+
 struct LuteText
 {
     qint64 id = 0;

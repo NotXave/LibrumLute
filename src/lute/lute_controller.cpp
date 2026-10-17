@@ -578,34 +578,47 @@ void LuteController::openLanguages()
 void LuteController::loadBookmarks()
 {
     m_bookmarks.clear();
-    if(m_currentBook.id > 0 && !m_database.path().isEmpty())
+    if(m_currentBook.id > 0 && m_database.isOpen())
     {
-        QSettings settings;
-        const QString key = QStringLiteral("lute/bookmarks/%1/%2")
-                                .arg(m_database.path())
-                                .arg(m_currentBook.id);
-        const QStringList pages = settings.value(key).toStringList();
-        for(const QString& page : pages)
-            m_bookmarks.append(page.toInt());
+        for(const LuteBookmark& bookmark : m_database.bookmarks(m_currentBook.id))
+        {
+            QVariantMap map;
+            map.insert(QStringLiteral("id"), bookmark.id);
+            map.insert(QStringLiteral("page"), bookmark.page);
+            map.insert(QStringLiteral("title"), bookmark.title);
+            map.insert(QStringLiteral("label"),
+                       QStringLiteral("p. %1").arg(bookmark.page));
+            m_bookmarks.append(map);
+        }
     }
     emit bookmarksChanged();
 }
 
 bool LuteController::toggleBookmark(int page)
 {
-    if(m_currentBook.id <= 0 || m_database.path().isEmpty() || page < 1)
+    if(m_currentBook.id <= 0)
         return false;
-    QSettings settings;
-    const QString key = QStringLiteral("lute/bookmarks/%1/%2")
-                            .arg(m_database.path())
-                            .arg(m_currentBook.id);
-    QStringList pages = settings.value(key).toStringList();
-    const QString value = QString::number(page);
-    if(pages.contains(value))
-        pages.removeAll(value);
+    const auto text = m_database.text(m_currentBook.id, page);
+    if(!text)
+        return false;
+
+    QString error;
+    if(const auto existing = m_database.bookmarkForText(text->id))
+    {
+        if(!m_database.deleteBookmark(existing->id, &error))
+        {
+            setMessage(error, true);
+            return false;
+        }
+    }
     else
-        pages.append(value);
-    settings.setValue(key, pages);
+    {
+        if(m_database.addBookmark(text->id, m_currentBook.title, &error) <= 0)
+        {
+            setMessage(error, true);
+            return false;
+        }
+    }
     loadBookmarks();
     return true;
 }

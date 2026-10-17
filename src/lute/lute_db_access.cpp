@@ -1267,6 +1267,84 @@ QVector<LuteText> LuteDbAccess::texts(qint64 bookId)
     return result;
 }
 
+QVector<LuteBookmark> LuteDbAccess::bookmarks(qint64 bookId)
+{
+    QVector<LuteBookmark> result;
+    if(!m_impl->db.isOpen())
+        return result;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT b.TbID, b.TbTxID, t.TxOrder, COALESCE(b.TbTitle, '') "
+        "FROM textbookmarks b JOIN texts t ON t.TxID = b.TbTxID "
+        "WHERE t.TxBkID = ? ORDER BY t.TxOrder"));
+    query.addBindValue(bookId);
+    if(!query.exec())
+        return result;
+    while(query.next())
+    {
+        LuteBookmark bookmark;
+        bookmark.id = query.value(0).toLongLong();
+        bookmark.textId = query.value(1).toLongLong();
+        bookmark.page = query.value(2).toInt();
+        bookmark.title = query.value(3).toString();
+        result.append(bookmark);
+    }
+    return result;
+}
+
+std::optional<LuteBookmark> LuteDbAccess::bookmarkForText(qint64 textId)
+{
+    if(!m_impl->db.isOpen())
+        return std::nullopt;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT b.TbID, b.TbTxID, t.TxOrder, COALESCE(b.TbTitle, '') "
+        "FROM textbookmarks b JOIN texts t ON t.TxID = b.TbTxID "
+        "WHERE b.TbTxID = ?"));
+    query.addBindValue(textId);
+    if(!query.exec() || !query.next())
+        return std::nullopt;
+    LuteBookmark bookmark;
+    bookmark.id = query.value(0).toLongLong();
+    bookmark.textId = query.value(1).toLongLong();
+    bookmark.page = query.value(2).toInt();
+    bookmark.title = query.value(3).toString();
+    return bookmark;
+}
+
+qint64 LuteDbAccess::addBookmark(qint64 textId, const QString& title,
+                                QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return 0;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "INSERT INTO textbookmarks (TbTxID, TbTitle) VALUES (?, ?)"));
+    query.addBindValue(textId);
+    query.addBindValue(title.isNull() ? QStringLiteral("") : title);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return 0;
+    }
+    return query.lastInsertId().toLongLong();
+}
+
+bool LuteDbAccess::deleteBookmark(qint64 bookmarkId, QString* error)
+{
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral("DELETE FROM textbookmarks WHERE TbID = ?"));
+    query.addBindValue(bookmarkId);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 std::optional<LuteText> LuteDbAccess::text(qint64 bookId, int order)
 {
     if(!m_impl->db.isOpen())

@@ -160,13 +160,12 @@ Page {
                     borderWidth: 1
                     borderColor: Style.colorButtonBorder
                     backgroundColor: "transparent"
-                    textColor: LuteController.bookmarks.indexOf(
-                                   LuteController.readerPage) !== -1
-                               ? Style.colorBasePurple : Style.colorText
+                    readonly property bool marked:
+                        LuteController.bookmarks.some(
+                            bookmark => bookmark.page === LuteController.readerPage)
+                    textColor: marked ? Style.colorBasePurple : Style.colorText
                     fontSize: Fonts.size10
-                    text: LuteController.bookmarks.indexOf(
-                              LuteController.readerPage) !== -1
-                          ? qsTr("★ Bookmarked") : qsTr("☆ Bookmark")
+                    text: marked ? qsTr("★ Bookmarked") : qsTr("☆ Bookmark")
 
                     onClicked: LuteController.toggleBookmark(
                                    LuteController.readerPage)
@@ -177,11 +176,12 @@ Page {
                     Layout.preferredHeight: 28
                     visible: LuteController.bookmarks.length > 0
                     model: LuteController.bookmarks
+                    textRole: "label"
                     font.pointSize: Fonts.size9
 
                     onActivated: index => {
                                      LuteController.openPage(
-                                         LuteController.bookmarks[index])
+                                         LuteController.bookmarks[index].page)
                                      currentIndex = -1
                                  }
                 }

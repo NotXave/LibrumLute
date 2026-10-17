@@ -514,3 +514,37 @@ TEST(LuteDatabase, LinksTermFamilies)
     ASSERT_TRUE(database.setTermParents(child.id, {}, &error));
     EXPECT_TRUE(database.parentsForTerm(child.id).isEmpty());
 }
+
+
+TEST(LuteDatabase, StoresTextBookmarks)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+    const qint64 bookId = database.findOrCreateBook(
+        QStringLiteral("Bookmarks"), QString(), english->id, &error);
+    ASSERT_GT(bookId, 0);
+
+    const qint64 pageId =
+        database.createText(bookId, 3, QStringLiteral("Page three."), 2, &error);
+    ASSERT_GT(pageId, 0);
+
+    const qint64 bookmarkId =
+        database.addBookmark(pageId, QStringLiteral("Bookmarks"), &error);
+    ASSERT_GT(bookmarkId, 0) << error.toStdString();
+
+    const QVector<LuteBookmark> bookmarks = database.bookmarks(bookId);
+    ASSERT_EQ(bookmarks.size(), 1);
+    EXPECT_EQ(bookmarks.first().page, 3);
+
+    ASSERT_TRUE(database.bookmarkForText(pageId).has_value());
+
+    ASSERT_TRUE(database.deleteBookmark(bookmarkId, &error));
+    EXPECT_TRUE(database.bookmarks(bookId).isEmpty());
+}

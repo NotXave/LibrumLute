@@ -112,6 +112,12 @@ public:
 
     /// The pages of a book, in reading order (without the text contents).
     QVector<LuteText> texts(qint64 bookId);
+
+    QVector<LuteBookmark> bookmarks(qint64 bookId);
+    std::optional<LuteBookmark> bookmarkForText(qint64 textId);
+    qint64 addBookmark(qint64 textId, const QString& title,
+                       QString* error = nullptr);
+    bool deleteBookmark(qint64 bookmarkId, QString* error = nullptr);
     /// One page including its text.
     std::optional<LuteText> text(qint64 bookId, int order);
 
