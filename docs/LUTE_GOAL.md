@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 9 (packaging refresh) — portable package updated with the latest
+  reader (slider), tags/families and statistics features: 169.7 MB, 1,405
+  files; smoke test opened the Lute reader with the Polish library copy and
+  produced a screenshot (96 KB).
+
+
 - Phase 2 (reader polish) — page slider in the reader toolbar: drag jumps to
   the page via `openPage()`, bound to `readerPage`/`readerPageCount`, disabled
   for single-page books. Verified in the reading screenshot (page 1 of 262,
