@@ -18,6 +18,10 @@ class ADAPTERS_EXPORT BookController : public IBookController
     Q_OBJECT
 
 public:
+    /// Emitted after a book was opened successfully; Lute uses the same file
+    /// for word lookups and highlights.
+    Q_SIGNAL void bookOpened(const QString& filePath);
+
     BookController(application::IBookService* bookService,
                    application::ILibraryService* libraryService);
 

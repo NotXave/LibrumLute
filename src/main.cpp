@@ -234,6 +234,14 @@ int main(int argc, char* argv[])
     luteController->initialize();
     qmlRegisterSingletonInstance("Librum.lute", 1, 0, "LuteController",
                                  luteController.get());
+    QObject::connect(
+        bookController.get(), &BookController::bookOpened,
+        luteController.get(),
+        [luteController = luteController.get()](const QString& filePath) {
+            if(!filePath.isEmpty())
+                luteController->setDocumentPath(filePath);
+        });
+
 
     // Free books stack
     auto* freeBooksService = config::diConfig().create<application::IFreeBooksService*>();
@@ -431,10 +439,18 @@ int main(int argc, char* argv[])
         if(index + 1 < app.arguments().size())
             page = app.arguments().at(index + 1).toInt();
         const QString outputPath = demoOutputPath;
-        QTimer::singleShot(3000, &app, [externalBookController = externalBookController.get(), page]() {
-            externalBookController->setCurrentPage(page);
+        QTimer::singleShot(3000, &app, [&engine, page]() {
+            auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0));
+            if(!window)
+                return;
+            window->requestActivate();
+            for(int i = 0; i < page; ++i)
+            {
+                QKeyEvent press(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
+                QCoreApplication::sendEvent(window, &press);
+            }
         });
-        QTimer::singleShot(9000, &engine, [&engine, outputPath]() {
+        QTimer::singleShot(25000, &engine, [&engine, outputPath]() {
             if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
                 window->grabWindow().save(outputPath);
             QCoreApplication::quit();

@@ -40,6 +40,7 @@ BookController::BookController(application::IBookService* bookService,
 
 bool BookController::setUp(QString uuid)
 {
+    const QString filePath = getFilePath();
     m_bookService->setUp(
         std::make_unique<LibraryBookGetter>(m_libraryService, QUuid(uuid)));
 
