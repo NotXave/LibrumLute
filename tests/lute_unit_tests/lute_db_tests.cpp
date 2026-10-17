@@ -210,3 +210,83 @@ TEST(LuteDatabase, ListsBooksAndReadsTextPages)
     ASSERT_EQ(after.size(), 2);
     EXPECT_TRUE(after.at(1).read);
 }
+
+
+TEST(LuteDatabase, SavesUpdatesAndGuardsLanguageDeletion)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+
+    LuteLanguage language;
+    language.name = QStringLiteral("Testish");
+    language.regexpSplitSentences = QStringLiteral(".!?");
+    language.regexpWordCharacters = QStringLiteral("a-z");
+    language.parserType = QStringLiteral("spacedel");
+    language.showRomanization = true;
+    ASSERT_TRUE(database.saveLanguage(language, &error)) << error.toStdString();
+    EXPECT_GT(language.id, 0);
+
+    const auto created = database.languageById(language.id);
+    ASSERT_TRUE(created.has_value());
+    EXPECT_EQ(created->name, QStringLiteral("Testish"));
+    EXPECT_TRUE(created->showRomanization);
+
+    language.name = QStringLiteral("Testish 2");
+    ASSERT_TRUE(database.saveLanguage(language, &error)) << error.toStdString();
+    EXPECT_EQ(database.languageById(language.id)->name, QStringLiteral("Testish 2"));
+
+    LuteTerm term;
+    term.languageId = language.id;
+    term.text = QStringLiteral("abc");
+    term.status = 1;
+    term.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(term, &error)) << error.toStdString();
+
+    QString deleteError;
+    EXPECT_FALSE(database.deleteLanguage(language.id, &deleteError));
+    EXPECT_FALSE(deleteError.isEmpty());
+
+    ASSERT_TRUE(database.deleteTerm(term.id, &error));
+    EXPECT_TRUE(database.deleteLanguage(language.id, &error));
+    EXPECT_FALSE(database.languageById(language.id).has_value());
+}
+
+TEST(LuteDatabase, FiltersTermsByTextAndStatus)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    LuteTerm harbor;
+    harbor.languageId = english->id;
+    harbor.text = QStringLiteral("Harbor");
+    harbor.status = 3;
+    harbor.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(harbor, &error));
+
+    LuteTerm lighthouse;
+    lighthouse.languageId = english->id;
+    lighthouse.text = QStringLiteral("lighthouse");
+    lighthouse.status = 5;
+    lighthouse.tokenCount = 1;
+    ASSERT_TRUE(database.saveTerm(lighthouse, &error));
+
+    EXPECT_EQ(database.terms(english->id, QStringLiteral("har"), 0).size(), 1);
+    EXPECT_EQ(database.terms(english->id, QString(), 5).size(), 1);
+    EXPECT_EQ(database.terms(english->id, QStringLiteral("LIGHT"), 0)
+                  .first()
+                  .text,
+              QStringLiteral("lighthouse"));
+    EXPECT_EQ(database.terms(english->id, QString(), 0).size(), 2);
+}

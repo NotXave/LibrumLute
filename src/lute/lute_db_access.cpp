@@ -221,6 +221,17 @@ bool LuteDbAccess::saveLanguage(LuteLanguage& language, QString* error)
     if(!m_impl->db.isOpen())
         return false;
 
+    // Lute's columns are NOT NULL; default-constructed QStrings are null and
+    // would be bound as SQL NULL.
+    auto text = [](QString value) {
+        return value.isNull() ? QStringLiteral("") : value;
+    };
+    language.characterSubstitutions = text(language.characterSubstitutions);
+    language.regexpSplitSentences = text(language.regexpSplitSentences);
+    language.exceptionsSplitSentences = text(language.exceptionsSplitSentences);
+    language.regexpWordCharacters = text(language.regexpWordCharacters);
+    language.parserType = text(language.parserType);
+
     QSqlQuery query(m_impl->db);
     if(language.id > 0)
     {

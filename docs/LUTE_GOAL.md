@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5/3 (tests) — language manager and term filters covered by gtest:
+  save/insert/update language (all parser columns, NULL-safety), guarded
+  deletion while terms exist, deletion after cleanup; term search/status
+  filters. 23 tests green. This closes the open verification from the language
+  round.
+
 - Phase 5 (started) — language manager: the hub's Languages section lists all
   languages of the open lute.db with parser type/RTL/romanization flags and
   edits every parser column via `LuteDbAccess::saveLanguage`; new languages and
