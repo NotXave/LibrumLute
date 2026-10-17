@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 9 (packaging refresh) — packaged exe rebuilt with the Lute-table
+  bookmarks and reader controls; smoke test opened the reader with the Polish
+  library copy (screenshot 100 KB). Package remains 169.7 MB.
+
+
 - Phase 2 (reader polish) — bookmarks: "Bookmark/Bookmarked" toggles the
   current page for the open book (stored per lute.db path and book id in
   QSettings), a picker jumps to a bookmark; loaded on `openBook`. Verified in
