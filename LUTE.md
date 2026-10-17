@@ -10,7 +10,7 @@ page are Librum's own QML, and the Lute features were added on top of it.
 
 ## What was added
 
-* **Lute word popup** – clicking a word in the PDF opens a popup with the word,
+* **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
 * **Coloured underlines on the page** – every word that has a Lute status is
@@ -32,6 +32,9 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Statistics page** – Librum's placeholder page now shows the Lute vocabulary
   of the selected language: terms, learning/known counts, words read, the
   coverage of the currently open document and the status distribution.
+* **Single-click word selection** – Librum only selected a word on double
+  clicks; the fork selects it on a normal click (a small change in
+  `PageView::mouseReleaseEvent`) so looking a word up feels like Lute.
 * **Offline reading** – Librum normally requires an account. The fork adds an
   *Open a PDF without an account* button to the login page and can be started
   with a file path (`librum.exe book.pdf`, "Open with Librum"). Settings are
@@ -72,6 +75,9 @@ Notes on the Windows build in this fork:
   C runtimes.
 * `-DLIBRUM_CONSOLE=ON` keeps a console window with the QML messages, which is
   useful while developing.
+* The QML files are compiled into a `.qrc`; the fork adds explicit
+  `OBJECT_DEPENDS` entries for them because CMake's AUTORCC otherwise kept
+  stale QML in the binary after edits.
 
 ## Running
 
@@ -87,6 +93,7 @@ Notes on the Windows build in this fork:
 ```powershell
 librum.exe --lute-selftest book.pdf          # extract words, print, exit
 librum.exe book.pdf --lute-demo --out r.png   # seed statuses, open popup, screenshot
+librum.exe book.pdf --lute-demo-click --out c.png  # click a word through the real event path
 librum.exe book.pdf --lute-demo-settings --out s.png
 librum.exe book.pdf --lute-demo-stats --out t.png
 librum.exe --lute-demo-login --out l.png

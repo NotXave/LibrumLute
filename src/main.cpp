@@ -10,6 +10,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QMouseEvent>
+#include <QQuickItem>
 #include <QQuickWindow>
 #include <QTimer>
 #include <QImage>
@@ -49,6 +51,28 @@
 using namespace adapters::controllers;
 using namespace application::services;
 
+
+
+// Fork QA helper: find the page item visually (delegates have no QObject parent
+// chain to the window, so QObject::findChild does not see them).
+static QQuickItem* findLutePageItem(QQuickItem* root)
+{
+    if(!root)
+        return nullptr;
+
+    if(QString::fromLatin1(root->metaObject()->className())
+           .contains(QStringLiteral("PageView"))
+       && root->property("pageNumber").toInt() == 0 && root->width() > 0
+       && root->height() > 0)
+        return root;
+
+    for(QQuickItem* child : root->childItems())
+    {
+        if(QQuickItem* found = findLutePageItem(child))
+            return found;
+    }
+    return nullptr;
+}
 
 void registerTypes();
 void setupGlobalSettings();
@@ -445,6 +469,84 @@ int main(int argc, char* argv[])
     {
         const QString outputPath = demoOutputPath;
         QTimer::singleShot(3500, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-click` clicks a word through the real
+    // QML event path (PageView -> selection -> Lute popup) and screenshots it.
+    if(app.arguments().contains("--lute-demo-click"))
+    {
+        const QString outputPath = demoOutputPath;
+
+        QTimer::singleShot(3000, &app, [&engine, externalBookController = externalBookController.get()]() {
+            externalBookController->setCurrentPage(0);
+        });
+
+        auto* pollTimer = new QTimer(&engine);
+        pollTimer->setInterval(400);
+        QObject::connect(pollTimer, &QTimer::timeout, &engine,
+                         [&engine, pollTimer, luteController = luteController.get()]() {
+            auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0));
+            if(!window)
+                return;
+
+            QQuickItem* pageItem = findLutePageItem(window->contentItem());
+            if(!pageItem)
+                return;
+
+            const QVariantList words = luteController->pageWords(0);
+            QVariantMap target;
+            for(const QVariant& entry : words)
+            {
+                const QVariantMap word = entry.toMap();
+                if(word.value(QStringLiteral("word")).toString().compare(
+                       QStringLiteral("harbor"), Qt::CaseInsensitive) == 0)
+                {
+                    target = word;
+                    break;
+                }
+            }
+            if(target.isEmpty())
+                return;
+
+            pollTimer->stop();
+
+            const QVariantMap rect = target.value(QStringLiteral("rect")).toMap();
+            const QPointF local((rect.value(QStringLiteral("x")).toDouble()
+                                 + rect.value(QStringLiteral("w")).toDouble() / 2)
+                                    * pageItem->width(),
+                                (rect.value(QStringLiteral("y")).toDouble()
+                                 + rect.value(QStringLiteral("h")).toDouble() / 2)
+                                    * pageItem->height());
+            const QPointF scenePos = pageItem->mapToScene(local);
+
+            qInfo() << "lute click: page" << pageItem->size() << "local" << local
+                    << "scene" << scenePos;
+
+            window->requestActivate();
+            QMouseEvent press(QEvent::MouseButtonPress, scenePos,
+                              window->mapToGlobal(scenePos.toPoint()),
+                              Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+            QCoreApplication::sendEvent(window, &press);
+            QMouseEvent release(QEvent::MouseButtonRelease, scenePos,
+                                window->mapToGlobal(scenePos.toPoint()),
+                                Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+            QCoreApplication::sendEvent(window, &release);
+
+            qInfo() << "lute click: popup visible" << luteController->wordPopupVisible();
+
+            QTimer::singleShot(1200, &engine, [&engine]() {
+                if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                    window->grabWindow().save(QStringLiteral("lute-click-debug.png"));
+            });
+        });
+        pollTimer->start();
+
+        QTimer::singleShot(6000, &engine, [&engine, outputPath, pollTimer]() {
+            pollTimer->stop();
             if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
                 window->grabWindow().save(outputPath);
             QCoreApplication::quit();

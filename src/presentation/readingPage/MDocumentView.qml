@@ -152,6 +152,7 @@ Pane {
             spacing: pageSpacing
             delegate: PageView {
                 id: page
+                objectName: "librumLutePage"
                 pageNumber: modelData
                 bookController: root.bookController
                 height: implicitHeight
@@ -171,7 +172,7 @@ Pane {
                 // Lute's coloured underlines for this page.
                 MLutePageOverlay {
                     anchors.fill: parent
-                    pageNumber: page.pageNumber
+                    pageNumber: modelData
                 }
             }
 

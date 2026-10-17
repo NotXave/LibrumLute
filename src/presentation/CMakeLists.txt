@@ -1,6 +1,18 @@
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 
+
+# Fork: AUTORCC does not notice edits of the QML files listed inside the .qrc,
+# which silently keeps stale QML in the binary. Track them explicitly.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/qmlSources.qrc" _qrc_content)
+string(REGEX MATCHALL "<file>[^<]+</file>" _qrc_entries "${_qrc_content}")
+set(_qrc_files "")
+foreach(_entry IN LISTS _qrc_entries)
+    string(REGEX REPLACE "^<file>|</file>$" "" _relative "${_entry}")
+    list(APPEND _qrc_files "${CMAKE_CURRENT_SOURCE_DIR}/${_relative}")
+endforeach()
+set_property(SOURCE qmlSources.qrc APPEND PROPERTY OBJECT_DEPENDS "${_qrc_files}")
+
 # Build
 add_library(presentation
                 SHARED

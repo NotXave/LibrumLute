@@ -251,7 +251,36 @@ void PageView::mouseReleaseEvent(QMouseEvent* event)
     if(m_selectionStart == QPointF(mouseX, mouseY) &&
        !m_tripleClickTimer.isActive())
     {
-        removeSelection();
+        if(event->button() == Qt::LeftButton && !m_startedMousePressOnLink)
+        {
+            // Fork: a single left click selects the word under the cursor so
+            // that Lute can open its word popup. Librum itself only opened a
+            // popup on double clicks.
+            m_selectionStart = mousePoint;
+            m_selectionEnd = mousePoint;
+            selectSingleWord();
+
+            auto rects = m_pageController->getBufferedSelectionRects();
+            QList<QRectF> restoredRects;
+            restoredRects.reserve(rects.size());
+            for(auto rect : rects)
+            {
+                utils::restoreQRect(rect, m_pageController->getZoom());
+                utils::scaleQRectFToZoom(
+                    rect, m_pageController->getZoom()
+                              / window()->devicePixelRatio());
+                restoredRects.push_back(rect);
+            }
+
+            auto positions = getCenterXAndBottomYFromRects(restoredRects);
+            if(positions.first != -1)
+                emit m_bookController->textSelectionFinished(positions.first,
+                                                             positions.second);
+        }
+        else
+        {
+            removeSelection();
+        }
 
         // Restart it since some actions are checking if it is active to e.g.
         // prevent removing the line select on mouse release
