@@ -68,6 +68,9 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (QA) — tag chips verified in the real popup: a tag was seeded into
+  the user's DB copy and appears in the KRAJOWY popup under the headword
+  (screenshot `docs/lute/tags-popup.png`). Toggle click-through still to do.
 - Phase 8 (continued) — tag assignment UI: the word popup renders every tag of
   the database as a chip, highlights the ones assigned to the active term and
   toggles them via `toggleActiveTag()` (writes `wordtags`, updates the popup).
