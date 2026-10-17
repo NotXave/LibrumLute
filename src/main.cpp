@@ -743,6 +743,23 @@ int main(int argc, char* argv[])
         });
     }
 
+    // Fork QA helper: `--lute-demo-terms` opens the Lute term list.
+    if(app.arguments().contains("--lute-demo-terms"))
+    {
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(2500, &app, [luteController = luteController.get()]() {
+            luteController->openLibrary();
+        });
+        QTimer::singleShot(3300, &app, [luteController = luteController.get()]() {
+            luteController->openTerms();
+        });
+        QTimer::singleShot(5200, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-create` creates a Lute book from text and
     // shows it in the library.
     if(app.arguments().contains("--lute-demo-create"))

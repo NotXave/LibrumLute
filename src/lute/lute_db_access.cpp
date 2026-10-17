@@ -375,6 +375,54 @@ QHash<QString, LuteTerm> LuteDbAccess::getTermMap(const QStringList& words, int 
     return result;
 }
 
+QVector<LuteTerm> LuteDbAccess::terms(int languageId, const QString& search,
+                                     int status, int limit)
+{
+    QVector<LuteTerm> result;
+    if(!m_impl->db.isOpen())
+        return result;
+
+    QString sql = QStringLiteral("SELECT %1 FROM words WHERE WoLgID = ?")
+                      .arg(QString::fromLatin1(kTermColumns));
+    if(!search.trimmed().isEmpty())
+        sql += QStringLiteral(" AND WoTextLC LIKE ?");
+    if(status > 0)
+        sql += QStringLiteral(" AND WoStatus = ?");
+    sql += QStringLiteral(" ORDER BY WoStatus, WoTextLC LIMIT ?");
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(sql);
+    query.addBindValue(languageId);
+    if(!search.trimmed().isEmpty())
+        query.addBindValue(QStringLiteral("%%1%").arg(search.trimmed().toLower()));
+    if(status > 0)
+        query.addBindValue(status);
+    query.addBindValue(limit > 0 ? limit : 500);
+
+    if(!query.exec())
+    {
+        m_impl->lastError = query.lastError().text();
+        return result;
+    }
+    while(query.next())
+        result.append(readTermRow(query));
+    return result;
+}
+
+std::optional<LuteTerm> LuteDbAccess::termById(qint64 termId)
+{
+    if(!m_impl->db.isOpen())
+        return std::nullopt;
+
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral("SELECT %1 FROM words WHERE WoID = ?")
+                      .arg(QString::fromLatin1(kTermColumns)));
+    query.addBindValue(termId);
+    if(!query.exec() || !query.next())
+        return std::nullopt;
+    return readTermRow(query);
+}
+
 QVector<LuteTerm> LuteDbAccess::multiWordTerms(int languageId)
 {
     QVector<LuteTerm> result;

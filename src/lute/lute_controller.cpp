@@ -443,6 +443,59 @@ void LuteController::refreshLibrary()
     emit booksChanged();
 }
 
+void LuteController::refreshTerms(const QString& search, int status)
+{
+    m_termsLoaded = true;
+    m_termSearch = search;
+    m_termStatus = status;
+    m_terms.clear();
+
+    if(m_database.isOpen() && m_languageId > 0)
+    {
+        const QVector<LuteTerm> terms =
+            m_database.terms(m_languageId, search, status);
+        for(const LuteTerm& term : terms)
+        {
+            QVariantMap map;
+            map.insert(QStringLiteral("id"), term.id);
+            map.insert(QStringLiteral("word"), term.text);
+            map.insert(QStringLiteral("status"), term.status);
+            map.insert(QStringLiteral("statusLabel"), statusLabel(term.status));
+            map.insert(QStringLiteral("statusAbbrev"), statusAbbreviation(term.status));
+            map.insert(QStringLiteral("color"), statusColor(term.status).name());
+            map.insert(QStringLiteral("translation"), term.translation);
+            map.insert(QStringLiteral("romanization"), term.romanization);
+            map.insert(QStringLiteral("tokenCount"), term.tokenCount);
+            map.insert(QStringLiteral("isPhrase"), term.tokenCount > 1);
+            m_terms.append(map);
+        }
+    }
+    emit termsChanged();
+}
+
+void LuteController::openTerms()
+{
+    refreshTerms(m_termSearch, m_termStatus);
+    emit showTermsRequested();
+}
+
+bool LuteController::selectTerm(qint64 termId)
+{
+    const auto term = m_database.termById(termId);
+    if(!term)
+        return false;
+
+    WordQuad word;
+    word.word = term->text;
+    word.page = 0;
+    word.index = 0;
+    word.rect = QRectF();
+    buildActiveWord(0, word, 0,
+                    term->tokenCount > 0 ? term->tokenCount - 1 : 0,
+                    term->tokenCount > 1);
+    return true;
+}
+
 bool LuteController::openBook(qint64 bookId)
 {
     if(!m_database.isOpen())
@@ -1101,6 +1154,8 @@ void LuteController::setActiveStatus(int status)
     refreshStats();
     if(m_readerOpen)
         openPage(m_readerPage);
+    if(m_termsLoaded)
+        refreshTerms(m_termSearch, m_termStatus);
 }
 
 void LuteController::setActiveTranslation(const QString& text)
@@ -1129,6 +1184,8 @@ void LuteController::setActiveTranslation(const QString& text)
     invalidateHighlights();
     refreshActiveTerm();
     refreshStats();
+    if(m_termsLoaded)
+        refreshTerms(m_termSearch, m_termStatus);
 }
 
 void LuteController::setActiveRomanization(const QString& text)

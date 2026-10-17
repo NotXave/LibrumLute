@@ -100,6 +100,7 @@
         <file>lute/MLuteSettingsPage.qml</file>
         <file>lute/MLuteReaderPage.qml</file>
         <file>lute/MLuteTextsPage.qml</file>
+        <file>lute/MLuteTermsPage.qml</file>
         <file>lute/MLuteHubPage.qml</file>
         <file>readingPage/MBookmarkItem.qml</file>
         <file>readingPage/MExplanationPopup.qml</file>

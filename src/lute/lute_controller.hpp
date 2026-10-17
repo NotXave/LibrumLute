@@ -60,6 +60,7 @@ class LuteController : public QObject
     Q_PROPERTY(QVariantMap aiConfig READ aiConfig NOTIFY aiConfigChanged)
 
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
+    Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
     Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
     Q_PROPERTY(bool readerOpen READ readerOpen NOTIFY readerChanged)
     Q_PROPERTY(QString readerHtml READ readerHtml NOTIFY readerChanged)
@@ -100,6 +101,7 @@ public:
     QVariantMap aiConfig() const;
 
     QVariantList books() const { return m_books; }
+    QVariantList terms() const { return m_terms; }
     QVariantMap currentBook() const { return m_currentBookMap; }
     bool readerOpen() const { return m_readerOpen; }
     QString readerHtml() const { return m_readerHtml; }
@@ -199,6 +201,12 @@ public slots:
     /// Imports a UTF-8 text file as a new Lute book.
     bool importTextFile(const QString& path);
 
+    /// Reloads the term list (search text and status filter, 0 = all).
+    void refreshTerms(const QString& search = QString(), int status = 0);
+    void openTerms();
+    /// Opens the Lute popup for a stored term (used by the term list).
+    bool selectTerm(qint64 termId);
+
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
                              const QString& targetLanguage);
@@ -219,6 +227,8 @@ signals:
     void showReaderRequested();
     void libraryChanged();
     void booksChanged();
+    void termsChanged();
+    void showTermsRequested();
     void readerChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();
@@ -254,6 +264,10 @@ private:
     int m_libraryRevision = 0;
 
     QVariantList m_books;
+    QVariantList m_terms;
+    bool m_termsLoaded = false;
+    QString m_termSearch;
+    int m_termStatus = 0;
     LuteBook m_currentBook;
     QVariantMap m_currentBookMap;
     bool m_readerOpen = false;

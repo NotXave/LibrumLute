@@ -15,6 +15,16 @@ import "../settings/settingsSidebar"
  */
 Page {
     id: root
+    property int currentSection: 0
+
+    Connections {
+        target: LuteController
+
+        function onShowTermsRequested() {
+            root.currentSection = 1
+        }
+    }
+
     background: Rectangle {
         anchors.fill: parent
         color: Style.colorPageBackground
@@ -71,13 +81,15 @@ Page {
                     Layout.preferredWidth: 236
                     Layout.topMargin: 10
                     Layout.leftMargin: 1
-                    selected: true
+                    selected: root.currentSection === 0
                     imageLeftMargin: 24
                     imageWidth: 18
                     labelLeftMargin: 10
                     textContent: qsTr("Texts")
                     defaultIcon: Icons.settingsSidebarLute
                     selectedIcon: Icons.settingsSidebarLuteSelected
+
+                    onClicked: root.currentSection = 0
                 }
 
                 Label {
@@ -94,13 +106,15 @@ Page {
                     Layout.preferredWidth: 236
                     Layout.topMargin: 10
                     Layout.leftMargin: 1
-                    opacity: 0.4
+                    selected: root.currentSection === 1
                     imageLeftMargin: 24
                     imageWidth: 16
                     labelLeftMargin: 10
                     textContent: qsTr("Terms")
                     defaultIcon: Icons.settingsSidebarShortcuts
                     selectedIcon: Icons.settingsSidebarShortcutsSelected
+
+                    onClicked: root.currentSection = 1
                 }
 
                 MSettingsSidebarItem {
@@ -184,9 +198,10 @@ Page {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: 0
+            currentIndex: root.currentSection
 
             MLuteTextsPage {}
+            MLuteTermsPage {}
         }
     }
 }

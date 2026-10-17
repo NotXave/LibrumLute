@@ -51,6 +51,11 @@ public:
     /// Full term records for a batch of words (used by the popup and overlay).
     QHash<QString, LuteTerm> getTermMap(const QStringList& words, int languageId);
 
+    /// Terms of a language, optionally filtered by text and status.
+    QVector<LuteTerm> terms(int languageId, const QString& search = QString(),
+                            int status = 0, int limit = 500);
+    std::optional<LuteTerm> termById(qint64 termId);
+
     /// Terms stored with `WoTokenCount > 1`, i.e. phrases like "run out of".
     QVector<LuteTerm> multiWordTerms(int languageId);
 

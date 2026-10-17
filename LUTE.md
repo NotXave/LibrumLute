@@ -20,6 +20,10 @@ page are Librum's own QML, and the Lute features were added on top of it.
   library and progress), and opens them in a Lute text reader: pages as rich
   text, every word clickable, coloured by its status, with prev/next, page
   indicator and "mark page read".
+* **Term list** – the Lute hub's *Terms* page lists the vocabulary of the
+  selected language with search, status filter and status colours; clicking a
+  term opens the Lute popup for editing. Your own 14k-term Polish database is
+  shown as-is.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
@@ -118,6 +122,7 @@ librum.exe --lute-db lute.db --lute-demo-hub --out lib.png     # Lute book libra
 librum.exe --lute-db lute.db --lute-demo-reading --out read.png # open the first book
 librum.exe --lute-db lute.db --lute-demo-word --out word.png   # reader + word popup
 librum.exe --lute-db lute.db --lute-demo-create --out new.png  # create a book from text
+librum.exe --lute-db lute.db --lute-demo-terms --out terms.png # term list
 python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
 librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png

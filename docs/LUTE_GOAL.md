@@ -68,6 +68,13 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 3 (started) — the Lute hub now switches between Texts and Terms; the
+  term list reads the real `words` table (search by text, status filter,
+  status colours, phrase badge, translation) and clicking a term opens the Lute
+  popup for editing. Verified against the user's Polish database: 14,358 terms,
+  status distribution 1:5735, 2:176, 3:502, 4:63, 5:17, 98:487, 99:6496;
+  screenshot `docs/lute/terms.png`. Bulk edit/export/sentences still open.
+
 - Phase 2 (continued) — texts can be created/imported: "New text" (paste),
   "Import .txt" and "Add a PDF" in the Lute library; new books are paginated
   with Lute's rules (`LutePaginator`: 250-token threshold, optional sentence
