@@ -1304,6 +1304,14 @@ bool LuteController::setDocumentPath(const QString& path)
 
     QSettings().setValue(QStringLiteral("lute/lastDocument"), path);
 
+    // Diagnostic: makes EPUB/PDF regressions visible in the app log.
+    const auto language = currentLanguage();
+    qInfo() << "lute document opened:" << path
+            << "pages:" << m_pageCount
+            << "words on page 1:" << (m_pageCount > 0 ? m_extractor->words(0).size() : 0)
+            << "language:" << (language ? language->name : QStringLiteral("<none>"))
+            << "db open:" << m_database.isOpen();
+
     emit documentChanged();
     invalidateHighlights();
     rebuildDocumentVocabulary();
@@ -1364,7 +1372,10 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
 
     const QVector<WordQuad>& words = m_extractor->words(pageIndex);
     if(words.isEmpty())
+    {
+        qInfo() << "lute highlights: no words extracted for page" << pageIndex;
         return list;
+    }
 
     QStringList texts;
     texts.reserve(words.size());
