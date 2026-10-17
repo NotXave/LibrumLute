@@ -114,6 +114,8 @@ public:
     QVector<LuteText> texts(qint64 bookId);
 
     QVector<LuteDictionary> dictionaries(int languageId);
+    bool setDictionaryActive(qint64 dictionaryId, bool active,
+                             QString* error = nullptr);
 
     QVector<LuteBookmark> bookmarks(qint64 bookId);
     std::optional<LuteBookmark> bookmarkForText(qint64 textId);

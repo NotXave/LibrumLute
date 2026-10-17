@@ -548,3 +548,31 @@ TEST(LuteDatabase, StoresTextBookmarks)
     ASSERT_TRUE(database.deleteBookmark(bookmarkId, &error));
     EXPECT_TRUE(database.bookmarks(bookId).isEmpty());
 }
+
+
+TEST(LuteDatabase, ListsAndTogglesDictionaries)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+    const auto english = database.languageByName(QStringLiteral("English"));
+    ASSERT_TRUE(english.has_value());
+
+    const QVector<LuteDictionary> before = database.dictionaries(english->id);
+    if(before.isEmpty())
+        GTEST_SKIP() << "template has no dictionaries for English";
+
+    const LuteDictionary dictionary = before.first();
+    ASSERT_TRUE(database.setDictionaryActive(dictionary.id,
+                                             !dictionary.active, &error));
+    const QVector<LuteDictionary> after = database.dictionaries(english->id);
+    ASSERT_FALSE(after.isEmpty());
+    EXPECT_EQ(after.first().active, !dictionary.active);
+
+    ASSERT_TRUE(database.setDictionaryActive(dictionary.id, dictionary.active,
+                                            &error));
+}

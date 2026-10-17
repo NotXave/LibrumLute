@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5 (dictionaries) — activation support: `setDictionaryActive()` writes
+  `languagedicts.LdIsActive`, the controller reloads the list; gtest toggles a
+  dictionary off and back on (31 tests green). The checkbox UI on the Languages
+  page is the remaining step.
+
+
 - Phase 5 (dictionaries) — `LuteDbAccess::dictionaries(languageId)` reads
   Lute's `languagedicts` rows (use-for, type, URI, active, order); the
   controller exposes them and the Languages header shows the count for the

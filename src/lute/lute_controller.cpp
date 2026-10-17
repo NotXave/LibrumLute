@@ -646,6 +646,18 @@ bool LuteController::toggleBookmark(int page)
     return true;
 }
 
+bool LuteController::setDictionaryActive(qint64 id, bool active)
+{
+    QString error;
+    if(!m_database.setDictionaryActive(id, active, &error))
+    {
+        setMessage(error, true);
+        return false;
+    }
+    loadDictionaries();
+    return true;
+}
+
 bool LuteController::copyActiveWord()
 {
     const QString word = m_activeWord.value(QStringLiteral("word")).toString();

@@ -1295,6 +1295,25 @@ QVector<LuteDictionary> LuteDbAccess::dictionaries(int languageId)
     return result;
 }
 
+bool LuteDbAccess::setDictionaryActive(qint64 dictionaryId, bool active,
+                                       QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "UPDATE languagedicts SET LdIsActive = ? WHERE LdID = ?"));
+    query.addBindValue(active ? 1 : 0);
+    query.addBindValue(dictionaryId);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 QVector<LuteBookmark> LuteDbAccess::bookmarks(qint64 bookId)
 {
     QVector<LuteBookmark> result;
