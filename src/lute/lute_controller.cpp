@@ -625,6 +625,41 @@ bool LuteController::deleteTag(qint64 id)
     return true;
 }
 
+bool LuteController::toggleActiveTag(qint64 tagId)
+{
+    if(!m_popupVisible || !m_activeTerm || !m_activeTerm->isValid())
+        return false;
+
+    QVector<qint64> ids;
+    bool present = false;
+    for(const LuteTag& tag : m_database.tagsForTerm(m_activeTerm->id))
+    {
+        ids.append(tag.id);
+        if(tag.id == tagId)
+            present = true;
+    }
+    if(present)
+        ids.removeAll(tagId);
+    else
+        ids.append(tagId);
+
+    QString error;
+    if(!m_database.setTermTags(m_activeTerm->id, ids, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not update the tags")
+                                   : error,
+                   true);
+        return false;
+    }
+
+    QVariantList names;
+    for(const LuteTag& tag : m_database.tagsForTerm(m_activeTerm->id))
+        names.append(tag.text);
+    m_activeWord.insert(QStringLiteral("tags"), names);
+    emit wordPopupChanged();
+    return true;
+}
+
 void LuteController::openTags()
 {
     refreshTags();

@@ -98,28 +98,40 @@ Popup {
             Layout.fillWidth: true
             Layout.topMargin: 8
             spacing: 6
-            visible: LuteController.activeWord.tags !== undefined
-                     && LuteController.activeWord.tags.length > 0
+            visible: LuteController.tags.length > 0
 
             Repeater {
-                model: LuteController.activeWord.tags !== undefined
-                       ? LuteController.activeWord.tags : []
+                model: LuteController.tags
 
                 delegate: Rectangle {
                     required property var modelData
+                    readonly property bool selected:
+                        LuteController.activeWord.tags !== undefined
+                        && LuteController.activeWord.tags.indexOf(modelData.text) !== -1
+
                     Layout.preferredHeight: 22
                     Layout.preferredWidth: tagLabel.implicitWidth + 16
                     radius: 11
-                    color: Style.colorControlBackground
+                    color: selected ? Style.colorBasePurple
+                                    : Style.colorControlBackground
                     border.width: 1
-                    border.color: Style.colorContainerBorder
+                    border.color: selected ? Style.colorBasePurple
+                                           : Style.colorContainerBorder
+                    opacity: selected ? 1 : 0.75
 
                     Label {
                         id: tagLabel
                         anchors.centerIn: parent
-                        text: modelData
-                        color: Style.colorBasePurple
+                        text: modelData.text
+                        color: selected ? Style.colorFocusedButtonText
+                                        : Style.colorLightText
                         font.pointSize: Fonts.size9
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: LuteController.toggleActiveTag(modelData.id)
                     }
                 }
             }

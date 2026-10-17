@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (continued) — tag assignment UI: the word popup renders every tag of
+  the database as a chip, highlights the ones assigned to the active term and
+  toggles them via `toggleActiveTag()` (writes `wordtags`, updates the popup).
+  Compiles and builds; a click-through QA helper follows with the word-family
+  round.
+
 - Phase 8 (continued) — term tags: `tagsForTerm()`/`setTermTags()` write Lute's
   `wordtags` join table, the controller adds the assigned tag names to the
   active word and the popup renders them as chips. gtest assigns and clears a

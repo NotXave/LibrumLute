@@ -41,8 +41,8 @@ page are Librum's own QML, and the Lute features were added on top of it.
   Lute/Anki round trips.
 * **Tags** – the hub's *Tags* page manages Lute's `tags` table (add with
   comment, delete, live list); tags can be assigned to terms
-  (`setTermTags`/`tagsForTerm` on Lute's `wordtags` table) and the word popup
-  shows them as chips. The visual assignment UI inside the popup follows.
+  (`setTermTags`/`tagsForTerm` on Lute's `wordtags` table); the word popup
+  lists all tags as chips and toggles the assignment on click.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
