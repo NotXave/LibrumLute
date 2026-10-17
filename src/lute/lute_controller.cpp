@@ -660,6 +660,89 @@ bool LuteController::toggleActiveTag(qint64 tagId)
     return true;
 }
 
+bool LuteController::linkActiveParent(const QString& parentText)
+{
+    if(!m_popupVisible || !m_activeTerm || !m_activeTerm->isValid()
+       || parentText.trimmed().isEmpty())
+        return false;
+
+    const QString text = parentText.trimmed();
+    qint64 parentId = 0;
+    if(const auto existing = m_database.getTermByText(text, m_languageId))
+        parentId = existing->id;
+    else
+    {
+        LuteTerm parent;
+        parent.languageId = m_languageId;
+        parent.text = text;
+        parent.status = 0;
+        parent.tokenCount = 1;
+        QString createError;
+        if(!m_database.saveTerm(parent, &createError))
+        {
+            setMessage(createError, true);
+            return false;
+        }
+        parentId = parent.id;
+    }
+
+    QVector<qint64> ids;
+    for(const LuteTerm& current : m_database.parentsForTerm(m_activeTerm->id))
+    {
+        if(current.id == parentId)
+            return true;
+        ids.append(current.id);
+    }
+    ids.append(parentId);
+
+    QString error;
+    if(!m_database.setTermParents(m_activeTerm->id, ids, &error))
+    {
+        setMessage(error, true);
+        return false;
+    }
+    refreshActiveFamily();
+    return true;
+}
+
+bool LuteController::unlinkActiveParent(qint64 parentId)
+{
+    if(!m_popupVisible || !m_activeTerm || !m_activeTerm->isValid())
+        return false;
+    QVector<qint64> ids;
+    for(const LuteTerm& current : m_database.parentsForTerm(m_activeTerm->id))
+    {
+        if(current.id != parentId)
+            ids.append(current.id);
+    }
+    QString error;
+    if(!m_database.setTermParents(m_activeTerm->id, ids, &error))
+    {
+        setMessage(error, true);
+        return false;
+    }
+    refreshActiveFamily();
+    return true;
+}
+
+void LuteController::refreshActiveFamily()
+{
+    QVariantList parents;
+    if(m_activeTerm && m_activeTerm->isValid())
+    {
+        for(const LuteTerm& parent : m_database.parentsForTerm(m_activeTerm->id))
+        {
+            QVariantMap entry;
+            entry.insert(QStringLiteral("id"), parent.id);
+            entry.insert(QStringLiteral("text"), parent.text);
+            entry.insert(QStringLiteral("translation"), parent.translation);
+            parents.append(entry);
+        }
+    }
+    m_activeWord.insert(QStringLiteral("parents"), parents);
+    emit wordPopupChanged();
+}
+
 void LuteController::openTags()
 {
     refreshTags();

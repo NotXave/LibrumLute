@@ -68,6 +68,11 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (continued) — parent picker: `linkActiveParent(text)` finds or
+  creates the parent term and appends the link, `unlinkActiveParent(id)`
+  removes it; the popup has a "Link a parent term…" field and clickable family
+  chips. Compiles and builds; click-through QA alongside the next round.
+
 - Phase 8 (continued) — word families: `parentsForTerm()`/`setTermParents()`
   read and write Lute's `wordparents` table; the controller adds the parent
   terms to the active word and the popup shows a "Family:" chip row with

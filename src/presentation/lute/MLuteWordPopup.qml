@@ -167,12 +167,62 @@ Popup {
                     Label {
                         id: parentLabel
                         anchors.centerIn: parent
-                        text: modelData.translation.length > 0
-                              ? modelData.text + " — " + modelData.translation
-                              : modelData.text
+                        text: (modelData.translation.length > 0
+                               ? modelData.text + " — " + modelData.translation
+                               : modelData.text) + "  ×"
                         color: Style.colorText
                         font.pointSize: Fonts.size9
                     }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: LuteController.unlinkActiveParent(modelData.id)
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 6
+            spacing: 6
+
+            TextField {
+                id: parentInput
+                Layout.fillWidth: true
+                Layout.preferredHeight: 30
+                leftPadding: 10
+                background: Rectangle {
+                    color: Style.colorControlBackground
+                    border.width: 1
+                    border.color: Style.colorContainerBorder
+                    radius: 4
+                }
+                color: Style.colorBaseInputText
+                placeholderText: qsTr("Link a parent term…")
+                placeholderTextColor: Style.colorPlaceholderText
+                font.pointSize: Fonts.size10
+                selectByMouse: true
+                onAccepted: {
+                    LuteController.linkActiveParent(text)
+                    text = ""
+                }
+            }
+
+            MButton {
+                Layout.preferredHeight: 30
+                horizontalMargins: 10
+                borderWidth: 1
+                borderColor: Style.colorButtonBorder
+                backgroundColor: "transparent"
+                textColor: Style.colorText
+                fontSize: Fonts.size9
+                text: qsTr("Link")
+
+                onClicked: {
+                    LuteController.linkActiveParent(parentInput.text)
+                    parentInput.text = ""
                 }
             }
         }

@@ -226,6 +226,8 @@ public slots:
     bool saveTag(qint64 id, const QString& text, const QString& comment);
     bool deleteTag(qint64 id);
     bool toggleActiveTag(qint64 tagId);
+    bool linkActiveParent(const QString& parentText);
+    bool unlinkActiveParent(qint64 parentId);
     void openTags();
 
     void saveAiConfiguration(const QString& provider, const QString& model,
@@ -269,6 +271,7 @@ private:
     void buildActiveWord(int pageIndex, const WordQuad& word, int firstIndex,
                          int lastIndex, bool isPhrase);
     void refreshActiveTerm();
+    void refreshActiveFamily();
     const QVector<PhraseMatch>& phraseMatches(int pageIndex);
     bool importDocument(LuteWordExtractor& extractor, const QString& path);
     void selectFallbackLanguage();
