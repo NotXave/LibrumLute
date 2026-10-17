@@ -288,6 +288,12 @@ Newest entries first; each entry: what changed, evidence, commit.
   `attic/standalone/`, root README/FORK.md rewritten, this checklist added.
   Next in Phase 0: the Lute library page (C2/C3) in Phase 2.
 
+## Phase log
+
+- Phase 9 (packaging refresh) — packaged exe rebuilt with Anki export,
+  dictionary checkboxes and the term delete action; smoke test opened the
+  Terms page with the Polish library copy (screenshot 126 KB).
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
