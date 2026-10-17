@@ -28,7 +28,8 @@ page are Librum's own QML, and the Lute features were added on top of it.
   of the open `lute.db` with its parser type and RTL/romanization flags, and
   edits all parser fields Lute stores (name, split characters, exceptions,
   substitutions, word characters, parser type, RTL, romanization); new
-  languages and guarded deletion included.
+  languages and guarded deletion included; the page header also shows how
+  many dictionaries (`languagedicts`) the selected language has.
 * **Lute statistics** – the hub's *Statistics* section shows terms/learning/
   known/words read, 14-day "terms created" and "status changes" bar charts and
   the full status distribution, straight from `lute.db`.

@@ -68,6 +68,13 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 5 (dictionaries) — `LuteDbAccess::dictionaries(languageId)` reads
+  Lute's `languagedicts` rows (use-for, type, URI, active, order); the
+  controller exposes them and the Languages header shows the count for the
+  current language (user DB: 24 dictionary rows). Editing dictionaries is the
+  remaining part of C6.
+
+
 - Phase 2 (reader polish) — shortcuts: `b` toggles a bookmark for the current
   page, `m` marks the page read, on top of the existing left/right/Escape keys.
 

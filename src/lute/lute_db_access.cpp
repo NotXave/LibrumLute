@@ -1267,6 +1267,34 @@ QVector<LuteText> LuteDbAccess::texts(qint64 bookId)
     return result;
 }
 
+QVector<LuteDictionary> LuteDbAccess::dictionaries(int languageId)
+{
+    QVector<LuteDictionary> result;
+    if(!m_impl->db.isOpen())
+        return result;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral(
+        "SELECT LdID, LdLgID, LdUseFor, LdType, LdDictURI, LdIsActive, "
+        "LdSortOrder FROM languagedicts WHERE LdLgID = ? "
+        "ORDER BY LdSortOrder, LdID"));
+    query.addBindValue(languageId);
+    if(!query.exec())
+        return result;
+    while(query.next())
+    {
+        LuteDictionary dictionary;
+        dictionary.id = query.value(0).toLongLong();
+        dictionary.languageId = query.value(1).toInt();
+        dictionary.useFor = query.value(2).toString();
+        dictionary.type = query.value(3).toString();
+        dictionary.uri = query.value(4).toString();
+        dictionary.active = query.value(5).toInt() != 0;
+        dictionary.sortOrder = query.value(6).toInt();
+        result.append(dictionary);
+    }
+    return result;
+}
+
 QVector<LuteBookmark> LuteDbAccess::bookmarks(qint64 bookId)
 {
     QVector<LuteBookmark> result;

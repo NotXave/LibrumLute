@@ -275,6 +275,7 @@ void LuteController::initialize()
     settings.setValue(QStringLiteral("lute/databasePath"), path);
 
     loadLanguages();
+    loadDictionaries();
     if(m_languages.isEmpty())
     {
         setMessage(QStringLiteral("No languages found in lute.db"), true);
@@ -576,6 +577,25 @@ bool LuteController::deleteLanguage(int languageId)
 void LuteController::openLanguages()
 {
     emit showLanguagesRequested();
+}
+
+void LuteController::loadDictionaries()
+{
+    m_dictionaries.clear();
+    if(m_database.isOpen() && m_languageId > 0)
+    {
+        for(const LuteDictionary& dictionary : m_database.dictionaries(m_languageId))
+        {
+            QVariantMap map;
+            map.insert(QStringLiteral("id"), dictionary.id);
+            map.insert(QStringLiteral("useFor"), dictionary.useFor);
+            map.insert(QStringLiteral("type"), dictionary.type);
+            map.insert(QStringLiteral("uri"), dictionary.uri);
+            map.insert(QStringLiteral("active"), dictionary.active);
+            m_dictionaries.append(map);
+        }
+    }
+    emit dictionariesChanged();
 }
 
 void LuteController::loadBookmarks()

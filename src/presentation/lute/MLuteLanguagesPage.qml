@@ -75,8 +75,10 @@ Page {
             MTitle {
                 Layout.topMargin: 40
                 titleText: qsTr("Languages")
-                descriptionText: qsTr("%1 languages · parser rules stored in lute.db")
+                descriptionText: qsTr("%1 languages · %2 dictionaries for %3")
                                  .arg(LuteController.languages.length)
+                                 .arg(LuteController.dictionaries.length)
+                                 .arg(LuteController.languageName)
                 titleSize: Fonts.size25
                 descriptionSize: Fonts.size13dot25
             }

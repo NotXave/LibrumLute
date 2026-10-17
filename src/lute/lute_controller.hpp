@@ -62,6 +62,7 @@ class LuteController : public QObject
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
     Q_PROPERTY(QVariantList tags READ tags NOTIFY tagsChanged)
+    Q_PROPERTY(QVariantList dictionaries READ dictionaries NOTIFY dictionariesChanged)
     Q_PROPERTY(QVariantList bookmarks READ bookmarks NOTIFY bookmarksChanged)
     Q_PROPERTY(QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
@@ -107,6 +108,7 @@ public:
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }
     QVariantList tags() const { return m_tags; }
+    QVariantList dictionaries() const { return m_dictionaries; }
     QVariantList bookmarks() const { return m_bookmarks; }
     QVariantList learnedSeries() const { return m_learnedSeries; }
     QVariantList createdSeries() const { return m_createdSeries; }
@@ -261,6 +263,7 @@ signals:
     void showStatisticsPageRequested();
     void tagsChanged();
     void bookmarksChanged();
+    void dictionariesChanged();
     void showTagsRequested();
     void readerChanged();
     void showLibraryRequested();
@@ -279,6 +282,7 @@ private:
     void refreshActiveTerm();
     void refreshActiveFamily();
     void loadBookmarks();
+    void loadDictionaries();
     const QVector<PhraseMatch>& phraseMatches(int pageIndex);
     bool importDocument(LuteWordExtractor& extractor, const QString& path);
     void selectFallbackLanguage();
@@ -302,6 +306,7 @@ private:
     QVariantList m_terms;
     QVariantList m_tags;
     QVariantList m_bookmarks;
+    QVariantList m_dictionaries;
     QVariantList m_learnedSeries;
     QVariantList m_createdSeries;
     bool m_termsLoaded = false;
