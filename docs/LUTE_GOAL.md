@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (reader polish) — page slider in the reader toolbar: drag jumps to
+  the page via `openPage()`, bound to `readerPage`/`readerPageCount`, disabled
+  for single-page books. Verified in the reading screenshot (page 1 of 262,
+  `docs/lute/reader-slider.png`).
+
+
 - Phase 8 (QA) — word family verified through the controller:
   `--lute-demo-family` linked "dom" (id 1662) to the open word
   (`linkActiveParent true`, parents list contains it) and unlinked it again

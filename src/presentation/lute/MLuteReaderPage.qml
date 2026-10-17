@@ -64,6 +64,54 @@ Page {
                     Layout.maximumWidth: 520
                 }
 
+                Slider {
+                    id: pageSlider
+                    Layout.preferredWidth: 200
+                    Layout.leftMargin: 12
+                    from: 1
+                    to: Math.max(1, LuteController.readerPageCount)
+                    value: LuteController.readerPage
+                    stepSize: 1
+                    snapMode: Slider.SnapAlways
+                    enabled: LuteController.readerPageCount > 1
+                    onMoved: {
+                        const target = Math.round(value)
+                        if (target !== LuteController.readerPage)
+                            LuteController.openPage(target)
+                    }
+
+                    background: Rectangle {
+                        x: pageSlider.leftPadding
+                        y: pageSlider.topPadding
+                           + pageSlider.availableHeight / 2 - height / 2
+                        implicitHeight: 4
+                        width: pageSlider.availableWidth
+                        height: implicitHeight
+                        radius: 2
+                        color: Style.colorContainerBorder
+
+                        Rectangle {
+                            width: pageSlider.visualPosition * parent.width
+                            height: parent.height
+                            radius: 2
+                            color: Style.colorBasePurple
+                        }
+                    }
+
+                    handle: Rectangle {
+                        x: pageSlider.leftPadding
+                           + pageSlider.visualPosition
+                             * (pageSlider.availableWidth - width)
+                        y: pageSlider.topPadding
+                           + pageSlider.availableHeight / 2 - height / 2
+                        width: 14
+                        height: 14
+                        radius: 7
+                        color: pageSlider.enabled ? Style.colorBasePurple
+                                                  : Style.colorContainerBorder
+                    }
+                }
+
                 Item { Layout.fillWidth: true }
 
                 Label {
