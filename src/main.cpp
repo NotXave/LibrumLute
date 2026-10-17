@@ -422,6 +422,25 @@ int main(int argc, char* argv[])
     // Fork QA helper: `librum.exe --lute-demo <file.pdf> [out.png]` opens the
     // reader, seeds a few Lute statuses, opens the word popup and saves a
     // screenshot of the real window, then quits. Used for screenshots/QA.
+    // Fork QA helper: `--lute-demo-external-page <n>` navigates the external
+    // reader to page n before screenshotting it.
+    if(app.arguments().contains("--lute-demo-external-page"))
+    {
+        const int index = app.arguments().indexOf("--lute-demo-external-page");
+        int page = 0;
+        if(index + 1 < app.arguments().size())
+            page = app.arguments().at(index + 1).toInt();
+        const QString outputPath = demoOutputPath;
+        QTimer::singleShot(3000, &app, [externalBookController = externalBookController.get(), page]() {
+            externalBookController->setCurrentPage(page);
+        });
+        QTimer::singleShot(9000, &engine, [&engine, outputPath]() {
+            if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
     // Fork QA helper: `--lute-demo-external` screenshots the external reader
     // (EPUB/MOBI opened via the positional file argument).
     if(app.arguments().contains("--lute-demo-external"))

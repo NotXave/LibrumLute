@@ -1281,6 +1281,7 @@ bool LuteController::setDocumentPath(const QString& path)
     QString error;
     if(!m_extractor->open(path, &error))
     {
+        qWarning() << "lute document could not be opened:" << path << error;
         setMessage(error, true);
         return false;
     }

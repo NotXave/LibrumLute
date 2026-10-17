@@ -13,15 +13,22 @@ Item {
 
     property int pageNumber: 0
     property var marks: []
+    // Only pages near the viewport extract words; otherwise an EPUB with
+    // hundreds of pages would run hundreds of text extractions at once.
+    property bool active: true
 
-    visible: LuteController.documentOpen
+    visible: LuteController.documentOpen && active
     enabled: false
 
     function reload() {
+        if(!root.active)
+            return;
         marks = LuteController.highlightsForPage(root.pageNumber);
     }
 
-    Component.onCompleted: reload()
+    Component.onCompleted: if (root.active) reload()
+    onActiveChanged: if (root.active) reload()
+    onVisibleChanged: if (visible) reload()
     onMarksChanged: canvas.requestPaint()
 
     Connections {
