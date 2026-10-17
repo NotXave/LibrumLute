@@ -68,6 +68,10 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 2 (reader polish) — shortcuts: `b` toggles a bookmark for the current
+  page, `m` marks the page read, on top of the existing left/right/Escape keys.
+
+
 - Phase 2 (popup polish) — "Copy" button copies the active headword to the
   clipboard (`copyActiveWord`) and reports it in the message banner.
 

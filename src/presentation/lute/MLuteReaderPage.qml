@@ -334,4 +334,14 @@ Page {
         sequence: "Escape"
         onActivated: wordPopup.close()
     }
+
+    Shortcut {
+        sequence: "b"
+        onActivated: LuteController.toggleBookmark(LuteController.readerPage)
+    }
+
+    Shortcut {
+        sequence: "m"
+        onActivated: LuteController.markPageRead()
+    }
 }
