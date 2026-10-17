@@ -575,6 +575,62 @@ void LuteController::openLanguages()
     emit showLanguagesRequested();
 }
 
+void LuteController::refreshTags()
+{
+    m_tags.clear();
+    if(m_database.isOpen())
+    {
+        for(const LuteTag& tag : m_database.tags())
+        {
+            QVariantMap map;
+            map.insert(QStringLiteral("id"), tag.id);
+            map.insert(QStringLiteral("text"), tag.text);
+            map.insert(QStringLiteral("comment"), tag.comment);
+            m_tags.append(map);
+        }
+    }
+    emit tagsChanged();
+}
+
+bool LuteController::saveTag(qint64 id, const QString& text, const QString& comment)
+{
+    if(text.trimmed().isEmpty())
+    {
+        setMessage(QStringLiteral("The tag needs a name"), true);
+        return false;
+    }
+    LuteTag tag;
+    tag.id = id;
+    tag.text = text.trimmed();
+    tag.comment = comment;
+    QString error;
+    if(!m_database.saveTag(tag, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not save the tag") : error, true);
+        return false;
+    }
+    refreshTags();
+    return true;
+}
+
+bool LuteController::deleteTag(qint64 id)
+{
+    QString error;
+    if(!m_database.deleteTag(id, &error))
+    {
+        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the tag") : error, true);
+        return false;
+    }
+    refreshTags();
+    return true;
+}
+
+void LuteController::openTags()
+{
+    refreshTags();
+    emit showTagsRequested();
+}
+
 bool LuteController::importTerms(const QString& path)
 {
     if(!m_database.isOpen() || m_languageId <= 0)

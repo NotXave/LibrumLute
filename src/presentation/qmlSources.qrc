@@ -103,6 +103,7 @@
         <file>lute/MLuteTermsPage.qml</file>
         <file>lute/MLuteLanguagesPage.qml</file>
         <file>lute/MLuteStatisticsPage.qml</file>
+        <file>lute/MLuteTagsPage.qml</file>
         <file>lute/MLuteHubPage.qml</file>
         <file>readingPage/MBookmarkItem.qml</file>
         <file>readingPage/MExplanationPopup.qml</file>

@@ -417,3 +417,30 @@ TEST(LuteDatabase, ImportsTermsFromTsv)
     ASSERT_TRUE(restoredPhrase.has_value());
     EXPECT_EQ(restoredPhrase->tokenCount, 3);
 }
+
+
+TEST(LuteDatabase, ManagesTags)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = createTemplateDatabase(directory);
+
+    LuteDbAccess database;
+    QString error;
+    ASSERT_TRUE(database.open(path, &error)) << error.toStdString();
+
+    LuteTag tag;
+    tag.text = QStringLiteral("noun");
+    tag.comment = QStringLiteral("nouns");
+    ASSERT_TRUE(database.saveTag(tag, &error)) << error.toStdString();
+    EXPECT_GT(tag.id, 0);
+
+    EXPECT_EQ(database.tags().size(), 1);
+
+    tag.comment = QStringLiteral("substantives");
+    ASSERT_TRUE(database.saveTag(tag, &error));
+    EXPECT_EQ(database.tags().first().comment, QStringLiteral("substantives"));
+
+    ASSERT_TRUE(database.deleteTag(tag.id, &error));
+    EXPECT_TRUE(database.tags().isEmpty());
+}

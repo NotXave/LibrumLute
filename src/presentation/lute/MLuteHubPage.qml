@@ -31,6 +31,10 @@ Page {
         function onShowStatisticsPageRequested() {
             root.currentSection = 2
         }
+
+        function onShowTagsRequested() {
+            root.currentSection = 4
+        }
     }
 
     background: Rectangle {
@@ -157,6 +161,22 @@ Page {
                     onClicked: root.currentSection = 3
                 }
 
+                MSettingsSidebarItem {
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 236
+                    Layout.topMargin: 4
+                    Layout.leftMargin: 1
+                    selected: root.currentSection === 4
+                    imageLeftMargin: 26
+                    imageWidth: 16
+                    labelLeftMargin: 10
+                    textContent: qsTr("Tags")
+                    defaultIcon: Icons.settingsSidebarAbout
+                    selectedIcon: Icons.settingsSidebarAboutSelected
+
+                    onClicked: root.currentSection = 4
+                }
+
                 Label {
                     Layout.topMargin: 25
                     Layout.leftMargin: 25
@@ -216,6 +236,7 @@ Page {
             MLuteTermsPage {}
             MLuteStatisticsPage {}
             MLuteLanguagesPage {}
+            MLuteTagsPage {}
         }
     }
 }

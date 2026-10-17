@@ -61,6 +61,7 @@ class LuteController : public QObject
 
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
+    Q_PROPERTY(QVariantList tags READ tags NOTIFY tagsChanged)
     Q_PROPERTY(QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
@@ -104,6 +105,7 @@ public:
 
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }
+    QVariantList tags() const { return m_tags; }
     QVariantList learnedSeries() const { return m_learnedSeries; }
     QVariantList createdSeries() const { return m_createdSeries; }
     QVariantMap currentBook() const { return m_currentBookMap; }
@@ -219,6 +221,10 @@ public slots:
     bool exportTerms(const QString& path);
     bool backupDatabase(const QString& path);
     bool importTerms(const QString& path);
+    void refreshTags();
+    bool saveTag(qint64 id, const QString& text, const QString& comment);
+    bool deleteTag(qint64 id);
+    void openTags();
 
     void saveAiConfiguration(const QString& provider, const QString& model,
                              const QString& baseUrl, const QString& apiKey,
@@ -244,6 +250,8 @@ signals:
     void showTermsRequested();
     void showLanguagesRequested();
     void showStatisticsPageRequested();
+    void tagsChanged();
+    void showTagsRequested();
     void readerChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();
@@ -280,6 +288,7 @@ private:
 
     QVariantList m_books;
     QVariantList m_terms;
+    QVariantList m_tags;
     QVariantList m_learnedSeries;
     QVariantList m_createdSeries;
     bool m_termsLoaded = false;

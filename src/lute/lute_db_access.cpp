@@ -854,6 +854,74 @@ bool LuteDbAccess::deleteTerm(qint64 wordId, QString* error)
     return true;
 }
 
+QVector<LuteTag> LuteDbAccess::tags()
+{
+    QVector<LuteTag> result;
+    if(!m_impl->db.isOpen())
+        return result;
+
+    QSqlQuery query(m_impl->db);
+    if(!query.exec(QStringLiteral(
+            "SELECT TgID, COALESCE(TgText, ''), COALESCE(TgComment, '') "
+            "FROM tags ORDER BY TgText")))
+    {
+        m_impl->lastError = query.lastError().text();
+        return result;
+    }
+    while(query.next())
+    {
+        LuteTag tag;
+        tag.id = query.value(0).toLongLong();
+        tag.text = query.value(1).toString();
+        tag.comment = query.value(2).toString();
+        result.append(tag);
+    }
+    return result;
+}
+
+bool LuteDbAccess::saveTag(LuteTag& tag, QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+
+    QSqlQuery query(m_impl->db);
+    if(tag.id > 0)
+        query.prepare(QStringLiteral(
+            "UPDATE tags SET TgText = ?, TgComment = ? WHERE TgID = ?"));
+    else
+        query.prepare(QStringLiteral(
+            "INSERT INTO tags (TgText, TgComment) VALUES (?, ?)"));
+    query.addBindValue(tag.text);
+    query.addBindValue(tag.comment);
+    if(tag.id > 0)
+        query.addBindValue(tag.id);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    if(tag.id <= 0)
+        tag.id = query.lastInsertId().toLongLong();
+    return true;
+}
+
+bool LuteDbAccess::deleteTag(qint64 tagId, QString* error)
+{
+    if(!m_impl->db.isOpen())
+        return false;
+    QSqlQuery query(m_impl->db);
+    query.prepare(QStringLiteral("DELETE FROM tags WHERE TgID = ?"));
+    query.addBindValue(tagId);
+    if(!query.exec())
+    {
+        if(error)
+            *error = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 QHash<int, int> LuteDbAccess::statusCounts(int languageId)
 {
     QHash<int, int> result;

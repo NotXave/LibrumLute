@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lute_book.hpp"
+#include "lute_tag.hpp"
 #include "lute_language.hpp"
 #include "lute_stats.hpp"
 #include "lute_term.hpp"
@@ -83,6 +84,11 @@ public:
     bool updateTranslation(qint64 wordId, const QString& translation, QString* error = nullptr);
     bool updateRomanization(qint64 wordId, const QString& romanization, QString* error = nullptr);
     bool deleteTerm(qint64 wordId, QString* error = nullptr);
+
+    // ---- tags -------------------------------------------------------------
+    QVector<LuteTag> tags();
+    bool saveTag(LuteTag& tag, QString* error = nullptr);
+    bool deleteTag(qint64 tagId, QString* error = nullptr);
 
     // ---- statistics -------------------------------------------------------
     QHash<int, int> statusCounts(int languageId);

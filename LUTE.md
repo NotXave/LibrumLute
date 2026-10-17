@@ -39,6 +39,8 @@ page are Librum's own QML, and the Lute features were added on top of it.
   selected language as TSV (`WoText`, `WoTranslation`, `WoStatus`,
   `WoTokenCount`) and imports the same format back (header optional), for
   Lute/Anki round trips.
+* **Tags** – the hub's *Tags* page manages Lute's `tags` table (add with
+  comment, delete, live list); term assignment follows with the term editor.
 * **Lute word popup** – a single left click on a word opens a popup with the word,
   its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
   field, an optional romanisation field and the AI gloss.
@@ -140,6 +142,7 @@ librum.exe --lute-db lute.db --lute-demo-create --out new.png  # create a book f
 librum.exe --lute-db lute.db --lute-demo-terms --out terms.png # term list
 librum.exe --lute-db lute.db --lute-demo-languages --out langs.png # language manager
 librum.exe --lute-db lute.db --lute-demo-hub-stats --out stats.png # Lute statistics
+librum.exe --lute-db lute.db --lute-demo-tags --out tags.png     # tag manager
 python scripts/mock_ollama.py                      # tiny Ollama stand-in on :11888
 librum.exe book.pdf --lute-demo-ai --out a.png     # AI gloss via the mock server
 librum.exe book.pdf --lute-demo-settings --out s.png

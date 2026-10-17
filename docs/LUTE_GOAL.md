@@ -68,6 +68,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Phase 8 (started) — tag manager: `LuteTag`, `LuteDbAccess::tags/saveTag/
+  deleteTag`, controller list/CRUD plus a Tag page in the hub (add with
+  comment, delete, live count) and a `--lute-demo-tags` helper. gtest covers
+  create/list/update/delete; 27 tests green. Attaching tags to terms and word
+  families are the next part of C8.
+
 - Phase 7 (continued) — TSV term import: `importTermsTsv()` parses the export
   format (optional header, tabs, status/token count), the Terms page has an
   "Import TSV" picker and the controller refreshes list/stats. gtest exports
