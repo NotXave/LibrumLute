@@ -65,6 +65,9 @@ public:
     static QString languageCode(const QString& languageName);
     /// Lute language name ("Polish") -> Reverso slug ("polish").
     static QString reversoSlug(const QString& languageName);
+    /// Canonical names the table covers (one per ISO code, aliases like
+    /// german/deutsch deduped), for UI pickers.
+    static QStringList supportedLanguages();
 
     static QUrl googleTranslateUrl(const QString& text, const QString& sourceCode,
                                    const QString& targetCode);

@@ -20,7 +20,7 @@ struct LuteAiConfig {
     QString apiKey;
     /// Language the suggestion is written in, e.g. "German".
     QString targetLanguage = QStringLiteral("German");
-    int timeoutMs = 30000;
+    int timeoutMs = 15000;
 
     bool isValid() const { return !model.trimmed().isEmpty(); }
 

@@ -60,12 +60,42 @@ const LanguageNames kLanguages[] = {
     {"farsi", "fa", "persian"},
     {"hindi", "hi", "hindi"},
     {"korean", "ko", "korean"},
+    {"mandarin chinese", "zh-CN", "chinese"},
     {"japanese", "ja", "japanese"},
     {"chinese", "zh-CN", "chinese"},
     {"mandarin", "zh-CN", "chinese"},
     {"thai", "th", "thai"},
     {"vietnamese", "vi", "vietnamese"},
     {"indonesian", "id", "indonesian"},
+    {"ainu", "ain", "ain"},
+    {"amharic", "am", "am"},
+    {"armenian", "hy", "hy"},
+    {"azerbaijani", "az", "az"},
+    {"basque", "eu", "eu"},
+    {"belarusian", "be", "be"},
+    {"bengali", "bn", "bn"},
+    {"bosnian", "bs", "bs"},
+    {"breton", "br", "br"},
+    {"catalan", "ca", "ca"},
+    {"cebuano", "ceb", "ceb"},
+    {"classical chinese", "zh-CN", "chinese"},
+    {"esperanto", "eo", "eo"},
+    {"faroese", "fo", "fo"},
+    {"galician", "gl", "gl"},
+    {"georgian", "ka", "ka"},
+    {"gothic", "got", "got"},
+    {"icelandic", "is", "is"},
+    {"kazakh", "kk", "kk"},
+    {"khmer", "km", "km"},
+    {"latin", "la", "latin"},
+    {"nahuatl", "nah", "nah"},
+    {"navajo", "nv", "nv"},
+    {"okinawan", "ryu", "ryu"},
+    {"punjabi", "pa", "pa"},
+    {"sanskrit", "sa", "sa"},
+    {"swahili", "sw", "sw"},
+    {"tibetan", "bo", "bo"},
+    {"toki pona", "tok", "tok"},
 };
 
 const LanguageNames* lookup(const QString& languageName)
@@ -267,6 +297,22 @@ QString LuteTranslationAccess::reversoSlug(const QString& languageName)
     const LanguageNames* entry = lookup(languageName);
     return entry ? QString::fromLatin1(entry->reversoSlug)
                  : QStringLiteral("english");
+}
+
+QStringList LuteTranslationAccess::supportedLanguages()
+{
+    QStringList languages;
+    QSet<QString> seenIso;
+    for(const LanguageNames& entry : kLanguages)
+    {
+        const QString iso = QString::fromLatin1(entry.iso);
+        if(!seenIso.contains(iso))
+        {
+            seenIso.insert(iso);
+            languages.append(QString::fromLatin1(entry.name));
+        }
+    }
+    return languages;
 }
 
 QUrl LuteTranslationAccess::googleTranslateUrl(const QString& text,

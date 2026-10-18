@@ -685,12 +685,26 @@ Page {
                             echoMode: TextInput.Password
                         }
 
-                        MLabeledInputBox {
-                            id: targetLanguageInput
+                        MComboBox {
+                            id: targetLanguageComboBox
+                            Layout.preferredHeight: 36
                             Layout.preferredWidth: 380
                             Layout.topMargin: 14
+                            itemHeight: 32
+                            fontSize: Fonts.size12
+                            selectedItemFontSize: Fonts.size12
+                            selectedItemPadding: 4
                             headerText: qsTr("Translate into")
-                            placeholderContent: "German"
+                            contentPropertyName: "name"
+                            model: internal.targetLanguages
+
+                            onItemChanged: index => {
+                                               if (index >= 0
+                                                   && index < internal.targetLanguages.length)
+                                               internal.selectedTargetLanguage =
+                                                   internal.targetLanguages[index].name
+                                               closePopup()
+                                           }
                         }
 
                         MButton {
@@ -708,7 +722,7 @@ Page {
                                                               modelInput.text,
                                                               baseUrlInput.text,
                                                               apiKeyInput.text,
-                                                              targetLanguageInput.text)
+                                                              internal.selectedTargetLanguage)
                                 internal.loadAiSettings()
                             }
                         }
@@ -852,6 +866,26 @@ Page {
         property int scrollbarOffset: 10
         property string currentProvider: "ollama"
         property var enabledProviders: LuteController.translationProviders
+        property var targetLanguages: {
+            const list = [];
+            const supported = LuteController.supportedTargetLanguages();
+            for (let i = 0; i < supported.length; ++i)
+                list.push({
+                              "name": supported[i].charAt(0).toUpperCase()
+                                       + supported[i].slice(1)
+                          });
+            return list;
+        }
+        property string selectedTargetLanguage: "German"
+
+        function targetLanguageIndex(name) {
+            const lower = name.toLowerCase();
+            for (let i = 0; i < internal.targetLanguages.length; ++i) {
+                if (internal.targetLanguages[i].name.toLowerCase() === lower)
+                    return i;
+            }
+            return -1;
+        }
 
         function providerEnabled(key) {
             const list = internal.enabledProviders;
@@ -900,7 +934,18 @@ Page {
             modelInput.text = config.model;
             baseUrlInput.text = config.baseUrl;
             apiKeyInput.text = config.apiKey;
-            targetLanguageInput.text = config.targetLanguage;
+            // Keep custom saved values by appending them to the model.
+            let index = internal.targetLanguageIndex(config.targetLanguage);
+            if (index < 0) {
+                internal.targetLanguages.push({
+                                                  "name": config.targetLanguage
+                                              });
+                index = internal.targetLanguages.length - 1;
+            }
+            internal.selectedTargetLanguage = config.targetLanguage;
+            targetLanguageComboBox.defaultIndex = index;
+            targetLanguageComboBox.text =
+                internal.targetLanguages[index].name;
             providerComboBox.defaultIndex = providerIndex();
             providerComboBox.text = config.providerLabel;
         }

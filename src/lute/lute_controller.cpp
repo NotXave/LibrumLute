@@ -1486,6 +1486,11 @@ QUrl LuteController::googleTranslateUrl(const QString& text,
     return url;
 }
 
+QStringList LuteController::supportedTargetLanguages()
+{
+    return LuteTranslationAccess::supportedLanguages();
+}
+
 void LuteController::setTranslationProvider(const QString& provider)
 {
     const QString value = LuteTranslationAccess::providerKey(

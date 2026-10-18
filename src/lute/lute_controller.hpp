@@ -134,6 +134,8 @@ public:
     /// persisted in lute/translationEnabledProviders.
     Q_INVOKABLE void setTranslationProviderEnabled(const QString& key,
                                                    bool enabled);
+    /// Canonical names usable as translation target languages (settings UI).
+    Q_INVOKABLE QStringList supportedTargetLanguages();
 
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }

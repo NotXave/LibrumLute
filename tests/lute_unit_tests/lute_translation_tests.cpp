@@ -30,9 +30,32 @@ TEST(LuteTranslation, MapsLanguageNamesToIsoCodes)
               QStringLiteral("de"));
     EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("English")),
               QStringLiteral("en"));
+    // Lute study languages added for full coverage (data/lute_languages.sql).
+    EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("Japanese")),
+              QStringLiteral("ja"));
+    EXPECT_EQ(
+        LuteTranslationAccess::languageCode(QStringLiteral("Mandarin Chinese")),
+        QStringLiteral("zh-CN"));
+    EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("Vietnamese")),
+              QStringLiteral("vi"));
+    EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("Latin")),
+              QStringLiteral("la"));
+    EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("Swahili")),
+              QStringLiteral("sw"));
     // Unknown languages fall back to auto-detection.
     EXPECT_EQ(LuteTranslationAccess::languageCode(QStringLiteral("Klingon")),
               QStringLiteral("auto"));
+}
+
+TEST(LuteTranslation, SupportedLanguagesAreDedupedAndComplete)
+{
+    const QStringList languages = LuteTranslationAccess::supportedLanguages();
+    EXPECT_TRUE(languages.contains(QStringLiteral("german")));
+    EXPECT_TRUE(languages.contains(QStringLiteral("japanese")));
+    EXPECT_TRUE(languages.contains(QStringLiteral("mandarin chinese")));
+    // german/deutsch, farsi/persian, slovene/slovenian share ISO codes.
+    EXPECT_EQ(languages.size(), QSet<QString>(languages.cbegin(),
+                                              languages.cend()).size());
 }
 
 TEST(LuteTranslation, MapsLanguageNamesToReversoSlugs)
@@ -41,6 +64,11 @@ TEST(LuteTranslation, MapsLanguageNamesToReversoSlugs)
               QStringLiteral("polish"));
     EXPECT_EQ(LuteTranslationAccess::reversoSlug(QStringLiteral("German")),
               QStringLiteral("german"));
+    EXPECT_EQ(LuteTranslationAccess::reversoSlug(QStringLiteral("Japanese")),
+              QStringLiteral("japanese"));
+    EXPECT_EQ(
+        LuteTranslationAccess::reversoSlug(QStringLiteral("Mandarin Chinese")),
+        QStringLiteral("chinese"));
     // Unknown languages fall back to english.
     EXPECT_EQ(LuteTranslationAccess::reversoSlug(QStringLiteral("Klingon")),
               QStringLiteral("english"));
