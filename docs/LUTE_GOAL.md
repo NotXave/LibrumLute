@@ -68,6 +68,16 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
+
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
   and word boxes match exactly; overlays draw a thin baseline-relative
@@ -323,6 +333,16 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
+
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
   and word boxes match exactly; overlays draw a thin baseline-relative
@@ -365,6 +385,16 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
+
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
   and word boxes match exactly; overlays draw a thin baseline-relative
@@ -403,6 +433,16 @@ Newest entries first; each entry: what changed, evidence, commit.
   languages, statistics, tags (all in `docs/lute/`).
 
 ## Phase log
+
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
 
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
@@ -444,6 +484,16 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
+
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
   and word boxes match exactly; overlays draw a thin baseline-relative
@@ -483,6 +533,16 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
+
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
   and word boxes match exactly; overlays draw a thin baseline-relative
@@ -521,6 +581,16 @@ Newest entries first; each entry: what changed, evidence, commit.
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
 ## Phase log
+
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
 
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
@@ -567,6 +637,16 @@ Newest entries first; each entry: what changed, evidence, commit.
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
 ## Phase log
+
+- Crash on opening a library book fixed — the minidump
+  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
+  `BookService::getFilePath()`; `BookController::setUp()` called it before
+  `m_bookGetter` existed. The call was removed, the path is emitted after
+  `setUp`, the QML double-open hook is gone and BookService getters are
+  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
+  lute tests 34 green, application tests 105 green. Package rebuilt at
+  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
+
 
 - EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
   document (wrapper document kept alive, same context/layout), so page numbers
