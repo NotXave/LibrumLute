@@ -144,8 +144,8 @@ public:
     QVariantList createdSeries() const { return m_createdSeries; }
     QString readerPresentation() const { return m_readerPresentation; }
     QString readerPanelSide() const { return m_readerPanelSide; }
-    void setReaderPresentation(const QString& presentation);
-    void setReaderPanelSide(const QString& side);
+    Q_INVOKABLE void setReaderPresentation(const QString& presentation);
+    Q_INVOKABLE void setReaderPanelSide(const QString& side);
     Q_INVOKABLE void setTranslationProvider(const QString& provider);
 
     /// Opens the active word/sentence in Google Translate and the configured
