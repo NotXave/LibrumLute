@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopServices>
+#include <exception>
 #include <string>
 #include "highlight.hpp"
 #include "utils/book_searcher.hpp"
@@ -18,12 +19,32 @@ void BookService::setUp(std::unique_ptr<IBookGetter> bookGetter)
 {
     // Clean up previous book data first
     m_TOCModel = nullptr;
+    m_bookSearcher.reset();
+    m_fzDocument.reset();
 
     m_bookGetter = std::move(bookGetter);
+    if(!m_bookGetter)
+        return;
+
     auto book = m_bookGetter->getBook();
-    auto stdFilePath = book->getFilePath().toStdString();
-    m_fzDocument = std::make_unique<mupdf::FzDocument>(stdFilePath.c_str());
-    m_bookSearcher = std::make_unique<BookSearcher>(m_fzDocument.get());
+    if(!book)
+        return;
+
+    try
+    {
+        auto stdFilePath = book->getFilePath().toStdString();
+        m_fzDocument =
+            std::make_unique<mupdf::FzDocument>(stdFilePath.c_str());
+        m_bookSearcher =
+            std::make_unique<BookSearcher>(m_fzDocument.get());
+    }
+    catch(const std::exception&)
+    {
+        // Unsupported/corrupt file: leave the service without a document so
+        // the controller can report a clean error instead of terminating.
+        m_fzDocument.reset();
+        m_bookSearcher.reset();
+    }
 }
 
 mupdf::FzDocument* BookService::getFzDocument()

@@ -42,6 +42,11 @@ bool BookController::setUp(QString uuid)
 {
     m_bookService->setUp(
         std::make_unique<LibraryBookGetter>(m_libraryService, QUuid(uuid)));
+
+    // The service leaves the document null for unsupported/corrupt files.
+    if(!m_bookService->getFzDocument())
+        return false;
+
     // Only after the service owns a book getter may its path be read; this
     // used to be called before setUp and crashed on a null getter.
     emit bookOpened(m_bookService->getFilePath());
