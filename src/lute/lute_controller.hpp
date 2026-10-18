@@ -18,6 +18,8 @@
 #include "phrase_matcher.hpp"
 #include "word_quad.hpp"
 
+namespace mupdf { struct FzDocument; }
+
 namespace lute
 {
 
@@ -142,6 +144,9 @@ public slots:
 
     /// Opens `path` as the document Lute works on.
     bool setDocumentPath(const QString& path);
+    /// Use an already opened MuPDF document (shared with the renderer) so page
+    /// numbers and word coordinates match exactly.
+    bool setDocumentFromFzDocument(mupdf::FzDocument* document, const QString& path);
     void closeDocument();
 
     void selectLanguage(int languageId);

@@ -362,7 +362,6 @@ MFlickWrapper {
         onAccepted: {
             const path = root.toLocalPath(selectedFile)
             if (ExternalBookController.setUp(path)) {
-                LuteController.setDocumentPath(path)
                 baseRoot.externalBookMode = true
                 loadPage(externalReadingPage, undefined, false)
             }

@@ -56,44 +56,30 @@ Item {
 
             for (let i = 0; i < root.marks.length; ++i) {
                 const mark = root.marks[i];
+                const isPhrase = mark.kind === "phrase";
+                const parts = (mark.parts !== undefined && mark.parts.length > 0)
+                              ? mark.parts : [mark];
 
-                if (mark.parts !== undefined && mark.parts.length > 0) {
-                    for (let p = 0; p < mark.parts.length; ++p) {
-                        const part = mark.parts[p];
-                        drawMark(ctx, part.x * width, part.y * height,
-                                 part.w * width, part.h * height, mark, true);
-                    }
-                    continue;
+                for (let p = 0; p < parts.length; ++p) {
+                    const part = parts[p];
+                    if (part === undefined || part.w === undefined)
+                        continue;
+
+                    const x = part.x * width + 0.5;
+                    const w = part.w * width - 1.0;
+                    if (w <= 0.5)
+                        continue;
+
+                    const bottom = (part.y + part.h) * height;
+                    const thickness = isPhrase ? 2.5 : 2.0;
+                    const known = mark.status === 99 || mark.status === 98;
+
+                    ctx.globalAlpha = known ? 0.65 : 0.9;
+                    ctx.fillStyle = mark.color;
+                    ctx.fillRect(x, bottom - thickness, w, thickness);
                 }
-
-                drawMark(ctx, mark.x * width, mark.y * height,
-                         mark.w * width, mark.h * height, mark,
-                         mark.kind === "phrase");
             }
             ctx.globalAlpha = 1.0;
-        }
-
-        function drawMark(ctx, x, y, w, h, mark, isPhrase) {
-            if (w <= 0 || h <= 0)
-                return;
-
-            const known = mark.status === 99 || mark.status === 98;
-            ctx.globalAlpha = known ? 0.30 : 0.42;
-            ctx.fillStyle = mark.color;
-            ctx.fillRect(x, y, w, h);
-
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = mark.color;
-            const lineHeight = isPhrase ? 3 : 2;
-            ctx.fillRect(x, y + h - lineHeight, w, lineHeight);
-
-            if (isPhrase) {
-                ctx.globalAlpha = 0.85;
-                ctx.strokeStyle = mark.color;
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1),
-                               Math.max(0, h - 1));
-            }
         }
     }
 }

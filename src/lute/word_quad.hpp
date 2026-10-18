@@ -7,16 +7,27 @@
 
 namespace lute {
 
+/// One line fragment of a word. A word that is hyphenated across a line break
+/// has multiple parts; each part carries its own baseline so the presentation
+/// layer can draw a clean underline instead of one huge bounding box.
+struct WordPart {
+    QRectF rect;
+    qreal baseline = 0.0;
+};
+
 /// One clickable word on a rendered PDF page.
 ///
 /// `rect` is normalised to the page size (0..1 on both axes, origin at the
 /// top-left corner), so the presentation layer can draw it at any zoom level
-/// without knowing the page dimensions. `sentence` carries the surrounding
-/// sentence, which is what gets sent to the AI translation service.
+/// without knowing the page dimensions. `parts` holds the per-line geometry
+/// used for drawing; `rect` stays the union used for hit-testing.
+/// `sentence` carries the surrounding sentence, which is what gets sent to the
+/// AI translation service.
 struct WordQuad {
     QString word;
     QString sentence;
     QRectF rect;
+    QVector<WordPart> parts;
     int page = -1;
     int index = -1;
 

@@ -46,6 +46,7 @@ bool ExternalBookController::setUp(QString filePath)
         return false;
 
     m_externalBookService->setUp(std::move(bookGetter));
+    emit documentReady(filePath);
     return true;
 }
 

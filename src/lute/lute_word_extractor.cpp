@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include <mupdf/fitz.h>
+#include <mupdf/classes.h>
 
 #include "lute_text_parser.hpp"
 
@@ -31,6 +32,7 @@ struct LuteWordExtractor::Impl
 {
     fz_context* context = nullptr;
     fz_document* document = nullptr;
+    std::shared_ptr<mupdf::FzDocument> sharedDocument;
     QByteArray buffer;
     QString path;
     QString title;
@@ -59,6 +61,7 @@ struct LuteWordExtractor::Impl
         wordCache.clear();
         textCache.clear();
         sizeCache.clear();
+        sharedDocument.reset();
         buffer.clear();
         title.clear();
         path.clear();
@@ -83,6 +86,17 @@ LuteWordExtractor::LuteWordExtractor() :
 }
 
 LuteWordExtractor::~LuteWordExtractor() = default;
+
+bool LuteWordExtractor::openShared(mupdf::FzDocument* document,
+                                   const QString& filePath)
+{
+    close();
+    if(!document)
+        return false;
+    m_impl->sharedDocument = std::make_shared<mupdf::FzDocument>(*document);
+    m_impl->path = filePath;
+    return true;
+}
 
 bool LuteWordExtractor::open(const QString& filePath, QString* error)
 {
@@ -173,15 +187,6 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
         return false;
     }
 
-    fz_try(context)
-    {
-        if(fz_is_document_reflowable(context, document))
-            fz_layout_document(context, document, 450.f, 650.f, 11.f);
-    }
-    fz_catch(context)
-    {
-    }
-
     m_impl->context = context;
     m_impl->document = document;
     m_impl->buffer = data;
@@ -217,7 +222,7 @@ void LuteWordExtractor::close()
 
 bool LuteWordExtractor::isOpen() const
 {
-    return m_impl->document != nullptr;
+    return m_impl->document != nullptr || m_impl->sharedDocument != nullptr;
 }
 
 QString LuteWordExtractor::filePath() const
@@ -232,6 +237,17 @@ QString LuteWordExtractor::title() const
 
 int LuteWordExtractor::pageCount() const
 {
+    if(m_impl->sharedDocument)
+    {
+        try
+        {
+            return m_impl->sharedDocument->fz_count_pages();
+        }
+        catch(const std::exception&)
+        {
+            return 0;
+        }
+    }
     if(!m_impl->document)
         return 0;
     int count = 0;
@@ -248,6 +264,19 @@ int LuteWordExtractor::pageCount() const
 
 QSizeF LuteWordExtractor::pageSize(int pageIndex)
 {
+    if(m_impl->sharedDocument)
+    {
+        try
+        {
+            mupdf::FzPage page(*m_impl->sharedDocument, pageIndex);
+            const mupdf::FzRect bounds = page.fz_bound_page();
+            return QSizeF(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+        }
+        catch(const std::exception&)
+        {
+            return {};
+        }
+    }
     if(!m_impl->document)
         return {};
     const auto cached = m_impl->sizeCache.constFind(pageIndex);
@@ -313,25 +342,20 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
     if(cached != m_impl->wordCache.constEnd())
         return *cached;
 
-    if(!m_impl->document || pageIndex < 0 || pageIndex >= pageCount())
+    if(!isOpen() || pageIndex < 0 || pageIndex >= pageCount())
         return empty;
 
-    // Rebuild the page as running text while remembering the glyph rectangle
-    // of every character, so a token range can be turned back into a box.
     QString text;
     QVector<QRectF> charRects;
+    QVector<int> charLines;
+    QVector<qreal> charBaselines;
     QSizeF pageSize;
+    QPointF pageOrigin;
+    int lineId = 0;
 
-    fz_page* page = nullptr;
-    fz_stext_page* stext = nullptr;
-    fz_try(m_impl->context)
-    {
-        page = fz_load_page(m_impl->context, m_impl->document, pageIndex);
-        const fz_rect bounds = fz_bound_page(m_impl->context, page);
-        pageSize = QSizeF(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
-
-        fz_stext_options options = {0, 0};
-        stext = fz_new_stext_page_from_page(m_impl->context, page, &options);
+    auto collect = [&](fz_stext_page* stext) {
+        if(!stext)
+            return;
         for(fz_stext_block* block = stext->first_block; block;
             block = block->next)
         {
@@ -342,13 +366,18 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
             {
                 text.append(QLatin1Char('\n'));
                 charRects.append(QRectF());
+                charLines.append(-1);
+                charBaselines.append(0.0);
                 text.append(QLatin1Char('\n'));
                 charRects.append(QRectF());
+                charLines.append(-1);
+                charBaselines.append(0.0);
             }
 
             for(fz_stext_line* line = block->u.t.first_line; line;
                 line = line->next)
             {
+                const int currentLine = lineId;
                 for(fz_stext_char* chr = line->first_char; chr; chr = chr->next)
                 {
                     const unsigned int code = unsigned(chr->c);
@@ -359,39 +388,84 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
                     {
                         text.append(character);
                         charRects.append(rect);
+                        charLines.append(currentLine);
+                        charBaselines.append(chr->origin.y);
                     }
                 }
                 text.append(QLatin1Char('\n'));
                 charRects.append(QRectF());
+                charLines.append(-1);
+                charBaselines.append(0.0);
+                ++lineId;
             }
         }
-    }
-    fz_always(m_impl->context)
+    };
+
+    if(m_impl->sharedDocument)
     {
-        if(stext)
-            fz_drop_stext_page(m_impl->context, stext);
-        if(page)
-            fz_drop_page(m_impl->context, page);
+        try
+        {
+            mupdf::FzDocument& document = *m_impl->sharedDocument;
+            mupdf::FzPage page(document, pageIndex);
+            const mupdf::FzRect bounds = page.fz_bound_page();
+            pageSize = QSizeF(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+            pageOrigin = QPointF(bounds.x0, bounds.y0);
+            mupdf::FzStextOptions options;
+            mupdf::FzStextPage stext(page, options);
+            collect(stext.m_internal);
+        }
+        catch(const std::exception&)
+        {
+            m_impl->wordCache.insert(pageIndex, QVector<WordQuad>());
+            m_impl->textCache.insert(pageIndex, QString());
+            return m_impl->wordCache.value(pageIndex);
+        }
     }
-    fz_catch(m_impl->context)
+    else
     {
-        m_impl->wordCache.insert(pageIndex, QVector<WordQuad>());
-        m_impl->textCache.insert(pageIndex, QString());
-        return m_impl->wordCache.value(pageIndex);
+        fz_page* page = nullptr;
+        fz_stext_page* stext = nullptr;
+        fz_try(m_impl->context)
+        {
+            page = fz_load_page(m_impl->context, m_impl->document, pageIndex);
+            const fz_rect bounds = fz_bound_page(m_impl->context, page);
+            pageSize = QSizeF(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+            pageOrigin = QPointF(bounds.x0, bounds.y0);
+            fz_stext_options options = {0, 0};
+            stext = fz_new_stext_page_from_page(m_impl->context, page, &options);
+            collect(stext);
+        }
+        fz_always(m_impl->context)
+        {
+            if(stext)
+                fz_drop_stext_page(m_impl->context, stext);
+            if(page)
+                fz_drop_page(m_impl->context, page);
+        }
+        fz_catch(m_impl->context)
+        {
+            m_impl->wordCache.insert(pageIndex, QVector<WordQuad>());
+            m_impl->textCache.insert(pageIndex, QString());
+            return m_impl->wordCache.value(pageIndex);
+        }
     }
 
     if(pageSize.isEmpty())
         pageSize = QSizeF(1, 1);
 
-    // Normalise all character rectangles to the page.
+    // Normalise all character rectangles and baselines to the page.
     for(QRectF& rect : charRects)
     {
         if(rect.isNull())
             continue;
-        rect = QRectF(rect.left() / pageSize.width(), rect.top() / pageSize.height(),
+        rect = QRectF((rect.left() - pageOrigin.x()) / pageSize.width(),
+                      (rect.top() - pageOrigin.y()) / pageSize.height(),
                       rect.width() / pageSize.width(),
                       rect.height() / pageSize.height());
     }
+    for(qreal& baseline : charBaselines)
+        baseline = qBound(0.0, (baseline - pageOrigin.y()) / pageSize.height(),
+                          1.0);
 
     LuteTextParser* parser = m_impl->ensureParser();
     const QVector<ParsedWord> tokens = parser->words(text);
@@ -401,14 +475,59 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
     int index = 0;
     for(const ParsedWord& token : tokens)
     {
-        QRectF box;
+        // Group the characters of the token by text line. A hyphenated word
+        // crossing a line break becomes two parts instead of one huge box.
+        QVector<WordPart> parts;
+        int partLine = -1;
+        QRectF partRect;
+        qreal partBaseline = 0.0;
+
+        auto flushPart = [&]() {
+            if(partRect.isNull() || partRect.width() <= 0
+               || partRect.height() <= 0)
+                return;
+            QRectF clamped = partRect.intersected(QRectF(0, 0, 1, 1));
+            if(clamped.width() <= 0 || clamped.height() <= 0)
+                return;
+            WordPart part;
+            part.rect = clamped;
+            part.baseline = qBound(clamped.top(), partBaseline,
+                                   clamped.bottom());
+            parts.append(part);
+        };
+
         for(int i = token.start; i < token.end && i < charRects.size(); ++i)
         {
             const QRectF& rect = charRects.at(i);
             if(rect.isNull() || rect.width() <= 0 || rect.height() <= 0)
                 continue;
-            box = box.isNull() ? rect : box.united(rect);
+
+            const int line = charLines.value(i, -1);
+            if(line < 0)
+                continue;
+
+            if(line != partLine)
+            {
+                flushPart();
+                partLine = line;
+                partRect = rect;
+                partBaseline = charBaselines.value(i, 0.0);
+            }
+            else
+            {
+                partRect = partRect.united(rect);
+                partBaseline = std::max(partBaseline,
+                                        charBaselines.value(i, 0.0));
+            }
         }
+        flushPart();
+
+        if(parts.isEmpty())
+            continue;
+
+        QRectF box;
+        for(const WordPart& part : parts)
+            box = box.isNull() ? part.rect : box.united(part.rect);
         if(box.isNull() || box.width() <= 0 || box.height() <= 0)
             continue;
 
@@ -418,6 +537,7 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
         word.page = pageIndex;
         word.index = index++;
         word.rect = box.intersected(QRectF(0, 0, 1, 1));
+        word.parts = parts;
         if(!word.rect.isValid())
             continue;
         words.append(word);

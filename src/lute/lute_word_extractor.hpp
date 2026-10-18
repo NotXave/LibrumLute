@@ -10,6 +10,8 @@
 #include "lute_language.hpp"
 #include "word_quad.hpp"
 
+namespace mupdf { struct FzDocument; }
+
 namespace lute
 {
 
@@ -33,6 +35,9 @@ public:
     LuteWordExtractor& operator=(const LuteWordExtractor&) = delete;
 
     bool open(const QString& filePath, QString* error = nullptr);
+    /// Share an already opened MuPDF document (same context, same layout) so
+    /// page numbers and word coordinates match what Librum renders.
+    bool openShared(mupdf::FzDocument* document, const QString& filePath);
     void close();
     bool isOpen() const;
     QString filePath() const;

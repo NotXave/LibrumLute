@@ -19,6 +19,8 @@
 #include "lute_text_parser.hpp"
 #include "lute_word_extractor.hpp"
 
+#include <mupdf/classes.h>
+
 namespace lute
 {
 namespace
@@ -31,6 +33,13 @@ QVariantMap rectToMap(const QRectF& rect)
     map.insert(QStringLiteral("y"), rect.y());
     map.insert(QStringLiteral("w"), rect.width());
     map.insert(QStringLiteral("h"), rect.height());
+    return map;
+}
+
+QVariantMap partToMap(const WordPart& part)
+{
+    QVariantMap map = rectToMap(part.rect);
+    map.insert(QStringLiteral("baseline"), part.baseline);
     return map;
 }
 
@@ -1273,6 +1282,48 @@ QString LuteController::buildReaderHtml(const QString& text)
     return html;
 }
 
+bool LuteController::setDocumentFromFzDocument(mupdf::FzDocument* document,
+                                             const QString& path)
+{
+    if(!document)
+        return false;
+    if(!m_extractor)
+        m_extractor = std::make_unique<LuteWordExtractor>();
+
+    if(!m_extractor->openShared(document, path))
+    {
+        setMessage(QStringLiteral("Could not share the opened document"), true);
+        return false;
+    }
+
+    if(const auto language = currentLanguage())
+        m_extractor->setLanguage(*language);
+
+    m_documentPath = path;
+    m_pageCount = m_extractor->pageCount();
+    m_visitedPages.clear();
+    m_highlightCache.clear();
+    m_phraseCache.clear();
+    m_documentRegistered = false;
+    closeWordPopup();
+
+    if(m_database.isOpen() && m_languageId > 0)
+    {
+        if(const auto bookId = m_database.findBookBySource(path, m_languageId))
+            m_documentRegistered = m_database.findTextForBook(*bookId).has_value();
+    }
+
+    QSettings().setValue(QStringLiteral("lute/lastDocument"), path);
+
+    qInfo() << "lute shared document:" << path << "pages:" << m_pageCount;
+
+    emit documentChanged();
+    invalidateHighlights();
+    rebuildDocumentVocabulary();
+    refreshStats();
+    return true;
+}
+
 bool LuteController::setDocumentPath(const QString& path)
 {
     if(!m_extractor)
@@ -1422,8 +1473,14 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
         QVariantList parts;
         for(int i = match.firstIndex; i <= match.lastIndex; ++i)
         {
-            if(i >= 0 && i < words.size())
-                parts.append(rectToMap(words.at(i).rect));
+            if(i < 0 || i >= words.size())
+                continue;
+            const WordQuad& word = words.at(i);
+            if(word.parts.isEmpty())
+                parts.append(rectToMap(word.rect));
+            else
+                for(const WordPart& part : word.parts)
+                    parts.append(partToMap(part));
         }
         entry.insert(QStringLiteral("parts"), parts);
         list.append(entry);
@@ -1448,6 +1505,14 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
         const QVariantMap rect = rectToMap(word.rect);
         for(auto it = rect.constBegin(); it != rect.constEnd(); ++it)
             entry.insert(it.key(), it.value());
+
+        QVariantList parts;
+        if(word.parts.isEmpty())
+            parts.append(rectToMap(word.rect));
+        else
+            for(const WordPart& part : word.parts)
+                parts.append(partToMap(part));
+        entry.insert(QStringLiteral("parts"), parts);
         list.append(entry);
     }
 

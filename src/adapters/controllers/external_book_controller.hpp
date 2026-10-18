@@ -26,6 +26,7 @@ public:
     ExternalBookController(application::IBookService* externalBookService);
 
     bool setUp(QString filePath) override;
+    Q_SIGNAL void documentReady(const QString& filePath);
     mupdf::FzDocument* getFzDocument() override;
 
     void search(const QString& text) override;

@@ -251,12 +251,25 @@ int main(int argc, char* argv[])
     luteController->initialize();
     qmlRegisterSingletonInstance("Librum.lute", 1, 0, "LuteController",
                                  luteController.get());
+
+    // External books (EPUB/MOBI/PDF) share their MuPDF document with Lute so
+    // page numbering and word coordinates match the renderer exactly.
+    QObject::connect(
+        externalBookController.get(), &ExternalBookController::documentReady,
+        luteController.get(),
+        [externalBookController = externalBookController.get(),
+         luteController = luteController.get()](const QString& filePath) {
+            luteController->setDocumentFromFzDocument(
+                externalBookController->getFzDocument(), filePath);
+        });
     QObject::connect(
         bookController.get(), &BookController::bookOpened,
         luteController.get(),
-        [luteController = luteController.get()](const QString& filePath) {
+        [luteController = luteController.get(),
+         bookController = bookController.get()](const QString& filePath) {
             if(!filePath.isEmpty())
-                luteController->setDocumentPath(filePath);
+                luteController->setDocumentFromFzDocument(
+                    bookController->getFzDocument(), filePath);
         });
 
 
@@ -425,8 +438,10 @@ int main(int argc, char* argv[])
             std::cerr << "The file type of: " << filePath.toStdString() << " is not supported.\n";
             return -1;
         }
-        // Let Lute index the same document for word lookups and highlights.
-        luteController->setDocumentPath(filePath);
+        // Let Lute share the renderer's MuPDF document for word lookups and
+        // highlights (same pagination, same coordinates).
+        luteController->setDocumentFromFzDocument(
+            externalBookController->getFzDocument(), filePath);
         engine.rootContext()->setContextProperty("externalBook", true);
     }
     else {
