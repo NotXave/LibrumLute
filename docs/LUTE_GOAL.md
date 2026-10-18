@@ -68,6 +68,18 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Learning colours + reader modes — known statuses stay invisible; status
+  0–5 use distinct non-green colours (5 blue) via `highlightColor()`.
+  `LuteController` gained persisted `readerPresentation` (popup/panel) and
+  `readerPanelSide` (left/right) plus Google-Translate and dictionary lookup
+  actions. The term editor docks as a side panel and shrinks the page; the
+  settings page has a new Reader card. Screenshots
+  `docs/lute/reader-colors.png`, `reader-panel-right.png`,
+  `reader-panel-left.png`, `reader-settings.png`; 37 lute + 106 application
+  tests green.
+
+## Phase log
+
 - Unknown-only highlighting — known statuses (98 ignored, 99 well known) are
   no longer emitted by `highlightsForPage`; every remaining term (status 0-5)
   is drawn in red `#D9534F`, and `buildReaderHtml` leaves known words plain.

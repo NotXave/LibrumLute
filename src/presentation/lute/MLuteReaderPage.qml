@@ -251,8 +251,15 @@ Page {
 
             Pane {
                 id: paper
-                width: Math.min(880, parent.width - 96)
+                width: Math.min(880,
+                                parent.width - 96
+                                - (wordPopup.docked && wordPopup.opened
+                                   ? wordPopup.width : 0))
                 anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenterOffset: (wordPopup.docked && wordPopup.opened)
+                    ? (LuteController.readerPanelSide === "right"
+                       ? -wordPopup.width / 2 : wordPopup.width / 2)
+                    : 0
                 y: 24
                 padding: 44
                 background: Rectangle {
@@ -306,6 +313,13 @@ Page {
         function onWordPopupChanged() {
             if (!LuteController.wordPopupVisible) {
                 wordPopup.close()
+                return
+            }
+            if (wordPopup.docked) {
+                wordPopup.x = LuteController.readerPanelSide === "right"
+                        ? root.width - wordPopup.width : 0
+                wordPopup.y = 0
+                wordPopup.open()
                 return
             }
 

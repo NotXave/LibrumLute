@@ -7,7 +7,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QPointF>
+#include <QDesktopServices>
 #include <QSettings>
+#include <QUrlQuery>
 #include <QStandardPaths>
 
 #include <algorithm>
@@ -42,10 +44,6 @@ QVariantMap partToMap(const WordPart& part)
     map.insert(QStringLiteral("baseline"), part.baseline);
     return map;
 }
-
-// Only words the reader does not know are marked, and always in red. Known
-// words (ignored/well-known) are deliberately invisible.
-const QString kUnknownHighlightColor = QStringLiteral("#D9534F");
 
 QVariantMap statusMap(int status)
 {
@@ -265,6 +263,24 @@ QString LuteController::defaultDatabasePath() const
 void LuteController::initialize()
 {
     QSettings settings;
+
+    const QString presentation =
+        settings.value(QStringLiteral("lute/readerPresentation"),
+                       QStringLiteral("popup"))
+            .toString();
+    m_readerPresentation =
+        presentation == QStringLiteral("panel") ? presentation
+                                                : QStringLiteral("popup");
+    const QString panelSide =
+        settings.value(QStringLiteral("lute/readerPanelSide"),
+                       QStringLiteral("right"))
+            .toString();
+    m_readerPanelSide = panelSide == QStringLiteral("left")
+                            ? panelSide
+                            : QStringLiteral("right");
+    emit readerPresentationChanged();
+    emit readerPanelSideChanged();
+
     QString path = settings.value(QStringLiteral("lute/databasePath")).toString();
     if(path.isEmpty())
         path = defaultDatabasePath();
@@ -1273,7 +1289,7 @@ QString LuteController::buildReaderHtml(const QString& text)
         const QString style =
             showAsUnknown
                 ? QStringLiteral("color:%1;text-decoration:underline")
-                      .arg(kUnknownHighlightColor)
+                      .arg(highlightColor(status).name())
                 : QStringLiteral("text-decoration:none");
 
         html += QStringLiteral("<a href=\"w:%1\" style=\"%2\">%3</a>")
@@ -1328,6 +1344,117 @@ bool LuteController::setDocumentFromFzDocument(mupdf::FzDocument* document,
     rebuildDocumentVocabulary();
     refreshStats();
     return true;
+}
+
+namespace
+{
+QString googleLanguageCode(const QString& languageName)
+{
+    const QString name = languageName.trimmed().toLower();
+    static const QHash<QString, QString> codes = {
+        {QStringLiteral("german"), QStringLiteral("de")},
+        {QStringLiteral("deutsch"), QStringLiteral("de")},
+        {QStringLiteral("english"), QStringLiteral("en")},
+        {QStringLiteral("polish"), QStringLiteral("pl")},
+        {QStringLiteral("french"), QStringLiteral("fr")},
+        {QStringLiteral("spanish"), QStringLiteral("es")},
+        {QStringLiteral("italian"), QStringLiteral("it")},
+        {QStringLiteral("portuguese"), QStringLiteral("pt")},
+        {QStringLiteral("russian"), QStringLiteral("ru")},
+        {QStringLiteral("ukrainian"), QStringLiteral("uk")},
+        {QStringLiteral("czech"), QStringLiteral("cs")},
+        {QStringLiteral("dutch"), QStringLiteral("nl")},
+        {QStringLiteral("swedish"), QStringLiteral("sv")},
+        {QStringLiteral("turkish"), QStringLiteral("tr")},
+        {QStringLiteral("japanese"), QStringLiteral("ja")},
+        {QStringLiteral("chinese"), QStringLiteral("zh-CN")},
+    };
+    return codes.value(name, QStringLiteral("auto"));
+}
+} // namespace
+
+QUrl LuteController::googleTranslateUrl(const QString& text,
+                                        const QString& targetLanguage)
+{
+    QUrl url(QStringLiteral("https://translate.google.com/"));
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("sl"), QStringLiteral("auto"));
+    query.addQueryItem(QStringLiteral("tl"),
+                       googleLanguageCode(targetLanguage));
+    query.addQueryItem(QStringLiteral("text"), text);
+    query.addQueryItem(QStringLiteral("op"), QStringLiteral("translate"));
+    url.setQuery(query);
+    return url;
+}
+
+bool LuteController::openGoogleTranslate()
+{
+    QString text = m_activeWord.value(QStringLiteral("word")).toString();
+    if(m_activeIsPhrase)
+    {
+        const QString sentence =
+            m_activeWord.value(QStringLiteral("sentence")).toString();
+        if(!sentence.isEmpty())
+            text = sentence;
+    }
+    if(text.trimmed().isEmpty())
+        return false;
+
+    const QString target =
+        m_ai ? m_ai->config().targetLanguage : QStringLiteral("German");
+    QDesktopServices::openUrl(googleTranslateUrl(text, target));
+    return true;
+}
+
+bool LuteController::openDictionaryLookup()
+{
+    const QString word = m_activeWord.value(QStringLiteral("word")).toString();
+    if(word.trimmed().isEmpty())
+        return false;
+    if(!m_database.isOpen() || m_languageId <= 0)
+        return false;
+
+    for(const LuteDictionary& dictionary : m_database.dictionaries(m_languageId))
+    {
+        if(!dictionary.active)
+            continue;
+        if(!dictionary.useFor.isEmpty()
+           && dictionary.useFor != QStringLiteral("terms"))
+            continue;
+        if(!dictionary.uri.contains(QStringLiteral("[LUTE]")))
+            continue;
+
+        QString uri = dictionary.uri;
+        uri.replace(QStringLiteral("[LUTE]"), word);
+        QDesktopServices::openUrl(QUrl(uri));
+        return true;
+    }
+
+    setMessage(QStringLiteral("No Lute dictionary configured, using Google Translate"));
+    return openGoogleTranslate();
+}
+
+void LuteController::setReaderPresentation(const QString& presentation)
+{
+    const QString value = presentation == QStringLiteral("panel")
+                              ? presentation
+                              : QStringLiteral("popup");
+    if(value == m_readerPresentation)
+        return;
+    m_readerPresentation = value;
+    QSettings().setValue(QStringLiteral("lute/readerPresentation"), value);
+    emit readerPresentationChanged();
+}
+
+void LuteController::setReaderPanelSide(const QString& side)
+{
+    const QString value =
+        side == QStringLiteral("left") ? side : QStringLiteral("right");
+    if(value == m_readerPanelSide)
+        return;
+    m_readerPanelSide = value;
+    QSettings().setValue(QStringLiteral("lute/readerPanelSide"), value);
+    emit readerPanelSideChanged();
 }
 
 bool LuteController::setDocumentPath(const QString& path)
@@ -1467,7 +1594,7 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
             continue;
 
         QVariantMap entry = statusMap(status);
-        entry.insert(QStringLiteral("color"), kUnknownHighlightColor);
+        entry.insert(QStringLiteral("color"), highlightColor(status).name());
         entry.insert(QStringLiteral("kind"), QStringLiteral("phrase"));
         entry.insert(QStringLiteral("text"), match.text);
         entry.insert(QStringLiteral("firstIndex"), match.firstIndex);
@@ -1508,7 +1635,7 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
             continue;
 
         QVariantMap entry = statusMap(status);
-        entry.insert(QStringLiteral("color"), kUnknownHighlightColor);
+        entry.insert(QStringLiteral("color"), highlightColor(status).name());
         entry.insert(QStringLiteral("kind"), QStringLiteral("word"));
         entry.insert(QStringLiteral("text"), word.word);
         entry.insert(QStringLiteral("firstIndex"), word.index);

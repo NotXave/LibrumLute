@@ -17,12 +17,23 @@ Popup {
 
     property alias contentColumn: contentLayout
 
+    readonly property bool docked: LuteController.readerPresentation === "panel"
+    readonly property bool dockRight: LuteController.readerPanelSide === "right"
+    readonly property int dockWidth: Math.max(360,
+                                              Math.min(520,
+                                                       (parent ? parent.width : 1200) * 0.42))
+
     padding: 16
-    width: 470
-    height: contentLayout.implicitHeight + 2 * padding
+    width: docked ? dockWidth : 470
+    height: docked ? (parent ? parent.height : 700)
+                   : contentLayout.implicitHeight + 2 * padding
+    modal: false
+    dim: false
+    closePolicy: docked ? Popup.NoAutoClose
+                        : (Popup.CloseOnEscape | Popup.CloseOnPressOutside)
     background: Rectangle {
         color: Style.colorPopupBackground
-        radius: 6
+        radius: docked ? 0 : 6
         border.width: 1
         border.color: Style.colorContainerBorder
     }
@@ -457,6 +468,39 @@ Popup {
                     color: Style.colorErrorText
                     font.pointSize: Fonts.size10
                     wrapMode: Text.Wrap
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    MButton {
+                        Layout.preferredHeight: 28
+                        horizontalMargins: 10
+                        borderWidth: 1
+                        borderColor: Style.colorButtonBorder
+                        backgroundColor: "transparent"
+                        textColor: Style.colorText
+                        fontSize: Fonts.size10
+                        text: qsTr("Google Translate")
+
+                        onClicked: LuteController.openGoogleTranslate()
+                    }
+
+                    MButton {
+                        Layout.preferredHeight: 28
+                        horizontalMargins: 10
+                        borderWidth: 1
+                        borderColor: Style.colorButtonBorder
+                        backgroundColor: "transparent"
+                        textColor: Style.colorText
+                        fontSize: Fonts.size10
+                        text: qsTr("Dictionary")
+
+                        onClicked: LuteController.openDictionaryLookup()
+                    }
+
+                    Item { Layout.fillWidth: true }
                 }
 
                 MButton {

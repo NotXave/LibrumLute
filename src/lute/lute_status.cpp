@@ -59,6 +59,20 @@ QColor statusColor(int status)
     }
 }
 
+QColor highlightColor(int status)
+{
+    switch(status)
+    {
+    case StatusUnknown: return QColor(QStringLiteral("#D9534F"));
+    case StatusNew1: return QColor(QStringLiteral("#E06C75"));
+    case StatusNew2: return QColor(QStringLiteral("#E5A15C"));
+    case StatusLearning3: return QColor(QStringLiteral("#E3C95A"));
+    case StatusLearning4: return QColor(QStringLiteral("#B48EAD"));
+    case StatusLearned5: return QColor(QStringLiteral("#6FA8DC"));
+    default: return QColor();
+    }
+}
+
 QList<int> allStatuses()
 {
     return {StatusNew1, StatusNew2, StatusLearning3, StatusLearning4,

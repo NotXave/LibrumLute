@@ -149,9 +149,15 @@ Pane {
             property real prevZoom: 1
 
             height: parent.height
-            width: contentWidth <= root.width ? contentWidth : root.width
+            width: Math.min(contentWidth,
+                            root.width - (lutePopup.docked && lutePopup.opened
+                                          ? lutePopup.width : 0))
             contentWidth: pageView.widestItem
             anchors.centerIn: parent
+            anchors.horizontalCenterOffset: (lutePopup.docked && lutePopup.opened)
+                ? (LuteController.readerPanelSide === "right"
+                   ? -lutePopup.width / 2 : lutePopup.width / 2)
+                : 0
             flickableDirection: Flickable.AutoFlickDirection
             flickDeceleration: 150000
             interactive: false
@@ -192,7 +198,8 @@ Pane {
             onContentYChanged: {
                 NavigationLogic.updateCurrentPageCounter()
                 selectionOptionsPopup.close()
-                lutePopup.close()
+                if(!lutePopup.docked)
+                    lutePopup.close()
             }
 
             onContentXChanged: selectionOptionsPopup.close()
@@ -384,8 +391,19 @@ Pane {
         }
 
         function showLutePopup() {
+            if(!LuteController.wordPopupVisible) {
+                lutePopup.close()
+                return
+            }
+            if(lutePopup.docked) {
+                lutePopup.x = LuteController.readerPanelSide === "right"
+                        ? root.width - lutePopup.width : 0
+                lutePopup.y = 0
+                lutePopup.open()
+                return
+            }
             const item = activeFocusItem ? activeFocusItem : pageView.currentItem
-            if(!LuteController.wordPopupVisible || !item) {
+            if(!item) {
                 lutePopup.close()
                 return
             }

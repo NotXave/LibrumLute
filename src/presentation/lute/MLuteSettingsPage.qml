@@ -32,6 +32,18 @@ Page {
         ListElement { providerKey: "gemini"; label: "Google Gemini" }
     }
 
+    ListModel {
+        id: presentationModel
+        ListElement { key: "popup"; label: "Word popup" }
+        ListElement { key: "panel"; label: "Side panel (full Lute)" }
+    }
+
+    ListModel {
+        id: panelSideModel
+        ListElement { key: "left"; label: "Left" }
+        ListElement { key: "right"; label: "Right" }
+    }
+
     function rebuildLanguageModel() {
         languageModel.clear();
         const languages = LuteController.languages;
@@ -56,6 +68,20 @@ Page {
 
         function onAiConfigChanged() {
             internal.loadAiSettings();
+        }
+
+        function onReaderPresentationChanged() {
+            presentationComboBox.defaultIndex =
+                LuteController.readerPresentation === "panel" ? 1 : 0;
+            presentationComboBox.text =
+                presentationModel.get(presentationComboBox.defaultIndex).label;
+        }
+
+        function onReaderPanelSideChanged() {
+            panelSideComboBox.defaultIndex =
+                LuteController.readerPanelSide === "left" ? 0 : 1;
+            panelSideComboBox.text =
+                panelSideModel.get(panelSideComboBox.defaultIndex).label;
         }
     }
 
@@ -306,6 +332,121 @@ Page {
                                 text: qsTr("Restore…")
 
                                 onClicked: restoreDialog.open()
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+                    }
+                }
+
+                // ---- reader ---------------------------------------------
+                Pane {
+                    Layout.fillWidth: true
+                    verticalPadding: 26
+                    horizontalPadding: 28
+                    background: Rectangle {
+                        color: Style.colorContainerBackground
+                        border.color: Style.colorContainerBorder
+                        radius: 4
+                    }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 0
+
+                        Label {
+                            text: qsTr("Reader")
+                            font.pointSize: Fonts.size17
+                            font.weight: Font.DemiBold
+                            color: Style.colorText
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 6
+                            text: qsTr("Choose between the quick word popup and the full Lute side panel with the translation field and all translation methods.")
+                            font.pointSize: Fonts.size11
+                            color: Style.colorPageSubtitle
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+                            spacing: 24
+
+                            ColumnLayout {
+                                spacing: 6
+
+                                Label {
+                                    text: qsTr("Word display")
+                                    color: Style.colorLightText
+                                    font.pointSize: Fonts.size10
+                                }
+
+                                MComboBox {
+                                    id: presentationComboBox
+                                    Layout.preferredHeight: 36
+                                    Layout.preferredWidth: 260
+                                    itemHeight: 32
+                                    fontSize: Fonts.size12
+                                    selectedItemFontSize: Fonts.size12
+                                    selectedItemPadding: 4
+                                    contentPropertyName: "label"
+                                    model: presentationModel
+
+                                    Component.onCompleted: {
+                                        defaultIndex =
+                                            LuteController.readerPresentation === "panel"
+                                            ? 1 : 0;
+                                        text = presentationModel.get(defaultIndex).label;
+                                    }
+
+                                    onItemChanged: index => {
+                                                       if (index >= 0 && index < presentationModel.count)
+                                                       LuteController.setReaderPresentation(
+                                                           presentationModel.get(index).key);
+                                                       closePopup();
+                                                   }
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: 6
+
+                                Label {
+                                    text: qsTr("Panel side")
+                                    color: Style.colorLightText
+                                    font.pointSize: Fonts.size10
+                                }
+
+                                MComboBox {
+                                    id: panelSideComboBox
+                                    Layout.preferredHeight: 36
+                                    Layout.preferredWidth: 160
+                                    itemHeight: 32
+                                    fontSize: Fonts.size12
+                                    selectedItemFontSize: Fonts.size12
+                                    selectedItemPadding: 4
+                                    contentPropertyName: "label"
+                                    model: panelSideModel
+                                    enabled: LuteController.readerPresentation === "panel"
+                                    opacity: enabled ? 1 : 0.5
+
+                                    Component.onCompleted: {
+                                        defaultIndex =
+                                            LuteController.readerPanelSide === "left"
+                                            ? 0 : 1;
+                                        text = panelSideModel.get(defaultIndex).label;
+                                    }
+
+                                    onItemChanged: index => {
+                                                       if (index >= 0 && index < panelSideModel.count)
+                                                       LuteController.setReaderPanelSide(
+                                                           panelSideModel.get(index).key);
+                                                       closePopup();
+                                                   }
+                                }
                             }
 
                             Item { Layout.fillWidth: true }

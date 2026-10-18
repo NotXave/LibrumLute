@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSet>
 #include <QString>
+#include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QVector>
@@ -75,6 +76,10 @@ class LuteController : public QObject
     Q_PROPERTY(int readerPage READ readerPage NOTIFY readerChanged)
     Q_PROPERTY(int readerPageCount READ readerPageCount NOTIFY readerChanged)
     Q_PROPERTY(bool readerPageRead READ readerPageRead NOTIFY readerChanged)
+    Q_PROPERTY(QString readerPresentation READ readerPresentation WRITE
+                   setReaderPresentation NOTIFY readerPresentationChanged)
+    Q_PROPERTY(QString readerPanelSide READ readerPanelSide WRITE
+                   setReaderPanelSide NOTIFY readerPanelSideChanged)
 
     Q_PROPERTY(QString lastMessage READ lastMessage NOTIFY lastMessageChanged)
     Q_PROPERTY(bool lastMessageIsError READ lastMessageIsError NOTIFY
@@ -114,6 +119,17 @@ public:
     QVariantList bookmarks() const { return m_bookmarks; }
     QVariantList learnedSeries() const { return m_learnedSeries; }
     QVariantList createdSeries() const { return m_createdSeries; }
+    QString readerPresentation() const { return m_readerPresentation; }
+    QString readerPanelSide() const { return m_readerPanelSide; }
+    void setReaderPresentation(const QString& presentation);
+    void setReaderPanelSide(const QString& side);
+
+    /// Opens the active word/sentence in Google Translate and the configured
+    /// Lute dictionary (falls back to Google Translate without a dictionary).
+    Q_INVOKABLE bool openGoogleTranslate();
+    Q_INVOKABLE bool openDictionaryLookup();
+    /// Public for tests: builds the browser URL for a translation request.
+    static QUrl googleTranslateUrl(const QString& text, const QString& targetLanguage);
     QVariantMap currentBook() const { return m_currentBookMap; }
     bool readerOpen() const { return m_readerOpen; }
     QString readerHtml() const { return m_readerHtml; }
@@ -275,6 +291,8 @@ signals:
     void dictionariesChanged();
     void showTagsRequested();
     void readerChanged();
+    void readerPresentationChanged();
+    void readerPanelSideChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();
 
@@ -330,6 +348,8 @@ private:
     bool m_readerPageRead = false;
     QString m_readerHtml;
     QString m_readerText;
+    QString m_readerPresentation = QStringLiteral("popup");
+    QString m_readerPanelSide = QStringLiteral("right");
     QVector<ParsedWord> m_textTokens;
 
     QSet<int> m_visitedPages;

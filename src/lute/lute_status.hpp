@@ -40,6 +40,13 @@ bool isKnownStatus(int status);
 /// highlighted by this application looks like a Lute text.
 QColor statusColor(int status);
 
+/// Colour used to mark a word in the reader.
+///
+/// Known statuses (98/99) return an invalid colour and are not drawn. The
+/// learning ladder gets distinct, deliberately non-green colours so that only
+/// words that still need attention stand out; status 5 is blue for that reason.
+QColor highlightColor(int status);
+
 /// Statuses ordered the way Lute shows them in its term lists.
 QList<int> allStatuses();
 
