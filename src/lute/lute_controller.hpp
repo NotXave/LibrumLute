@@ -146,7 +146,7 @@ public:
     QString readerPanelSide() const { return m_readerPanelSide; }
     void setReaderPresentation(const QString& presentation);
     void setReaderPanelSide(const QString& side);
-    void setTranslationProvider(const QString& provider);
+    Q_INVOKABLE void setTranslationProvider(const QString& provider);
 
     /// Opens the active word/sentence in Google Translate and the configured
     /// Lute dictionary (falls back to Google Translate without a dictionary).

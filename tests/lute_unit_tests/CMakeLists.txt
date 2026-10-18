@@ -8,6 +8,7 @@ add_executable(lute_unit_tests
                     lute_word_extractor_tests.cpp
                     lute_status_tests.cpp
                     lute_translation_tests.cpp
+                    lute_controller_tests.cpp
 )
 
 target_include_directories(lute_unit_tests
