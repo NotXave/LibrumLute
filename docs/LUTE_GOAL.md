@@ -68,6 +68,18 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Gemini "connection refused" fixed — switching the AI provider kept the
+  previous provider's default URL/model in the settings fields, so saving
+  under Gemini persisted Ollama's `localhost:11434` and every AI request
+  was refused. The three duplicated settings-load blocks in
+  `lute_controller.cpp` collapse into `loadAiConfigFromSettings()`, which
+  self-heals (read-only) URL+model to the selected provider's defaults
+  when either matches a foreign provider default; the api key and target
+  language are preserved. The provider combo prefills the visible fields,
+  AI failures name provider + base URL, and the QML ollama model default
+  was aligned with C++ (`qwen2.5:7b`, was `llama3.1`). Regression:
+  `LuteController.AiConfigSelfHealsForeignProviderDefaults` seeds the
+  broken state both ways (fails before, 53/53 green after).
 - Provider selection fixed — `setTranslationProvider` is now `Q_INVOKABLE`
   (lute_controller.hpp); the Settings Default-source dropdown and the term
   panel provider tabs called it from QML, which silently failed without the
