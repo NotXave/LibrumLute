@@ -43,6 +43,10 @@ QVariantMap partToMap(const WordPart& part)
     return map;
 }
 
+// Only words the reader does not know are marked, and always in red. Known
+// words (ignored/well-known) are deliberately invisible.
+const QString kUnknownHighlightColor = QStringLiteral("#D9534F");
+
 QVariantMap statusMap(int status)
 {
     QVariantMap map;
@@ -1262,13 +1266,15 @@ QString LuteController::buildReaderHtml(const QString& text)
             html += text.mid(last, token.start - last).toHtmlEscaped();
 
         const QString wordText = text.mid(token.start, token.end - token.start);
-        const int status =
-            statuses.value(m_parser->lowercase(wordText), 0);
-        const QString color = status != 0 ? statusColor(status).name()
-                                         : QStringLiteral("#D5D5D5");
-        QString style = QStringLiteral("color:%1;text-decoration:none").arg(color);
-        if(status != 0)
-            style += QStringLiteral(";text-decoration:underline");
+        const QString key = m_parser->lowercase(wordText);
+        const int status = statuses.value(key, 0);
+        const bool showAsUnknown =
+            statuses.contains(key) && !isKnownStatus(status);
+        const QString style =
+            showAsUnknown
+                ? QStringLiteral("color:%1;text-decoration:underline")
+                      .arg(kUnknownHighlightColor)
+                : QStringLiteral("text-decoration:none");
 
         html += QStringLiteral("<a href=\"w:%1\" style=\"%2\">%3</a>")
                     .arg(i)
@@ -1457,10 +1463,11 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
                 break;
             }
         }
-        if(status == 0)
+        if(status == 0 || isKnownStatus(status))
             continue;
 
         QVariantMap entry = statusMap(status);
+        entry.insert(QStringLiteral("color"), kUnknownHighlightColor);
         entry.insert(QStringLiteral("kind"), QStringLiteral("phrase"));
         entry.insert(QStringLiteral("text"), match.text);
         entry.insert(QStringLiteral("firstIndex"), match.firstIndex);
@@ -1491,12 +1498,17 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
         if(consumed.value(i))
             continue;
         const WordQuad& word = words.at(i);
-        const int status =
-            m_parser ? statuses.value(m_parser->lowercase(word.word), 0) : 0;
-        if(status == 0)
+        if(!m_parser)
+            continue;
+        const QString key = m_parser->lowercase(word.word);
+        if(!statuses.contains(key))
+            continue;
+        const int status = statuses.value(key);
+        if(isKnownStatus(status))
             continue;
 
         QVariantMap entry = statusMap(status);
+        entry.insert(QStringLiteral("color"), kUnknownHighlightColor);
         entry.insert(QStringLiteral("kind"), QStringLiteral("word"));
         entry.insert(QStringLiteral("text"), word.word);
         entry.insert(QStringLiteral("firstIndex"), word.index);

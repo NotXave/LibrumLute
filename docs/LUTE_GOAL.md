@@ -68,6 +68,15 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Unknown-only highlighting — known statuses (98 ignored, 99 well known) are
+  no longer emitted by `highlightsForPage`; every remaining term (status 0-5)
+  is drawn in red `#D9534F`, and `buildReaderHtml` leaves known words plain.
+  Verified with the real EPUB page 18/267 (`docs/lute/epub-unknown-red.png`):
+  only unknown words carry a thin red line. 34 lute + 106 application tests
+  green.
+
+## Phase log
+
 - Crash hardening — `BookService::setUp` now catches unsupported/corrupt
   documents (leaves `getFzDocument()` null) and `BookController::setUp`
   reports failure instead of opening an empty reader; QML shows a warning and
