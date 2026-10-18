@@ -21,6 +21,7 @@
 #include <QString>
 #include <QTextStream>
 #include <QTranslator>
+#include <QNetworkProxy>
 #include <iostream>
 #include <memory>
 #include <tools_service.hpp>
@@ -582,6 +583,71 @@ int main(int argc, char* argv[])
         QTimer::singleShot(5200, &engine, [&engine, outputPath]() {
             if(auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
                 window->grabWindow().save(outputPath);
+            QCoreApplication::quit();
+        });
+    }
+
+    // Fork QA helper: `--lute-demo-panel <provider|offline> [out.png]` opens
+    // the reader with the docked right panel, clicks a word and activates the
+    // given translation provider before screenshotting. "offline" points the
+    // application proxy at a dead endpoint so every request fails and the
+    // error state with the browser link is captured.
+    const int panelDemoIndex = app.arguments().indexOf("--lute-demo-panel");
+    if(panelDemoIndex >= 0)
+    {
+        QString provider = QStringLiteral("reverso");
+        if(panelDemoIndex + 1 < app.arguments().size()
+           && !app.arguments().at(panelDemoIndex + 1).startsWith(QLatin1String("--")))
+        {
+            provider = app.arguments().at(panelDemoIndex + 1);
+        }
+        if(provider == QStringLiteral("offline"))
+        {
+            QNetworkProxy::setApplicationProxy(
+                QNetworkProxy(QNetworkProxy::HttpProxy,
+                              QStringLiteral("127.0.0.1"), 9));
+            provider = QStringLiteral("google");
+        }
+        const QString outputPath2 = demoOutputPath;
+
+        QTimer::singleShot(
+            2500, &app,
+            [&engine, luteController = luteController.get(),
+             externalBookController = externalBookController.get(), provider]() {
+                luteController->setReaderPresentation(QStringLiteral("panel"));
+                externalBookController->setCurrentPage(0);
+
+                QTimer::singleShot(
+                    900, &engine,
+                    [&engine, luteController, provider]() {
+                        const QVariantList words = luteController->pageWords(0);
+                        for(const QVariant& entry : words)
+                        {
+                            const QVariantMap word = entry.toMap();
+                            const QString text =
+                                word.value(QStringLiteral("word")).toString();
+                            if(text.length() < 4 || !text.at(0).isLetter())
+                                continue;
+                            const QVariantMap rect =
+                                word.value(QStringLiteral("rect")).toMap();
+                            luteController->selectAtPagePoint(
+                                0,
+                                rect.value(QStringLiteral("x")).toDouble()
+                                    + rect.value(QStringLiteral("w")).toDouble() / 2,
+                                rect.value(QStringLiteral("y")).toDouble()
+                                    + rect.value(QStringLiteral("h")).toDouble() / 2);
+                            break;
+                        }
+                        QTimer::singleShot(400, &engine, [luteController, provider]() {
+                            luteController->setTranslationProvider(provider);
+                        });
+                    });
+            });
+
+        QTimer::singleShot(11000, &engine, [&engine, outputPath2]() {
+            if(auto* window =
+                   qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
+                window->grabWindow().save(outputPath2);
             QCoreApplication::quit();
         });
     }

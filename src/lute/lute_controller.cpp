@@ -19,6 +19,7 @@
 #include "lute_schema.hpp"
 #include "lute_status.hpp"
 #include "lute_text_parser.hpp"
+#include "lute_translation_access.hpp"
 #include "lute_word_extractor.hpp"
 
 #include <mupdf/classes.h>
@@ -83,29 +84,84 @@ constexpr int kMaxSampledPages = 40;
 LuteController::LuteController(QObject* parent) :
     QObject(parent),
     m_extractor(std::make_unique<LuteWordExtractor>()),
-    m_ai(std::make_unique<LuteAiAccess>())
+    m_ai(std::make_unique<LuteAiAccess>()),
+    m_translation(std::make_unique<LuteTranslationAccess>())
 {
     connect(m_ai.get(), &LuteAiAccess::suggestionReady, this,
             [this](const QString& suggestion) {
                 m_aiSuggestion = suggestion;
                 m_aiError.clear();
                 m_activeWord.insert(QStringLiteral("aiSuggestion"), suggestion);
+                if(m_translationProvider == QStringLiteral("ai"))
+                {
+                    m_translationResult = LuteTranslationAccess::aiResult(
+                        suggestion, aiProviderLabel());
+                    m_translationError.clear();
+                    emit translationChanged();
+                }
                 emit aiChanged();
                 emit wordPopupChanged();
             });
     connect(m_ai.get(), &LuteAiAccess::requestFailed, this,
             [this](const QString& error) {
                 m_aiError = error;
+                if(m_translationProvider == QStringLiteral("ai"))
+                {
+                    m_translationError = error;
+                    emit translationChanged();
+                }
                 emit aiChanged();
             });
     connect(m_ai.get(), &LuteAiAccess::busyChanged, this,
-            [this]() { emit aiChanged(); });
+            [this]() {
+                emit aiChanged();
+                if(m_translationProvider == QStringLiteral("ai"))
+                    emit translationChanged();
+            });
+
+    connect(m_translation.get(), &LuteTranslationAccess::resultReady, this,
+            [this](const QVariantMap& result) {
+                m_translationResult = result;
+                m_translationError.clear();
+                emit translationChanged();
+            });
+    connect(m_translation.get(), &LuteTranslationAccess::requestFailed, this,
+            [this](const QString& providerKey, const QString& error) {
+                m_translationError =
+                    LuteTranslationAccess::providerLabel(
+                        LuteTranslationAccess::providerFromKey(
+                            providerKey, TranslationProvider::Google))
+                    + QStringLiteral(": ") + error;
+                if(providerKey == QStringLiteral("reverso"))
+                {
+                    // Keep the browser link usable even after a failure.
+                    QVariantMap fallback;
+                    fallback.insert(QStringLiteral("provider"),
+                                    QStringLiteral("reverso"));
+                    fallback.insert(QStringLiteral("label"),
+                                    QStringLiteral("Reverso Context"));
+                    fallback.insert(QStringLiteral("translation"), QString());
+                    fallback.insert(
+                        QStringLiteral("attributionUrl"),
+                        LuteTranslationAccess::reversoUrl(
+                            m_activeWord.value(QStringLiteral("word")).toString(),
+                            LuteTranslationAccess::reversoSlug(languageName()),
+                            LuteTranslationAccess::reversoSlug(aiTargetLanguage()))
+                            .toString());
+                    m_translationResult = fallback;
+                }
+                emit translationChanged();
+            });
+    connect(m_translation.get(), &LuteTranslationAccess::busyChanged, this,
+            [this]() { emit translationChanged(); });
 }
 
 LuteController::~LuteController()
 {
     if(m_ai)
         m_ai->cancel();
+    if(m_translation)
+        m_translation->cancel();
 }
 
 bool LuteController::databaseOpen() const
@@ -278,8 +334,35 @@ void LuteController::initialize()
     m_readerPanelSide = panelSide == QStringLiteral("left")
                             ? panelSide
                             : QStringLiteral("right");
+    const QString savedProvider =
+        settings.value(QStringLiteral("lute/translationProvider"),
+                       QStringLiteral("reverso"))
+            .toString();
+    const QStringList providerKeys = {QStringLiteral("reverso"),
+                                      QStringLiteral("google"),
+                                      QStringLiteral("ai"),
+                                      QStringLiteral("mymemory")};
+    const QStringList savedEnabled =
+        settings.value(QStringLiteral("lute/translationEnabledProviders"),
+                       providerKeys.join(QLatin1Char(',')))
+            .toString()
+            .split(QLatin1Char(','), Qt::SkipEmptyParts);
+    m_translationEnabledProviders.clear();
+    for(const QString& key : providerKeys)
+    {
+        // AI is always available; the other tabs can be switched off.
+        if(key == QStringLiteral("ai") || savedEnabled.contains(key))
+            m_translationEnabledProviders.append(key);
+    }
+    m_translationProvider =
+        m_translationEnabledProviders.contains(savedProvider)
+            ? savedProvider
+            : (m_translationEnabledProviders.isEmpty()
+                   ? QStringLiteral("reverso")
+                   : m_translationEnabledProviders.first());
     emit readerPresentationChanged();
     emit readerPanelSideChanged();
+    emit translationChanged();
 
     QString path = settings.value(QStringLiteral("lute/databasePath")).toString();
     if(path.isEmpty())
@@ -1387,6 +1470,148 @@ QUrl LuteController::googleTranslateUrl(const QString& text,
     return url;
 }
 
+void LuteController::setTranslationProvider(const QString& provider)
+{
+    const QString value = LuteTranslationAccess::providerKey(
+        LuteTranslationAccess::providerFromKey(provider,
+                                               TranslationProvider::Reverso));
+    if(value == m_translationProvider && !m_translationResult.isEmpty())
+        return;
+    m_translationProvider = value;
+    m_translationResult.clear();
+    m_translationError.clear();
+    QSettings().setValue(QStringLiteral("lute/translationProvider"), value);
+    emit translationChanged();
+
+    // Tab switch: fetch (or answer from cache) for the active word.
+    if(m_popupVisible)
+        requestTranslationForActiveWord();
+}
+
+bool LuteController::translationBusy() const
+{
+    if(m_translation && m_translation->isBusy())
+        return true;
+    return m_translationProvider == QStringLiteral("ai") && m_ai && m_ai->isBusy();
+}
+
+void LuteController::requestTranslationForActiveWord()
+{
+    const QString word = m_activeWord.value(QStringLiteral("word")).toString();
+    if(word.trimmed().isEmpty())
+        return;
+
+    m_translationError.clear();
+    if(m_translationProvider == QStringLiteral("ai"))
+    {
+        requestAiSuggestion();
+        emit translationChanged();
+        return;
+    }
+
+    const TranslationProvider provider = LuteTranslationAccess::providerFromKey(
+        m_translationProvider, TranslationProvider::Google);
+    m_translation->request(provider, word, languageName(), aiTargetLanguage(),
+                           m_activeIsPhrase);
+    emit translationChanged();
+}
+
+void LuteController::openTranslationInBrowser()
+{
+    const QString word = m_activeWord.value(QStringLiteral("word")).toString();
+    QUrl url = m_translationResult.value(QStringLiteral("attributionUrl")).toUrl();
+    if((!url.isValid() || url.isEmpty()) && !word.trimmed().isEmpty())
+    {
+        if(m_translationProvider == QStringLiteral("reverso"))
+            url = LuteTranslationAccess::reversoUrl(
+                word, LuteTranslationAccess::reversoSlug(languageName()),
+                LuteTranslationAccess::reversoSlug(aiTargetLanguage()));
+        else if(m_translationProvider == QStringLiteral("google"))
+            url = googleTranslateUrl(word, aiTargetLanguage());
+        else
+            url = QUrl(QStringLiteral("https://mymemory.translated.net/"));
+    }
+    if(url.isValid() && !url.isEmpty())
+        QDesktopServices::openUrl(url);
+}
+
+QVariantList LuteController::translationProviders() const
+{
+    QVariantList providers;
+    const QList<QPair<QString, QString>> all = {
+        {QStringLiteral("reverso"), QStringLiteral("Reverso")},
+        {QStringLiteral("google"), QStringLiteral("Google")},
+        {QStringLiteral("ai"), QStringLiteral("KI")},
+        {QStringLiteral("mymemory"), QStringLiteral("MyMemory")}};
+    for(const auto& entry : all)
+    {
+        if(!m_translationEnabledProviders.contains(entry.first))
+            continue;
+        QVariantMap item;
+        item.insert(QStringLiteral("key"), entry.first);
+        item.insert(QStringLiteral("label"), entry.second);
+        providers.append(item);
+    }
+    return providers;
+}
+
+void LuteController::setTranslationProviderEnabled(const QString& key,
+                                                   bool enabled)
+{
+    const QString value = LuteTranslationAccess::providerKey(
+        LuteTranslationAccess::providerFromKey(key,
+                                               TranslationProvider::Reverso));
+    if(value == QStringLiteral("ai"))
+        return; // always available
+
+    QStringList updated = m_translationEnabledProviders;
+    if(enabled)
+        updated.append(value);
+    else
+        updated.removeAll(value);
+
+    // Rebuild in the fixed tab order; AI is always present.
+    const QStringList order = {QStringLiteral("reverso"),
+                               QStringLiteral("google"),
+                               QStringLiteral("ai"),
+                               QStringLiteral("mymemory")};
+    m_translationEnabledProviders.clear();
+    for(const QString& entry : order)
+    {
+        if(entry == QStringLiteral("ai") || updated.contains(entry))
+            m_translationEnabledProviders.append(entry);
+    }
+    QSettings().setValue(QStringLiteral("lute/translationEnabledProviders"),
+                         m_translationEnabledProviders.join(QLatin1Char(',')));
+    if(!m_translationEnabledProviders.contains(m_translationProvider))
+    {
+        m_translationProvider = m_translationEnabledProviders.isEmpty()
+            ? QStringLiteral("ai")
+            : m_translationEnabledProviders.first();
+        m_translationResult.clear();
+        m_translationError.clear();
+        QSettings().setValue(QStringLiteral("lute/translationProvider"),
+                             m_translationProvider);
+        if(m_popupVisible)
+            requestTranslationForActiveWord();
+    }
+    emit translationChanged();
+}
+
+QString LuteController::aiTargetLanguage() const
+{
+    if(!m_ai)
+        return QStringLiteral("German");
+    const QString target = m_ai->config().targetLanguage;
+    return target.trimmed().isEmpty() ? QStringLiteral("German") : target;
+}
+
+QString LuteController::aiProviderLabel() const
+{
+    return m_ai ? m_ai->config().providerLabel()
+                : QStringLiteral("KI");
+}
+
 bool LuteController::openGoogleTranslate()
 {
     QString text = m_activeWord.value(QStringLiteral("word")).toString();
@@ -1795,6 +2020,11 @@ void LuteController::buildActiveWord(int pageIndex, const WordQuad& word,
 
     m_activeWord = map;
     m_popupVisible = true;
+    m_translationResult.clear();
+    m_translationError.clear();
+    emit translationChanged();
+    // Opening a word queries the selected source right away.
+    requestTranslationForActiveWord();
     m_aiSuggestion.clear();
     m_aiError.clear();
     emit aiChanged();
@@ -1857,6 +2087,9 @@ void LuteController::closeWordPopup()
     m_aiSuggestion.clear();
     m_aiError.clear();
     m_activeWord.clear();
+    m_translationResult.clear();
+    m_translationError.clear();
+    emit translationChanged();
     emit aiChanged();
     emit wordPopupChanged();
 }

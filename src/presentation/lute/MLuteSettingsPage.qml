@@ -44,6 +44,14 @@ Page {
         ListElement { key: "right"; label: "Right" }
     }
 
+    ListModel {
+        id: translationProviderModel
+        ListElement { key: "reverso"; label: "Reverso Context" }
+        ListElement { key: "google"; label: "Google Translate" }
+        ListElement { key: "ai"; label: "AI translation" }
+        ListElement { key: "mymemory"; label: "MyMemory" }
+    }
+
     function rebuildLanguageModel() {
         languageModel.clear();
         const languages = LuteController.languages;
@@ -454,6 +462,153 @@ Page {
                     }
                 }
 
+                // ---- Translation -------------------------------------------
+                Pane {
+                    Layout.fillWidth: true
+                    verticalPadding: 26
+                    horizontalPadding: 28
+                    background: Rectangle {
+                        color: Style.colorContainerBackground
+                        border.color: Style.colorContainerBorder
+                        radius: 4
+                    }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 0
+
+                        Label {
+                            text: qsTr("Translation")
+                            font.pointSize: Fonts.size17
+                            font.weight: Font.DemiBold
+                            color: Style.colorText
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 40
+
+                            ColumnLayout {
+                                spacing: 6
+
+                                Label {
+                                    text: qsTr("Default source")
+                                    color: Style.colorLightText
+                                    font.pointSize: Fonts.size10
+                                }
+
+                                MComboBox {
+                                    id: translationProviderComboBox
+                                    Layout.preferredHeight: 36
+                                    Layout.preferredWidth: 200
+                                    itemHeight: 32
+                                    fontSize: Fonts.size12
+                                    selectedItemFontSize: Fonts.size12
+                                    selectedItemPadding: 4
+                                    contentPropertyName: "label"
+                                    model: translationProviderModel
+
+                                    Component.onCompleted: syncSelection()
+
+                                    onItemChanged: index => {
+                                                       if (index >= 0
+                                                           && index < translationProviderModel.count)
+                                                       LuteController.setTranslationProvider(
+                                                           translationProviderModel.get(index).key);
+                                                       closePopup();
+                                                   }
+
+                                    function syncSelection() {
+                                        let index = 0;
+                                        for (let i = 0; i < translationProviderModel.count; ++i) {
+                                            if (translationProviderModel.get(i).key
+                                                === LuteController.translationProvider)
+                                                index = i;
+                                        }
+                                        defaultIndex = index;
+                                        text = translationProviderModel.get(index).label;
+                                    }
+
+                                    Connections {
+                                        target: LuteController
+
+                                        function onTranslationChanged() {
+                                            translationProviderComboBox.syncSelection();
+                                        }
+                                    }
+                                }
+
+                                Label {
+                                    Layout.topMargin: 10
+                                    text: qsTr("Disabled sources disappear from the term panel tabs.")
+                                    color: Style.colorPageSubtitle
+                                    font.pointSize: Fonts.size10
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: 10
+
+                                Label {
+                                    text: qsTr("Sources")
+                                    color: Style.colorLightText
+                                    font.pointSize: Fonts.size10
+                                }
+
+                                RowLayout {
+                                    spacing: 18
+
+                                    Repeater {
+                                        model: [{
+                                                "key": "reverso",
+                                                "label": "Reverso"
+                                            }, {
+                                                "key": "google",
+                                                "label": "Google"
+                                            }, {
+                                                "key": "mymemory",
+                                                "label": "MyMemory"
+                                            }]
+
+                                        delegate: RowLayout {
+                                            required property var modelData
+                                            spacing: 6
+
+                                            MCheckBox {
+                                                Layout.preferredWidth: 20
+                                                Layout.preferredHeight: 20
+                                                checked: internal.providerEnabled(modelData.key)
+
+                                                onClicked:
+                                                    LuteController.setTranslationProviderEnabled(
+                                                        modelData.key, checked)
+                                            }
+
+                                            Label {
+                                                text: modelData.label
+                                                color: Style.colorText
+                                                font.pointSize: Fonts.size11
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Label {
+                                    text: qsTr("AI is always available. Target language for all sources: ")
+                                          + LuteController.aiConfig.targetLanguage
+                                          + qsTr(" (see AI translation).")
+                                    color: Style.colorPageSubtitle
+                                    font.pointSize: Fonts.size10
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+                    }
+                }
+
                 // ---- AI -------------------------------------------------
                 Pane {
                     Layout.fillWidth: true
@@ -694,6 +849,16 @@ Page {
         id: internal
         property int scrollbarOffset: 10
         property string currentProvider: "ollama"
+        property var enabledProviders: LuteController.translationProviders
+
+        function providerEnabled(key) {
+            const list = internal.enabledProviders;
+            for (let i = 0; i < list.length; ++i) {
+                if (list[i].key === key)
+                    return true;
+            }
+            return false;
+        }
 
         function providerIndex() {
             const providers = ["ollama", "openai", "gemini"];

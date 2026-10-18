@@ -25,6 +25,7 @@ namespace lute
 {
 
 class LuteAiAccess;
+class LuteTranslationAccess;
 class LuteTextParser;
 class LuteWordExtractor;
 
@@ -61,7 +62,16 @@ class LuteController : public QObject
     Q_PROPERTY(bool aiBusy READ aiBusy NOTIFY aiChanged)
     Q_PROPERTY(QString aiError READ aiError NOTIFY aiChanged)
     Q_PROPERTY(QVariantMap aiConfig READ aiConfig NOTIFY aiConfigChanged)
+    Q_PROPERTY(QString translationProvider READ translationProvider WRITE
+                   setTranslationProvider NOTIFY translationChanged)
+    Q_PROPERTY(QVariantMap translationResult READ translationResult NOTIFY
+                   translationChanged)
+    Q_PROPERTY(bool translationBusy READ translationBusy NOTIFY translationChanged)
+    Q_PROPERTY(QString translationError READ translationError NOTIFY
+                   translationChanged)
 
+    Q_PROPERTY(QVariantList translationProviders READ translationProviders NOTIFY
+                   translationChanged)
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
     Q_PROPERTY(QVariantList tags READ tags NOTIFY tagsChanged)
@@ -111,6 +121,19 @@ public:
     bool aiBusy() const;
     QString aiError() const;
     QVariantMap aiConfig() const;
+    QString translationProvider() const { return m_translationProvider; }
+    QVariantMap translationResult() const { return m_translationResult; }
+    bool translationBusy() const;
+    QString translationError() const { return m_translationError; }
+    QVariantList translationProviders() const;
+    /// Runs the active provider for the current word; results land in
+    /// translationResult (cached lookups answer immediately).
+    Q_INVOKABLE void requestTranslationForActiveWord();
+    Q_INVOKABLE void openTranslationInBrowser();
+    /// Hides or shows a provider tab ("reverso", "google", "mymemory");
+    /// persisted in lute/translationEnabledProviders.
+    Q_INVOKABLE void setTranslationProviderEnabled(const QString& key,
+                                                   bool enabled);
 
     QVariantList books() const { return m_books; }
     QVariantList terms() const { return m_terms; }
@@ -123,6 +146,7 @@ public:
     QString readerPanelSide() const { return m_readerPanelSide; }
     void setReaderPresentation(const QString& presentation);
     void setReaderPanelSide(const QString& side);
+    void setTranslationProvider(const QString& provider);
 
     /// Opens the active word/sentence in Google Translate and the configured
     /// Lute dictionary (falls back to Google Translate without a dictionary).
@@ -195,6 +219,8 @@ public slots:
 
     void requestAiSuggestion();
     void applyAiSuggestion();
+    QString aiTargetLanguage() const;
+    QString aiProviderLabel() const;
 
     void refreshStats();
     void addDocumentToLuteLibrary();
@@ -293,6 +319,7 @@ signals:
     void readerChanged();
     void readerPresentationChanged();
     void readerPanelSideChanged();
+    void translationChanged();
     void showLibraryRequested();
     void showLuteReaderRequested();
 
@@ -318,6 +345,7 @@ private:
     LuteDbAccess m_database;
     std::unique_ptr<LuteWordExtractor> m_extractor;
     std::unique_ptr<LuteAiAccess> m_ai;
+    std::unique_ptr<LuteTranslationAccess> m_translation;
     std::unique_ptr<LuteTextParser> m_parser;
 
     QVector<LuteLanguage> m_languages;
@@ -373,6 +401,10 @@ private:
 
     QString m_aiSuggestion;
     QString m_aiError;
+    QString m_translationProvider = QStringLiteral("reverso");
+    QStringList m_translationEnabledProviders;
+    QVariantMap m_translationResult;
+    QString m_translationError;
 
     QString m_lastMessage;
     bool m_lastMessageIsError = false;

@@ -21,6 +21,8 @@ set(lute_SRC
     lute_status.hpp
     lute_term.hpp
     lute_text_parser.cpp
+    lute_translation_access.cpp
+    lute_translation_access.hpp
     lute_text_parser.hpp
     lute_word_extractor.cpp
     lute_word_extractor.hpp

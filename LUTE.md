@@ -52,9 +52,11 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **Word families** – terms can be linked to parent terms through Lute's
   `wordparents` table (`parentsForTerm`/`setTermParents`); the word popup shows
   the family members with their translations.
-* **Lute word popup** – a single left click on a word opens a popup with the word,
-  its sentence, Lute's seven statuses (1–5, well-known, ignored), a translation
-  field, an optional romanisation field and the AI gloss.
+* **Lute word popup / side panel** – a single left click on a word opens a
+  compact editor with the word, its sentence, Lute's seven statuses (1–5,
+  well-known, ignored), a translation field, an optional romanisation field
+  and switchable dictionary sources. It doubles as the docked right/left
+  side panel (*Settings → Reader*) with a fixed 380 px width.
 * **Coloured underlines on the page** – every word that has a Lute status is
   underlined in its status colour, drawn by `MLutePageOverlay` above Librum's
   `PageView`. Phrases that are stored in Lute are boxed.
@@ -75,6 +77,24 @@ page are Librum's own QML, and the Lute features were added on top of it.
 * **AI translation** – Ollama (local), OpenAI and Gemini, with the provider,
   model, base URL and API key configured in *Settings → Lute*. The AI gets the
   word and its sentence as context.
+* **Translation sources in the panel** – four tabs answer in place instead of
+  Lute's embedded dictionary iframes: **Reverso Context** (best-effort HTML
+  scrape of `context.reverso.net`; shows the primary hit plus up to three
+  example pairs), **Google Translate** (keyless `translate_a/single`
+  endpoint), **KI** (the configured Ollama/OpenAI/Gemini backend) and
+  **MyMemory** as a keyless fallback. Every result carries its source and an
+  "Im Browser öffnen" link; "Übernehmen" writes the translation into
+  `WoTranslation`. Lookups are cached per `provider|word|target`, so
+  switching tabs back and forth is instant.
+* **Translation privacy & fallbacks** – only the word and the target language
+  are sent to Google, MyMemory and Reverso; the sentence goes exclusively to
+  the configured AI backend. Reverso has no official API, so its parser is
+  best-effort and any block/parse failure degrades to an error line with the
+  browser link instead of an empty panel. The AI tab shows a settings link
+  when the backend is not reachable. The default source and the visible tabs
+  are configured in *Settings → Lute → Translation* (`lute/translationProvider`,
+  `lute/translationEnabledProviders`); the AI target language applies to all
+  sources.
 * **Statistics page** – Librum's placeholder page now shows the Lute vocabulary
   of the selected language: terms, learning/known counts, words read, the
   coverage of the currently open document and the status distribution.
