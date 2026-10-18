@@ -871,7 +871,7 @@ Page {
             if (provider === "openai")
                 return "gpt-4o-mini";
             if (provider === "gemini")
-                return "gemini-2.0-flash";
+                return "gemini-3.8-flash";
             // Keep in sync with defaultModel() in lute_ai_access.cpp.
             return "qwen2.5:7b";
         }

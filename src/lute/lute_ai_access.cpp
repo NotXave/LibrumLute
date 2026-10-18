@@ -25,7 +25,7 @@ QString defaultModel(const QString& provider)
     if (provider == QLatin1String("openai"))
         return QStringLiteral("gpt-4o-mini");
     if (provider == QLatin1String("gemini"))
-        return QStringLiteral("gemini-2.0-flash");
+        return QStringLiteral("gemini-3.8-flash");
     return QStringLiteral("qwen2.5:7b");
 }
 
@@ -203,8 +203,12 @@ void LuteAiAccess::requestTranslation(const QString& word, const QString& senten
         QJsonObject part{{QStringLiteral("text"), prompt}};
         QJsonObject content{{QStringLiteral("parts"), QJsonArray{part}}};
         QJsonObject payload{{QStringLiteral("contents"), QJsonArray{content}}};
+        // gemini-3.x are thinking models: without thinkingBudget 0 the
+        // thought tokens eat maxOutputTokens and content comes back empty.
         QJsonObject generation{{QStringLiteral("temperature"), 0.2},
-                               {QStringLiteral("maxOutputTokens"), 64}};
+                               {QStringLiteral("maxOutputTokens"), 256},
+                               {QStringLiteral("thinkingConfig"),
+                                QJsonObject{{QStringLiteral("thinkingBudget"), 0}}}};
         payload.insert(QStringLiteral("generationConfig"), generation);
         body = QJsonDocument(payload).toJson(QJsonDocument::Compact);
     } else if (provider == QLatin1String("openai")) {
@@ -254,9 +258,21 @@ void LuteAiAccess::requestTranslation(const QString& word, const QString& senten
 
         const QByteArray payload = reply->readAll();
         if (reply->error() != QNetworkReply::NoError) {
+            QString detail = reply->errorString();
+            // Never leak the api key in error output.
+            const QString key = m_config.apiKey.trimmed();
+            if (!key.isEmpty())
+                detail.replace(key, QStringLiteral("<redacted>"));
+            QString body = QString::fromUtf8(payload).simplified();
+            if (body.size() > 200)
+                body = body.left(200) + QStringLiteral("…");
             const QString error =
-                QStringLiteral("AI request failed: %1 (%2 at %3)")
-                    .arg(reply->errorString(), m_config.providerLabel(), baseUrl);
+                QStringLiteral("AI request failed: %1 (HTTP %2, %3 — %4 at %5)")
+                    .arg(detail)
+                    .arg(reply->attribute(
+                        QNetworkRequest::HttpStatusCodeAttribute).toInt())
+                    .arg(body.isEmpty() ? QStringLiteral("-") : body)
+                    .arg(m_config.providerLabel(), baseUrl);
             finishWithError(error);
             return;
         }

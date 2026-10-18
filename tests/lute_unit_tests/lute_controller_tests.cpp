@@ -97,7 +97,7 @@ TEST(LuteController, AiConfigSelfHealsForeignProviderDefaults)
         EXPECT_EQ(config.value("baseUrl").toString(),
                   QStringLiteral("https://generativelanguage.googleapis.com/v1beta"));
         EXPECT_EQ(config.value("model").toString(),
-                  QStringLiteral("gemini-2.0-flash"));
+                  QStringLiteral("gemini-3.8-flash"));
         EXPECT_EQ(config.value("apiKey").toString(), QStringLiteral("test-key"));
     }
 
