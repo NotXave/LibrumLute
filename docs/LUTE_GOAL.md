@@ -68,6 +68,15 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Crash hardening — `BookService::setUp` now catches unsupported/corrupt
+  documents (leaves `getFzDocument()` null) and `BookController::setUp`
+  reports failure instead of opening an empty reader; QML shows a warning and
+  stays on the library. Regression tests: `FailedSetUpLeavesSafeGetters`
+  (106 application tests green, 34 lute tests green). Package rebuilt and
+  smoke-tested, no new LibrumLute crash dump.
+
+## Phase log
+
 - Crash on opening a library book fixed — the minidump
   (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
   `BookService::getFilePath()`; `BookController::setUp()` called it before
