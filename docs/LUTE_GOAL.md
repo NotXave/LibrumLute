@@ -68,6 +68,14 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Gemini 404 fixed — Google retired `gemini-2.0-flash` ("no longer
+  available"); default model is now `gemini-3.8-flash` (verified live with
+  a real key), and gemini-3.x thinking is disabled in the payload
+  (`thinkingBudget: 0`) with `maxOutputTokens` 256, because thought tokens
+  otherwise consume the budget and content comes back empty. AI failure
+  messages redact the api key and include HTTP status + response body
+  excerpt (was: empty "server replied" with the key visible in the URL).
+  Commits `27243eb` (self-heal) and `8bf20de` (model bump).
 - Gemini "connection refused" fixed — switching the AI provider kept the
   previous provider's default URL/model in the settings fields, so saving
   under Gemini persisted Ollama's `localhost:11434` and every AI request
