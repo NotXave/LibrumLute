@@ -68,6 +68,35 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- Translation panel with four sources shipped — `LuteTranslationAccess`
+  fetches Reverso Context (best-effort HTML scrape: dictionary hit +
+  up to three example pairs, clean fallback to the browser link when
+  Cloudflare blocks or the layout changes), Google Translate (keyless
+  `translate_a/single`), MyMemory and routes KI through the existing
+  `LuteAiAccess`; results share one structure (`provider`, `label`,
+  `translation`, `examples`, `attributionUrl`) and are cached per
+  `provider|word|target`, so switching tabs back is instant. Opening a
+  word queries the selected source automatically. `MLuteWordPopup` was
+  rebuilt as a compact editor (380 px panel, 12 px padding, segment
+  tabs, skeleton loader, Übernehmen/Copy/browser actions, tag and
+  family chip rows, parent popover); *Settings → Lute → Translation*
+  adds the default source, provider checkboxes
+  (`lute/translationEnabledProviders`) and the shared target language
+  note. 12 new gtest cases cover the URL builders, parsers, language
+  mappings and garbage payloads (49 lute + 106 application tests green).
+  Package smoke-tested from `dist/LibrumLute-0.1.0-win64/` with the real
+  "Ostatnie życzenie" EPUB via `--lute-demo-panel reverso|google|
+  mymemory|offline`: Google and MyMemory return live translations,
+  Reverso degrades to the documented error + browser-link state
+  (Cloudflare), the offline run shows the error state; no new crash
+  dumps. Screenshots: `docs/lute/panel-reverso.png`,
+  `docs/lute/panel-google.png`, `docs/lute/panel-mymemory.png`,
+  `docs/lute/panel-error.png`, `docs/lute/popup-translation.png`.
+  QSettings after the runs: `lute/translationProvider=mymemory`
+  (persisted default). `lute/translationEnabledProviders` is written on
+  tab toggle and read with an all-enabled default; persistence was
+  verified at default-path level only (no headless checkbox click).
+
 - Learning colours + reader modes — known statuses stay invisible; status
   0–5 use distinct non-green colours (5 blue) via `highlightColor()`.
   `LuteController` gained persisted `readerPresentation` (popup/panel) and
@@ -78,16 +107,12 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
   `reader-panel-left.png`, `reader-settings.png`; 37 lute + 106 application
   tests green.
 
-## Phase log
-
 - Unknown-only highlighting — known statuses (98 ignored, 99 well known) are
   no longer emitted by `highlightsForPage`; every remaining term (status 0-5)
   is drawn in red `#D9534F`, and `buildReaderHtml` leaves known words plain.
   Verified with the real EPUB page 18/267 (`docs/lute/epub-unknown-red.png`):
   only unknown words carry a thin red line. 34 lute + 106 application tests
   green.
-
-## Phase log
 
 - Crash hardening — `BookService::setUp` now catches unsupported/corrupt
   documents (leaves `getFzDocument()` null) and `BookController::setUp`
@@ -96,7 +121,6 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
   (106 application tests green, 34 lute tests green). Package rebuilt and
   smoke-tested, no new LibrumLute crash dump.
 
-## Phase log
 
 - Crash on opening a library book fixed — the minidump
   (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
@@ -140,6 +164,47 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
   ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
   folder carries the fix and diagnostics for a user-side verification.
 
+- Phase 2 (EPUB fix) — `LuteWordExtractor::open()` passed
+  `application/pdf` to MuPDF for every file, so EPUBs failed to open and the
+  Lute colours never appeared. It now detects EPUB/MOBI/FB2/CBZ/HTML and opens
+  the matching format; verified with a generated Polish EPUB: the external
+  reader shows green/orange status colours (`docs/lute/epub.png`, demo
+  `--lute-demo-external`).
+
+- Phase 9 (final freeze, round 45) — final portable build smoke-tested (reader
+  with the Polish library, screenshot produced); C13 marked done, all C1-C13
+  now have evidence.
+
+- Phase 8/7 (acceptance) — C8 and C9 marked done: tags/families, TSV and
+  Anki export/import, backup and restore each have a controller log or gtest;
+  only the physical mouse click in the popup is not measurable headless.
+
+- Phase 3 (bulk QA) — gtest bulk-updates "har" to 99 and status 5 to 1,
+  checking that only the filtered rows change; 33 tests green. C5 marked done.
+
+- Phase 3 (bulk) — "Mark filtered known" bulk-updates the terms matching the
+  current search and status filter to 99 (`setStatusForTerms`, refuses without
+  a filter), then refreshes list and statistics. Closes the bulk part of C5.
+
+- Phase 5 (dictionaries) — URI editing: `setDictionaryUri()` updates
+  `languagedicts.LdDictURI`; the Languages panel's URI fields are editable and
+  save on editing finished, closing the dictionary part of C6.
+
+- Phase 2 (popup QA) — `--lute-demo-status` selected word 12, called
+  `setActiveStatus(3)` and logged `status 3 / "Learning (3)"`, i.e. the popup
+  state and the term update path work; the physical mouse click remains the
+  only unmeasured bit.
+
+- Phase 9 (screenshots) — final screenshot set recaptured from the packaged
+  feature state against the user's Polish DB copy: library, reader, terms,
+  languages, statistics, tags (all in `docs/lute/`).
+
+- Phase 9 (packaging refresh, round 41) — packaged exe rebuilt with
+  dictionary URI editing; smoke test opened the Languages page (69 languages)
+  against the Polish DB copy.
+- Phase 9 (packaging refresh) — packaged exe rebuilt with Anki export,
+  dictionary checkboxes and the term delete action; smoke test opened the
+  Terms page with the Polish library copy (screenshot 126 KB).
 
 - Phase 7 (Anki QA) — gtest exports a term with translation and tag, checks the
   header and the row `harbor\tHafen\tnoun\t3`; 32 tests green.
@@ -360,392 +425,6 @@ Newest entries first; each entry: what changed, evidence, commit.
 - Phase 0 (started) — consolidation done: standalone frozen into
   `attic/standalone/`, root README/FORK.md rewritten, this checklist added.
   Next in Phase 0: the Lute library page (C2/C3) in Phase 2.
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 9 (packaging refresh, round 41) — packaged exe rebuilt with
-  dictionary URI editing; smoke test opened the Languages page (69 languages)
-  against the Polish DB copy.
-- Phase 9 (packaging refresh) — packaged exe rebuilt with Anki export,
-  dictionary checkboxes and the term delete action; smoke test opened the
-  Terms page with the Polish library copy (screenshot 126 KB).
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 9 (screenshots) — final screenshot set recaptured from the packaged
-  feature state against the user's Polish DB copy: library, reader, terms,
-  languages, statistics, tags (all in `docs/lute/`).
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 2 (popup QA) — `--lute-demo-status` selected word 12, called
-  `setActiveStatus(3)` and logged `status 3 / "Learning (3)"`, i.e. the popup
-  state and the term update path work; the physical mouse click remains the
-  only unmeasured bit.
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 5 (dictionaries) — URI editing: `setDictionaryUri()` updates
-  `languagedicts.LdDictURI`; the Languages panel's URI fields are editable and
-  save on editing finished, closing the dictionary part of C6.
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 3 (bulk) — "Mark filtered known" bulk-updates the terms matching the
-  current search and status filter to 99 (`setStatusForTerms`, refuses without
-  a filter), then refreshes list and statistics. Closes the bulk part of C5.
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 9 (final freeze, round 45) — final portable build smoke-tested (reader
-  with the Polish library, screenshot produced); C13 marked done, all C1-C13
-  now have evidence.
-
-- Phase 8/7 (acceptance) — C8 and C9 marked done: tags/families, TSV and
-  Anki export/import, backup and restore each have a controller log or gtest;
-  only the physical mouse click in the popup is not measurable headless.
-
-- Phase 3 (bulk QA) — gtest bulk-updates "har" to 99 and status 5 to 1,
-  checking that only the filtered rows change; 33 tests green. C5 marked done.
-
-## Phase log
-
-- Crash on opening a library book fixed — the minidump
-  (`LibrumLute.exe.4792.dmp`) faulted in `application.dll+0x1B07D`, i.e.
-  `BookService::getFilePath()`; `BookController::setUp()` called it before
-  `m_bookGetter` existed. The call was removed, the path is emitted after
-  `setUp`, the QML double-open hook is gone and BookService getters are
-  null-safe. Regression test `BookService.GettersAreSafeWithoutAnOpenBook`;
-  lute tests 34 green, application tests 105 green. Package rebuilt at
-  `dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (commit 3b068fd).
-
-
-- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
-  document (wrapper document kept alive, same context/layout), so page numbers
-  and word boxes match exactly; overlays draw a thin baseline-relative
-  underline per line fragment instead of filled boxes. Verified with the real
-  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
-  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
-  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
-
-
-- EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
-  in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
-  uses the same layout, so pages render and word coordinates match. Verified
-  with the user's "Ostatnie życzenie" EPUB: page 17 of 267 shows the chapter
-  text with green Lute status highlights (`docs/lute/epub-in-reader.png`).
-
-
-- EPUB working path — importing the real "Ostatnie życzenie" EPUB into the
-  Lute library now paginates it (292 pages, 72,776 words, 250/page) instead of
-  one huge page; the Lute reader shows it with status colours (screenshot
-  `docs/lute/epub-reader.png`). Settings/Texts buttons are renamed to
-  "Add a book…" and accept EPUB/MOBI/FB2/CBZ. This is the reliable EPUB path
-  until the library-rendered EPUB overlay is confirmed.
-
-
-- EPUB follow-up — reproduced with the user's real "Ostatnie życzenie" EPUB:
-  MuPDF extracts words (multi-page, Polish) and the app opens it, but the
-  external reader renders this book's pages blank in our test build, while
-  library opening is the likely route. The library hook now passes
-  `BookController.getFilePath()` to Lute and failures are logged
-  ("lute document could not be opened ..."); `librum-fixed.exe` in the dist
-  folder carries the fix and diagnostics for a user-side verification.
-
-
-- Phase 2 (EPUB fix) — `LuteWordExtractor::open()` passed
-  `application/pdf` to MuPDF for every file, so EPUBs failed to open and the
-  Lute colours never appeared. It now detects EPUB/MOBI/FB2/CBZ/HTML and opens
-  the matching format; verified with a generated Polish EPUB: the external
-  reader shows green/orange status colours (`docs/lute/epub.png`, demo
-  `--lute-demo-external`).
-
-## Phase log
-
-- Translation panel with four sources shipped — `LuteTranslationAccess`
-  fetches Reverso Context (best-effort HTML scrape: dictionary hit +
-  up to three example pairs, clean fallback to the browser link when
-  Cloudflare blocks or the layout changes), Google Translate (keyless
-  `translate_a/single`), MyMemory and routes KI through the existing
-  `LuteAiAccess`; results share one structure (`provider`, `label`,
-  `translation`, `examples`, `attributionUrl`) and are cached per
-  `provider|word|target`, so switching tabs back is instant. Opening a
-  word queries the selected source automatically. `MLuteWordPopup` was
-  rebuilt as a compact editor (380 px panel, 12 px padding, segment
-  tabs, skeleton loader, Übernehmen/Copy/browser actions, tag and
-  family chip rows, parent popover); *Settings → Lute → Translation*
-  adds the default source, provider checkboxes
-  (`lute/translationEnabledProviders`) and the shared target language
-  note. 12 new gtest cases cover the URL builders, parsers, language
-  mappings and garbage payloads (49 lute + 106 application tests green).
-  Package smoke-tested from `dist/LibrumLute-0.1.0-win64/` with the real
-  "Ostatnie życzenie" EPUB via `--lute-demo-panel reverso|google|
-  mymemory|offline`: Google and MyMemory return live translations,
-  Reverso degrades to the documented error + browser-link state
-  (Cloudflare), the offline run shows the error state; no new crash
-  dumps. Screenshots: `docs/lute/panel-reverso.png`,
-  `docs/lute/panel-google.png`, `docs/lute/panel-mymemory.png`,
-  `docs/lute/panel-error.png`, `docs/lute/popup-translation.png`.
-  QSettings after the runs: `lute/translationProvider=mymemory`
-  (persisted default).
 
 ## Status summary (round 36)
 
