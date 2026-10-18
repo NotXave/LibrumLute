@@ -8,7 +8,6 @@ and MyMemory — plus the full Lute pipeline: word statuses, phrase terms, space
 repetition stats and a real `lute.db`.
 
 <p>
-  <img src="docs/lute/epub-in-reader.png" width="49%" alt="Reading an EPUB in LibrumLute">
   <img src="docs/lute/popup-translation.png" width="49%" alt="Term panel with translations">
 </p>
 <p>
