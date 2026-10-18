@@ -95,6 +95,7 @@ page are Librum's own QML, and the Lute features were added on top of it.
   are configured in *Settings → Lute → Translation* (`lute/translationProvider`,
   `lute/translationEnabledProviders`); the AI target language applies to all
   sources.
+
 * **Statistics page** – Librum's placeholder page now shows the Lute vocabulary
   of the selected language: terms, learning/known counts, words read, the
   coverage of the currently open document and the status distribution.
@@ -109,6 +110,11 @@ page are Librum's own QML, and the Lute features were added on top of it.
 | Phrase popup | AI gloss | Settings → Lute | Statistics |
 | --- | --- | --- | --- |
 | ![Phrase](docs/lute/phrase.png) | ![AI](docs/lute/ai.png) | ![Settings](docs/lute/settings.png) | ![Statistics](docs/lute/statistics.png) |
+
+
+| Panel: Google | Panel: MyMemory | Panel: Reverso (browser fallback) | Panel: network error |
+| --- | --- | --- | --- |
+| ![Panel Google](docs/lute/panel-google.png) | ![Panel MyMemory](docs/lute/panel-mymemory.png) | ![Panel Reverso](docs/lute/panel-reverso.png) | ![Panel error](docs/lute/panel-error.png) |
 
 ## Building
 

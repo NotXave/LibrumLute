@@ -611,40 +611,75 @@ int main(int argc, char* argv[])
         const QString outputPath2 = demoOutputPath;
 
         QTimer::singleShot(
-            2500, &app,
+            2000, &app,
             [&engine, luteController = luteController.get(),
              externalBookController = externalBookController.get(), provider]() {
                 luteController->setReaderPresentation(QStringLiteral("panel"));
                 externalBookController->setCurrentPage(0);
 
-                QTimer::singleShot(
-                    900, &engine,
-                    [&engine, luteController, provider]() {
-                        const QVariantList words = luteController->pageWords(0);
-                        for(const QVariant& entry : words)
+                // EPUB pagination can take a few seconds: poll until the
+                // first page has words, then click one.
+                auto* pollTimer = new QTimer(&engine);
+                pollTimer->setInterval(400);
+                QObject::connect(
+                    pollTimer, &QTimer::timeout, &engine,
+                    [&engine, pollTimer, luteController, provider,
+                     externalBookController]() {
+                        // EPUBs start with covers/front matter: find the
+                        // first page with extractable words and click one.
+                        int page = -1;
+                        QVariantList words;
+                        for(int candidate = 0; candidate < 40; ++candidate)
                         {
-                            const QVariantMap word = entry.toMap();
-                            const QString text =
-                                word.value(QStringLiteral("word")).toString();
-                            if(text.length() < 4 || !text.at(0).isLetter())
-                                continue;
-                            const QVariantMap rect =
-                                word.value(QStringLiteral("rect")).toMap();
-                            luteController->selectAtPagePoint(
-                                0,
-                                rect.value(QStringLiteral("x")).toDouble()
-                                    + rect.value(QStringLiteral("w")).toDouble() / 2,
-                                rect.value(QStringLiteral("y")).toDouble()
-                                    + rect.value(QStringLiteral("h")).toDouble() / 2);
-                            break;
+                            words = luteController->pageWords(candidate);
+                            if(!words.isEmpty())
+                            {
+                                page = candidate;
+                                break;
+                            }
                         }
-                        QTimer::singleShot(400, &engine, [luteController, provider]() {
-                            luteController->setTranslationProvider(provider);
-                        });
+                        if(page < 0)
+                            return;
+                        externalBookController->setCurrentPage(page);
+                        pollTimer->stop();
+                        QTimer::singleShot(
+                            600, &engine, [&engine, luteController, page, words,
+                                          provider]() {
+                                for(const QVariant& entry : words)
+                                {
+                                    const QVariantMap word = entry.toMap();
+                                    const QString text = word
+                                        .value(QStringLiteral("word"))
+                                        .toString();
+                                    if(text.length() < 4
+                                       || !text.at(0).isLetter())
+                                        continue;
+                                    const QVariantMap rect =
+                                        word.value(QStringLiteral("rect")).toMap();
+                                    luteController->selectAtPagePoint(
+                                        page,
+                                        rect.value(QStringLiteral("x")).toDouble()
+                                            + rect.value(QStringLiteral("w"))
+                                                  .toDouble()
+                                                  / 2,
+                                        rect.value(QStringLiteral("y")).toDouble()
+                                            + rect.value(QStringLiteral("h"))
+                                                  .toDouble()
+                                                  / 2);
+                                    break;
+                                }
+                                QTimer::singleShot(
+                                    600, &engine,
+                                    [luteController, provider]() {
+                                        luteController->setTranslationProvider(
+                                            provider);
+                                    });
+                            });
                     });
+                pollTimer->start();
             });
 
-        QTimer::singleShot(11000, &engine, [&engine, outputPath2]() {
+        QTimer::singleShot(16000, &engine, [&engine, outputPath2]() {
             if(auto* window =
                    qobject_cast<QQuickWindow*>(engine.rootObjects().value(0)))
                 window->grabWindow().save(outputPath2);

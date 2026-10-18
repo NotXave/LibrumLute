@@ -718,6 +718,35 @@ Newest entries first; each entry: what changed, evidence, commit.
   reader shows green/orange status colours (`docs/lute/epub.png`, demo
   `--lute-demo-external`).
 
+## Phase log
+
+- Translation panel with four sources shipped — `LuteTranslationAccess`
+  fetches Reverso Context (best-effort HTML scrape: dictionary hit +
+  up to three example pairs, clean fallback to the browser link when
+  Cloudflare blocks or the layout changes), Google Translate (keyless
+  `translate_a/single`), MyMemory and routes KI through the existing
+  `LuteAiAccess`; results share one structure (`provider`, `label`,
+  `translation`, `examples`, `attributionUrl`) and are cached per
+  `provider|word|target`, so switching tabs back is instant. Opening a
+  word queries the selected source automatically. `MLuteWordPopup` was
+  rebuilt as a compact editor (380 px panel, 12 px padding, segment
+  tabs, skeleton loader, Übernehmen/Copy/browser actions, tag and
+  family chip rows, parent popover); *Settings → Lute → Translation*
+  adds the default source, provider checkboxes
+  (`lute/translationEnabledProviders`) and the shared target language
+  note. 12 new gtest cases cover the URL builders, parsers, language
+  mappings and garbage payloads (49 lute + 106 application tests green).
+  Package smoke-tested from `dist/LibrumLute-0.1.0-win64/` with the real
+  "Ostatnie życzenie" EPUB via `--lute-demo-panel reverso|google|
+  mymemory|offline`: Google and MyMemory return live translations,
+  Reverso degrades to the documented error + browser-link state
+  (Cloudflare), the offline run shows the error state; no new crash
+  dumps. Screenshots: `docs/lute/panel-reverso.png`,
+  `docs/lute/panel-google.png`, `docs/lute/panel-mymemory.png`,
+  `docs/lute/panel-error.png`, `docs/lute/popup-translation.png`.
+  QSettings after the runs: `lute/translationProvider=mymemory`
+  (persisted default).
+
 ## Status summary (round 36)
 
 | Criterion | State | Evidence |
