@@ -68,6 +68,16 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- AI wait capped, all Lute languages translatable — the AI transfer timeout
+  dropped 30s -> 15s ("Operation abgebrochen (HTTP 0)" was the timeout on
+  dead network paths; normal Gemini answers take 3-6s). The translation
+  language table covers all Lute study languages now (29 additions:
+  swahili, latin, tibetan, toki pona, ...; canonical "mandarin chinese"
+  before the "chinese" alias so dedup keeps the Lute name), and
+  "Translate into" in the settings became a dropdown fed from that same
+  table (`LuteTranslationAccess::supportedLanguages()` via
+  `LuteController::supportedTargetLanguages()`), custom saved values are
+  appended. Commit `e9da183`; 54/54 + 106/106 green.
 - Gemini 404 fixed — Google retired `gemini-2.0-flash` ("no longer
   available"); default model is now `gemini-3.8-flash` (verified live with
   a real key), and gemini-3.x thinking is disabled in the payload
