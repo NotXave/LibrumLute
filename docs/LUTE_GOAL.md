@@ -71,13 +71,16 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 - Provider selection fixed — `setTranslationProvider` is now `Q_INVOKABLE`
   (lute_controller.hpp); the Settings Default-source dropdown and the term
   panel provider tabs called it from QML, which silently failed without the
-  annotation and the provider never changed. New metaobject regression test
-  (`LuteController.SetTranslationProviderCallableViaMetaObject`,
-  lute_controller_tests.cpp) proves the exact QML invocation mechanism and
-  restores the user's persisted provider afterwards; unit tests now mirror
-  the app's QSettings identity (`Librum-Reader`/`Librum`) so persistence
-  assertions hit the real registry location. Failing-before/passing-after:
-  invokeMethod returned false before the annotation, 50/50 green after.
+  annotation and the provider never changed. Same defect and fix for
+  `setReaderPresentation`/`setReaderPanelSide` (the Reader card's
+  presentation and panel-side dropdowns were dead the same way). Metaobject
+  regression tests (`LuteController.*CallableViaMetaObject`,
+  lute_controller_tests.cpp) prove the exact QML invocation mechanism for
+  all three setters and restore the user's persisted values afterwards;
+  unit tests now mirror the app's QSettings identity
+  (`Librum-Reader`/`Librum`) so persistence assertions hit the real
+  registry location. Failing-before/passing-after: invokeMethod returned
+  false before the annotation, 52/52 green after.
 - Translation panel with four sources shipped — `LuteTranslationAccess`
   fetches Reverso Context (best-effort HTML scrape: dictionary hit +
   up to three example pairs, clean fallback to the browser link when
