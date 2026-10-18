@@ -40,9 +40,11 @@ BookController::BookController(application::IBookService* bookService,
 
 bool BookController::setUp(QString uuid)
 {
-    const QString filePath = getFilePath();
     m_bookService->setUp(
         std::make_unique<LibraryBookGetter>(m_libraryService, QUuid(uuid)));
+    // Only after the service owns a book getter may its path be read; this
+    // used to be called before setUp and crashed on a null getter.
+    emit bookOpened(m_bookService->getFilePath());
 
     m_bookmarksModel = std::make_unique<data_models::BookmarksModel>(
         QUuid(uuid), m_bookService);

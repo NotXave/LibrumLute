@@ -7,6 +7,7 @@ add_executable(application_unit_tests
                     services/settings_service_tests.cpp
                     services/authentication_service_tests.cpp
                     services/folder_service_tests.cpp
+                    services/book_service_tests.cpp
                     
                     utility/local_library_tracker_tests.cpp
                     utility/library_storage_manager_tests.cpp
@@ -15,10 +16,14 @@ add_executable(application_unit_tests
                     utility/book_merger_tests.cpp
     )
 
+target_link_directories(application_unit_tests PRIVATE
+    "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
+
 target_link_libraries(application_unit_tests
                 PRIVATE
                     domain
                     application
+                    mupdfcpp64
                     gtest
                     gmock
                     Qt6::Core

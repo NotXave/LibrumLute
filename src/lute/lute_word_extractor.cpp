@@ -418,7 +418,7 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
         {
             m_impl->wordCache.insert(pageIndex, QVector<WordQuad>());
             m_impl->textCache.insert(pageIndex, QString());
-            return m_impl->wordCache.value(pageIndex);
+            return *m_impl->wordCache.find(pageIndex);
         }
     }
     else
@@ -446,7 +446,7 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
         {
             m_impl->wordCache.insert(pageIndex, QVector<WordQuad>());
             m_impl->textCache.insert(pageIndex, QString());
-            return m_impl->wordCache.value(pageIndex);
+            return *m_impl->wordCache.find(pageIndex);
         }
     }
 

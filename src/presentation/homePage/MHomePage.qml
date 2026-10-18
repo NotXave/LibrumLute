@@ -853,11 +853,10 @@ Page {
             else if (bookMultiSelectOptionsPopup.opened)
                 bookMultiSelectOptionsPopup.close()
 
-            BookController.setUp(Globals.selectedBook.uuid)
-            // Give Lute the same file so library EPUBs/PDFs get the word
-            // colours and popup as well.
-            if (BookController.getFilePath().length > 0)
-                LuteController.setDocumentPath(BookController.getFilePath())
+            if (!BookController.setUp(Globals.selectedBook.uuid)) {
+                console.warn("Could not open the selected book")
+                return
+            }
 
             LibraryController.refreshLastOpenedFlag(Globals.selectedBook.uuid)
             loadPage(readingPage)

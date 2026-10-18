@@ -185,26 +185,35 @@ void BookService::followLink(const char* uri)
 
 QString BookService::getFilePath() const
 {
+    if(!m_bookGetter)
+        return {};
     auto book = m_bookGetter->getBook();
-    return book->getFilePath();
+    return book ? book->getFilePath() : QString();
 }
 
 int BookService::getPageCount() const
 {
+    if(!m_bookGetter)
+        return 0;
     auto book = m_bookGetter->getBook();
-    return book->getPageCount();
+    return book ? book->getPageCount() : 0;
 }
 
 int BookService::getCurrentPage() const
 {
+    if(!m_bookGetter)
+        return 0;
     auto book = m_bookGetter->getBook();
-    return book->getCurrentPage();
+    return book ? book->getCurrentPage() : 0;
 }
 
 void BookService::setCurrentPage(int newCurrentPage)
 {
+    if(!m_bookGetter)
+        return;
     auto book = m_bookGetter->getBook();
-    book->setCurrentPage(newCurrentPage);
+    if(book)
+        book->setCurrentPage(newCurrentPage);
 }
 
 float BookService::getZoom() const
