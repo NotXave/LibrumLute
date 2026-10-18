@@ -78,7 +78,7 @@ Prerequisites: **Qt 6.8.x (msvc2022_64)**, Visual Studio 2022 (C++ workload),
 CMake 3.28+, Python 3 (MuPDF build).
 
 ```bat
-git clone https://github.com/NotXave/LibrumLute.git
+git clone --recurse-submodules https://github.com/NotXave/LibrumLute.git
 cd LibrumLute
 cmake -B build-package -DCMAKE_BUILD_TYPE=Release
 cmake --build build-package --parallel
