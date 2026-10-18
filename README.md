@@ -9,9 +9,9 @@ repetition stats and a real `lute.db`.
 
 <p>
   <img src="docs/lute/popup-translation.png" width="49%" alt="Term panel with translations">
+  <img src="docs/lute/phrase.png" width="49%" alt="Phrase terms">
 </p>
 <p>
-  <img src="docs/lute/phrase.png" width="49%" alt="Phrase terms">
   <img src="docs/lute/statistics.png" width="49%" alt="Lute statistics">
 </p>
 
