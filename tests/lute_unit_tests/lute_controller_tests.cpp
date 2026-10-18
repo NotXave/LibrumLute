@@ -117,5 +117,20 @@ TEST(LuteController, AiConfigSelfHealsForeignProviderDefaults)
                   QStringLiteral("qwen2.5:7b"));
     }
 
+    // A saved model that Google retired heals to the current default; the
+    // URL is kept.
+    QSettings().setValue("lute/aiProvider", QStringLiteral("gemini"));
+    QSettings().setValue("lute/aiModel", QStringLiteral("gemini-2.0-flash"));
+    QSettings().setValue("lute/aiBaseUrl",
+                         QStringLiteral("https://generativelanguage.googleapis.com/v1beta"));
+    {
+        lute::LuteController controller;
+        const QVariantMap config = controller.aiConfig();
+        EXPECT_EQ(config.value("model").toString(),
+                  QStringLiteral("gemini-3.8-flash"));
+        EXPECT_EQ(config.value("baseUrl").toString(),
+                  QStringLiteral("https://generativelanguage.googleapis.com/v1beta"));
+    }
+
     restore();
 }

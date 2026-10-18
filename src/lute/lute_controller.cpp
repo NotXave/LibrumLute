@@ -118,6 +118,14 @@ LuteAiConfig loadAiConfigFromSettings()
             break;
         }
     }
+
+    // Models this app once shipped as gemini defaults that the provider
+    // retired: reset to the current default so saved configs keep working
+    // (URL untouched).
+    if(provider == QLatin1String("gemini")
+       && config.model == QLatin1String("gemini-2.0-flash")) {
+        config.model = LuteAiConfig::defaultsFor(provider).model;
+    }
     return config;
 }
 
