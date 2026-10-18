@@ -7,6 +7,7 @@ import Librum.fonts
 Item {
     id: root
     property alias text: inputField.text
+    property alias echoMode: inputField.echoMode
     property int boxHeight: 40
     property string placeholderContent
     property color placeholderColor: Style.colorPlaceholderText

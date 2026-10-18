@@ -681,6 +681,8 @@ Page {
                             Layout.topMargin: 14
                             headerText: qsTr("API key")
                             placeholderContent: qsTr("only needed for OpenAI / Gemini")
+                            // Mask the key so screenshots share nothing usable.
+                            echoMode: TextInput.Password
                         }
 
                         MLabeledInputBox {
