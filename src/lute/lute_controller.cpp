@@ -79,6 +79,48 @@ int wordIndexAt(const QVector<WordQuad>& words, QPointF point,
 
 constexpr int kMaxSampledPages = 40;
 
+// Single source of truth for the settings-backed AI configuration; used by
+// aiConfig(), initialize() and requestAiSuggestion(). A base URL or model
+// saved as another provider's default can never be intended for the selected
+// provider (e.g. Ollama's localhost URL kept after switching to Gemini), so
+// both reset to the selected provider's defaults. Read-only: nothing is
+// persisted until the user next saves AI settings.
+LuteAiConfig loadAiConfigFromSettings()
+{
+    QSettings settings;
+    const QString provider =
+        settings.value(QStringLiteral("lute/aiProvider"),
+                       QStringLiteral("ollama"))
+            .toString();
+    LuteAiConfig config = LuteAiConfig::defaultsFor(provider);
+    config.model =
+        settings.value(QStringLiteral("lute/aiModel"), config.model).toString();
+    config.baseUrl =
+        settings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl).toString();
+    config.apiKey = settings.value(QStringLiteral("lute/aiApiKey")).toString();
+    config.targetLanguage =
+        settings
+            .value(QStringLiteral("lute/aiTargetLanguage"),
+                   QStringLiteral("German"))
+            .toString();
+
+    const char* kProviders[] = {"ollama", "openai", "gemini"};
+    for(const char* other : kProviders) {
+        if(provider == QLatin1String(other))
+            continue;
+        const LuteAiConfig otherDefaults =
+            LuteAiConfig::defaultsFor(QLatin1String(other));
+        if(config.baseUrl.trimmed() == otherDefaults.baseUrl
+           || config.model == otherDefaults.model) {
+            const LuteAiConfig own = LuteAiConfig::defaultsFor(provider);
+            config.baseUrl = own.baseUrl;
+            config.model = own.model;
+            break;
+        }
+    }
+    return config;
+}
+
 } // namespace
 
 LuteController::LuteController(QObject* parent) :
@@ -272,21 +314,7 @@ QString LuteController::aiError() const
 
 QVariantMap LuteController::aiConfig() const
 {
-    QSettings settings;
-    LuteAiConfig config = LuteAiConfig::defaultsFor(
-        settings.value(QStringLiteral("lute/aiProvider"),
-                       QStringLiteral("ollama"))
-            .toString());
-    config.model = settings.value(QStringLiteral("lute/aiModel"), config.model)
-                       .toString();
-    config.baseUrl =
-        settings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl).toString();
-    config.apiKey = settings.value(QStringLiteral("lute/aiApiKey")).toString();
-    config.targetLanguage =
-        settings
-            .value(QStringLiteral("lute/aiTargetLanguage"),
-                   QStringLiteral("German"))
-            .toString();
+    const LuteAiConfig config = loadAiConfigFromSettings();
 
     QVariantMap map;
     map.insert(QStringLiteral("provider"), config.provider);
@@ -401,27 +429,7 @@ void LuteController::initialize()
     if(wantedName.isEmpty() || !selectLanguageByName(wantedName))
         selectFallbackLanguage();
 
-    m_ai->setConfig([this]() {
-        QSettings aiSettings;
-        LuteAiConfig config = LuteAiConfig::defaultsFor(
-            aiSettings.value(QStringLiteral("lute/aiProvider"),
-                             QStringLiteral("ollama"))
-                .toString());
-        config.model =
-            aiSettings.value(QStringLiteral("lute/aiModel"), config.model)
-                .toString();
-        config.baseUrl =
-            aiSettings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl)
-                .toString();
-        config.apiKey =
-            aiSettings.value(QStringLiteral("lute/aiApiKey")).toString();
-        config.targetLanguage =
-            aiSettings
-                .value(QStringLiteral("lute/aiTargetLanguage"),
-                       QStringLiteral("German"))
-                .toString();
-        return config;
-    }());
+    m_ai->setConfig(loadAiConfigFromSettings());
 
     emit databaseChanged();
     emit aiConfigChanged();
@@ -2242,22 +2250,7 @@ void LuteController::requestAiSuggestion()
     emit wordPopupChanged();
 
     // Use the settings-backed configuration (provider/model/url/key).
-    QSettings settings;
-    LuteAiConfig config = LuteAiConfig::defaultsFor(
-        settings.value(QStringLiteral("lute/aiProvider"),
-                       QStringLiteral("ollama"))
-            .toString());
-    config.model =
-        settings.value(QStringLiteral("lute/aiModel"), config.model).toString();
-    config.baseUrl =
-        settings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl).toString();
-    config.apiKey = settings.value(QStringLiteral("lute/aiApiKey")).toString();
-    config.targetLanguage =
-        settings
-            .value(QStringLiteral("lute/aiTargetLanguage"),
-                   QStringLiteral("German"))
-            .toString();
-    m_ai->setConfig(config);
+    m_ai->setConfig(loadAiConfigFromSettings());
 
     m_ai->requestTranslation(m_activeQuad.word, m_activeQuad.sentence,
                              m_activeIsPhrase);

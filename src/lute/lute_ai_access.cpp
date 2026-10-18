@@ -245,7 +245,7 @@ void LuteAiAccess::requestTranslation(const QString& word, const QString& senten
     m_reply = m_network->post(request, body);
     emit busyChanged();
 
-    connect(m_reply, &QNetworkReply::finished, this, [this, provider]() {
+    connect(m_reply, &QNetworkReply::finished, this, [this, provider, baseUrl]() {
         QNetworkReply* reply = m_reply;
         if (!reply)
             return;
@@ -255,7 +255,8 @@ void LuteAiAccess::requestTranslation(const QString& word, const QString& senten
         const QByteArray payload = reply->readAll();
         if (reply->error() != QNetworkReply::NoError) {
             const QString error =
-                QStringLiteral("AI request failed: %1").arg(reply->errorString());
+                QStringLiteral("AI request failed: %1 (%2 at %3)")
+                    .arg(reply->errorString(), m_config.providerLabel(), baseUrl);
             finishWithError(error);
             return;
         }

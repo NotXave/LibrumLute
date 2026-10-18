@@ -872,7 +872,8 @@ Page {
                 return "gpt-4o-mini";
             if (provider === "gemini")
                 return "gemini-2.0-flash";
-            return "llama3.1";
+            // Keep in sync with defaultModel() in lute_ai_access.cpp.
+            return "qwen2.5:7b";
         }
 
         function defaultBaseUrl(provider) {
@@ -885,6 +886,8 @@ Page {
 
         function updateProvider(provider) {
             internal.currentProvider = provider;
+            modelInput.text = defaultModel(provider);
+            baseUrlInput.text = defaultBaseUrl(provider);
             modelInput.placeholderContent = defaultModel(provider);
             baseUrlInput.placeholderContent = defaultBaseUrl(provider);
         }
