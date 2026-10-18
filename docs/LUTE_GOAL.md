@@ -75,7 +75,9 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
   otherwise consume the budget and content comes back empty. AI failure
   messages redact the api key and include HTTP status + response body
   excerpt (was: empty "server replied" with the key visible in the URL).
-  Commits `27243eb` (self-heal) and `8bf20de` (model bump).
+  Explicitly saved `gemini-2.0-flash` heals to the current default at load
+  (retired-model list, URL untouched). Commits `27243eb` (self-heal),
+  `8bf20de` (model bump), `09f5ee0` (retired-model heal).
 - Gemini "connection refused" fixed — switching the AI provider kept the
   previous provider's default URL/model in the settings fields, so saving
   under Gemini persisted Ollama's `localhost:11434` and every AI request
