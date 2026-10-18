@@ -68,6 +68,15 @@ Status values: `[ ]` open, `[~]` in progress, `[x]` done (evidence linked).
 
 ## Phase log
 
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
+
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
   uses the same layout, so pages render and word coordinates match. Verified
@@ -314,6 +323,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
+
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
   uses the same layout, so pages render and word coordinates match. Verified
@@ -347,6 +365,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
+
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
   uses the same layout, so pages render and word coordinates match. Verified
@@ -376,6 +403,15 @@ Newest entries first; each entry: what changed, evidence, commit.
   languages, statistics, tags (all in `docs/lute/`).
 
 ## Phase log
+
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
 
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
@@ -408,6 +444,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
+
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
   uses the same layout, so pages render and word coordinates match. Verified
@@ -438,6 +483,15 @@ Newest entries first; each entry: what changed, evidence, commit.
 
 ## Phase log
 
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
+
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
   uses the same layout, so pages render and word coordinates match. Verified
@@ -467,6 +521,15 @@ Newest entries first; each entry: what changed, evidence, commit.
   a filter), then refreshes list and statistics. Closes the bulk part of C5.
 
 ## Phase log
+
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
 
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor
@@ -504,6 +567,15 @@ Newest entries first; each entry: what changed, evidence, commit.
   checking that only the filtered rows change; 33 tests green. C5 marked done.
 
 ## Phase log
+
+- EPUB page view fixed and cleaned — Lute now shares the renderer's MuPDF
+  document (wrapper document kept alive, same context/layout), so page numbers
+  and word boxes match exactly; overlays draw a thin baseline-relative
+  underline per line fragment instead of filled boxes. Verified with the real
+  "Ostatnie życzenie" EPUB page 18/267 (`docs/lute/epub-highlights.png`).
+  Portable package rebuilt at `dist/LibrumLute-0.1.0-win64/LibrumLute.exe`
+  with BUILD-INFO.txt, smoke-tested from that folder. 34 gtest cases green.
+
 
 - EPUB fixed in the page view — reflowable books (EPUB/MOBI) are now laid out
   in BookService (`fz_layout_document(450, 650, 11)`) and the Lute extractor

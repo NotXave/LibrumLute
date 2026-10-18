@@ -110,6 +110,11 @@ cmake --build build --parallel
 
 The result is `build/librum.exe` next to the Qt and MuPDF DLLs.
 
+The canonical portable package lives at
+`dist/LibrumLute-0.1.0-win64/LibrumLute.exe` (next to `BUILD-INFO.txt`).
+It is the only build that should be started; `librum/dist` and
+`librum-fixed.exe` no longer exist.
+
 Notes on the Windows build in this fork:
 
 * MuPDF is built by `scripts/mupdfwrap.py`. The checked-in solution targets the
