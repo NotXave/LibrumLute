@@ -1,17 +1,18 @@
 #pragma once
 
-#include "lute_term.hpp"
-#include "word_quad.hpp"
-#include "lute_text_parser.hpp"
-
 #include <QRectF>
 #include <QString>
 #include <QVector>
+#include "lute_term.hpp"
+#include "lute_text_parser.hpp"
+#include "word_quad.hpp"
 
-namespace lute {
+namespace lute
+{
 
 /// One occurrence of a multi-word term on a page.
-struct PhraseMatch {
+struct PhraseMatch
+{
     qint64 termId = 0;
     QString text;
     int firstIndex = -1;
@@ -28,8 +29,8 @@ struct PhraseMatch {
 /// Matches Lute's multi-word terms ("run out of", "give up", ...) against the
 /// word sequence of a PDF page.
 ///
-/// Matching is greedy longest-first, case-insensitive, and never re-uses a token
-/// for two phrases, which is how Lute highlights phrases inside a text.
+/// Matching is greedy longest-first, case-insensitive, and never re-uses a
+/// token for two phrases, which is how Lute highlights phrases inside a text.
 class PhraseMatcher
 {
 public:
@@ -38,7 +39,8 @@ public:
                                             const LuteTextParser& parser);
 
     /// The match covering `wordIndex`, preferring the longest phrase.
-    static const PhraseMatch* matchAt(const QVector<PhraseMatch>& matches, int wordIndex);
+    static const PhraseMatch* matchAt(const QVector<PhraseMatch>& matches,
+                                      int wordIndex);
 };
 
-} // namespace lute
+}  // namespace lute

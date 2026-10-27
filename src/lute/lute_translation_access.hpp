@@ -13,7 +13,8 @@ namespace lute
 {
 
 /// Translation sources shown as tabs in the term panel.
-enum class TranslationProvider {
+enum class TranslationProvider
+{
     Reverso,
     Google,
     Ai,
@@ -49,7 +50,11 @@ public:
                  bool isPhrase);
     void cancel();
 
-    bool isBusy() const { return m_reply != nullptr; }
+    bool isBusy() const
+    {
+        return m_reply != nullptr;
+    }
+
     bool hasCached(TranslationProvider provider, const QString& text,
                    const QString& targetLanguage) const;
 
@@ -69,7 +74,8 @@ public:
     /// german/deutsch deduped), for UI pickers.
     static QStringList supportedLanguages();
 
-    static QUrl googleTranslateUrl(const QString& text, const QString& sourceCode,
+    static QUrl googleTranslateUrl(const QString& text,
+                                   const QString& sourceCode,
                                    const QString& targetCode);
     static QUrl myMemoryUrl(const QString& text, const QString& sourceCode,
                             const QString& targetCode);
@@ -81,13 +87,15 @@ public:
                                              const QString& text);
     /// Best-effort scraper: primary translation plus up to three example
     /// pairs from a context.reverso.net HTML page.
-    static QVariantMap parseReversoHtml(const QString& html, const QString& word,
+    static QVariantMap parseReversoHtml(const QString& html,
+                                        const QString& word,
                                         const QString& sourceSlug,
                                         const QString& targetSlug,
                                         bool isPhrase = false);
 
     /// Wraps an LuteAiAccess suggestion in the shared result structure.
-    static QVariantMap aiResult(const QString& suggestion, const QString& label);
+    static QVariantMap aiResult(const QString& suggestion,
+                                const QString& label);
 
 signals:
     void resultReady(const QVariantMap& result);
@@ -106,4 +114,4 @@ private:
     QString m_targetLanguage;
 };
 
-} // namespace lute
+}  // namespace lute

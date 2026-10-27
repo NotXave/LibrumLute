@@ -1,5 +1,4 @@
 #include "lute_translation_access.hpp"
-
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -23,79 +22,79 @@ struct LanguageNames
 
 /// Lute language display names -> ISO 639 code and context.reverso.net slug.
 const LanguageNames kLanguages[] = {
-    {"german", "de", "german"},
-    {"deutsch", "de", "german"},
-    {"english", "en", "english"},
-    {"polish", "pl", "polish"},
-    {"french", "fr", "french"},
-    {"spanish", "es", "spanish"},
-    {"italian", "it", "italian"},
-    {"portuguese", "pt", "portuguese"},
-    {"russian", "ru", "russian"},
-    {"ukrainian", "uk", "ukrainian"},
-    {"czech", "cs", "czech"},
-    {"dutch", "nl", "dutch"},
-    {"swedish", "sv", "swedish"},
-    {"norwegian", "no", "norwegian"},
-    {"danish", "da", "danish"},
-    {"finnish", "fi", "finnish"},
-    {"turkish", "tr", "turkish"},
-    {"greek", "el", "greek"},
-    {"hungarian", "hu", "hungarian"},
-    {"romanian", "ro", "romanian"},
-    {"bulgarian", "bg", "bulgarian"},
-    {"serbian", "sr", "serbian"},
-    {"croatian", "hr", "croatian"},
-    {"slovak", "sk", "slovak"},
-    {"slovene", "sl", "slovenian"},
-    {"slovenian", "sl", "slovenian"},
-    {"lithuanian", "lt", "lithuanian"},
-    {"latvian", "lv", "latvian"},
-    {"estonian", "et", "estonian"},
-    {"albanian", "sq", "albanian"},
-    {"macedonian", "mk", "macedonian"},
-    {"arabic", "ar", "arabic"},
-    {"hebrew", "he", "hebrew"},
-    {"persian", "fa", "persian"},
-    {"farsi", "fa", "persian"},
-    {"hindi", "hi", "hindi"},
-    {"korean", "ko", "korean"},
-    {"mandarin chinese", "zh-CN", "chinese"},
-    {"japanese", "ja", "japanese"},
-    {"chinese", "zh-CN", "chinese"},
-    {"mandarin", "zh-CN", "chinese"},
-    {"thai", "th", "thai"},
-    {"vietnamese", "vi", "vietnamese"},
-    {"indonesian", "id", "indonesian"},
-    {"ainu", "ain", "ain"},
-    {"amharic", "am", "am"},
-    {"armenian", "hy", "hy"},
-    {"azerbaijani", "az", "az"},
-    {"basque", "eu", "eu"},
-    {"belarusian", "be", "be"},
-    {"bengali", "bn", "bn"},
-    {"bosnian", "bs", "bs"},
-    {"breton", "br", "br"},
-    {"catalan", "ca", "ca"},
-    {"cebuano", "ceb", "ceb"},
-    {"classical chinese", "zh-CN", "chinese"},
-    {"esperanto", "eo", "eo"},
-    {"faroese", "fo", "fo"},
-    {"galician", "gl", "gl"},
-    {"georgian", "ka", "ka"},
-    {"gothic", "got", "got"},
-    {"icelandic", "is", "is"},
-    {"kazakh", "kk", "kk"},
-    {"khmer", "km", "km"},
-    {"latin", "la", "latin"},
-    {"nahuatl", "nah", "nah"},
-    {"navajo", "nv", "nv"},
-    {"okinawan", "ryu", "ryu"},
-    {"punjabi", "pa", "pa"},
-    {"sanskrit", "sa", "sa"},
-    {"swahili", "sw", "sw"},
-    {"tibetan", "bo", "bo"},
-    {"toki pona", "tok", "tok"},
+    { "german", "de", "german" },
+    { "deutsch", "de", "german" },
+    { "english", "en", "english" },
+    { "polish", "pl", "polish" },
+    { "french", "fr", "french" },
+    { "spanish", "es", "spanish" },
+    { "italian", "it", "italian" },
+    { "portuguese", "pt", "portuguese" },
+    { "russian", "ru", "russian" },
+    { "ukrainian", "uk", "ukrainian" },
+    { "czech", "cs", "czech" },
+    { "dutch", "nl", "dutch" },
+    { "swedish", "sv", "swedish" },
+    { "norwegian", "no", "norwegian" },
+    { "danish", "da", "danish" },
+    { "finnish", "fi", "finnish" },
+    { "turkish", "tr", "turkish" },
+    { "greek", "el", "greek" },
+    { "hungarian", "hu", "hungarian" },
+    { "romanian", "ro", "romanian" },
+    { "bulgarian", "bg", "bulgarian" },
+    { "serbian", "sr", "serbian" },
+    { "croatian", "hr", "croatian" },
+    { "slovak", "sk", "slovak" },
+    { "slovene", "sl", "slovenian" },
+    { "slovenian", "sl", "slovenian" },
+    { "lithuanian", "lt", "lithuanian" },
+    { "latvian", "lv", "latvian" },
+    { "estonian", "et", "estonian" },
+    { "albanian", "sq", "albanian" },
+    { "macedonian", "mk", "macedonian" },
+    { "arabic", "ar", "arabic" },
+    { "hebrew", "he", "hebrew" },
+    { "persian", "fa", "persian" },
+    { "farsi", "fa", "persian" },
+    { "hindi", "hi", "hindi" },
+    { "korean", "ko", "korean" },
+    { "mandarin chinese", "zh-CN", "chinese" },
+    { "japanese", "ja", "japanese" },
+    { "chinese", "zh-CN", "chinese" },
+    { "mandarin", "zh-CN", "chinese" },
+    { "thai", "th", "thai" },
+    { "vietnamese", "vi", "vietnamese" },
+    { "indonesian", "id", "indonesian" },
+    { "ainu", "ain", "ain" },
+    { "amharic", "am", "am" },
+    { "armenian", "hy", "hy" },
+    { "azerbaijani", "az", "az" },
+    { "basque", "eu", "eu" },
+    { "belarusian", "be", "be" },
+    { "bengali", "bn", "bn" },
+    { "bosnian", "bs", "bs" },
+    { "breton", "br", "br" },
+    { "catalan", "ca", "ca" },
+    { "cebuano", "ceb", "ceb" },
+    { "classical chinese", "zh-CN", "chinese" },
+    { "esperanto", "eo", "eo" },
+    { "faroese", "fo", "fo" },
+    { "galician", "gl", "gl" },
+    { "georgian", "ka", "ka" },
+    { "gothic", "got", "got" },
+    { "icelandic", "is", "is" },
+    { "kazakh", "kk", "kk" },
+    { "khmer", "km", "km" },
+    { "latin", "la", "latin" },
+    { "nahuatl", "nah", "nah" },
+    { "navajo", "nv", "nv" },
+    { "okinawan", "ryu", "ryu" },
+    { "punjabi", "pa", "pa" },
+    { "sanskrit", "sa", "sa" },
+    { "swahili", "sw", "sw" },
+    { "tibetan", "bo", "bo" },
+    { "toki pona", "tok", "tok" },
 };
 
 const LanguageNames* lookup(const QString& languageName)
@@ -112,33 +111,33 @@ const LanguageNames* lookup(const QString& languageName)
 QString decodeEntities(const QString& text)
 {
     static const QHash<QString, QString> named = {
-        {QStringLiteral("nbsp"), QStringLiteral(" ")},
-        {QStringLiteral("amp"), QStringLiteral("&")},
-        {QStringLiteral("lt"), QStringLiteral("<")},
-        {QStringLiteral("gt"), QStringLiteral(">")},
-        {QStringLiteral("quot"), QStringLiteral("\"")},
-        {QStringLiteral("apos"), QStringLiteral("'")},
-        {QStringLiteral("aacute"), QStringLiteral("á")},
-        {QStringLiteral("eacute"), QStringLiteral("é")},
-        {QStringLiteral("iacute"), QStringLiteral("í")},
-        {QStringLiteral("oacute"), QStringLiteral("ó")},
-        {QStringLiteral("uacute"), QStringLiteral("ú")},
-        {QStringLiteral("ntilde"), QStringLiteral("ñ")},
-        {QStringLiteral("auml"), QStringLiteral("ä")},
-        {QStringLiteral("ouml"), QStringLiteral("ö")},
-        {QStringLiteral("uuml"), QStringLiteral("ü")},
-        {QStringLiteral("szlig"), QStringLiteral("ß")},
-        {QStringLiteral("ccedil"), QStringLiteral("ç")},
-        {QStringLiteral("agrave"), QStringLiteral("à")},
-        {QStringLiteral("egrave"), QStringLiteral("è")},
-        {QStringLiteral("igrave"), QStringLiteral("ì")},
-        {QStringLiteral("ograve"), QStringLiteral("ò")},
-        {QStringLiteral("ugrave"), QStringLiteral("ù")},
-        {QStringLiteral("acirc"), QStringLiteral("â")},
-        {QStringLiteral("ecirc"), QStringLiteral("ê")},
-        {QStringLiteral("icirc"), QStringLiteral("î")},
-        {QStringLiteral("ocirc"), QStringLiteral("ô")},
-        {QStringLiteral("ucirc"), QStringLiteral("û")},
+        { QStringLiteral("nbsp"), QStringLiteral(" ") },
+        { QStringLiteral("amp"), QStringLiteral("&") },
+        { QStringLiteral("lt"), QStringLiteral("<") },
+        { QStringLiteral("gt"), QStringLiteral(">") },
+        { QStringLiteral("quot"), QStringLiteral("\"") },
+        { QStringLiteral("apos"), QStringLiteral("'") },
+        { QStringLiteral("aacute"), QStringLiteral("á") },
+        { QStringLiteral("eacute"), QStringLiteral("é") },
+        { QStringLiteral("iacute"), QStringLiteral("í") },
+        { QStringLiteral("oacute"), QStringLiteral("ó") },
+        { QStringLiteral("uacute"), QStringLiteral("ú") },
+        { QStringLiteral("ntilde"), QStringLiteral("ñ") },
+        { QStringLiteral("auml"), QStringLiteral("ä") },
+        { QStringLiteral("ouml"), QStringLiteral("ö") },
+        { QStringLiteral("uuml"), QStringLiteral("ü") },
+        { QStringLiteral("szlig"), QStringLiteral("ß") },
+        { QStringLiteral("ccedil"), QStringLiteral("ç") },
+        { QStringLiteral("agrave"), QStringLiteral("à") },
+        { QStringLiteral("egrave"), QStringLiteral("è") },
+        { QStringLiteral("igrave"), QStringLiteral("ì") },
+        { QStringLiteral("ograve"), QStringLiteral("ò") },
+        { QStringLiteral("ugrave"), QStringLiteral("ù") },
+        { QStringLiteral("acirc"), QStringLiteral("â") },
+        { QStringLiteral("ecirc"), QStringLiteral("ê") },
+        { QStringLiteral("icirc"), QStringLiteral("î") },
+        { QStringLiteral("ocirc"), QStringLiteral("ô") },
+        { QStringLiteral("ucirc"), QStringLiteral("û") },
     };
     static const QRegularExpression entity(
         QStringLiteral("&#(\\d+);|&([a-zA-Z]+);"));
@@ -190,7 +189,8 @@ QVariantList takeExamples(const QString& html, int limit)
 {
     QVariantList examples;
     static const QRegularExpression blockRegex(
-        QStringLiteral("<div[^>]*class=\"[^\"]*example[^\"]*\"[^>]*>(.*?)</div>"),
+        QStringLiteral(
+            "<div[^>]*class=\"[^\"]*example[^\"]*\"[^>]*>(.*?)</div>"),
         QRegularExpression::DotMatchesEverythingOption);
     QRegularExpressionMatchIterator it = blockRegex.globalMatch(html);
     while(it.hasNext() && examples.size() < limit)
@@ -214,7 +214,7 @@ QVariantList takeExamples(const QString& html, int limit)
     return examples;
 }
 
-} // namespace
+}  // namespace
 
 LuteTranslationAccess::LuteTranslationAccess(QObject* parent) :
     QObject(parent),
@@ -275,8 +275,8 @@ QString LuteTranslationAccess::cacheKey(TranslationProvider provider,
                                         const QString& text,
                                         const QString& targetLanguage)
 {
-    return providerKey(provider) + QLatin1Char('|') + text + QLatin1Char('|')
-        + targetLanguage.trimmed().toLower();
+    return providerKey(provider) + QLatin1Char('|') + text + QLatin1Char('|') +
+           targetLanguage.trimmed().toLower();
 }
 
 bool LuteTranslationAccess::hasCached(TranslationProvider provider,
@@ -319,7 +319,8 @@ QUrl LuteTranslationAccess::googleTranslateUrl(const QString& text,
                                                const QString& sourceCode,
                                                const QString& targetCode)
 {
-    QUrl url(QStringLiteral("https://translate.googleapis.com/translate_a/single"));
+    QUrl url(
+        QStringLiteral("https://translate.googleapis.com/translate_a/single"));
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("client"), QStringLiteral("gtx"));
     query.addQueryItem(QStringLiteral("sl"), sourceCode);
@@ -349,12 +350,13 @@ QUrl LuteTranslationAccess::reversoUrl(const QString& word,
 {
     const QString encoded =
         QString::fromUtf8(QUrl::toPercentEncoding(word.trimmed()));
-    return QUrl(QStringLiteral("https://context.reverso.net/translation/%1-%2/%3")
-                    .arg(sourceSlug, targetSlug, encoded));
+    return QUrl(
+        QStringLiteral("https://context.reverso.net/translation/%1-%2/%3")
+            .arg(sourceSlug, targetSlug, encoded));
 }
 
-QVariantMap LuteTranslationAccess::parseGoogleResponse(const QByteArray& payload,
-                                                       const QString& text)
+QVariantMap LuteTranslationAccess::parseGoogleResponse(
+    const QByteArray& payload, const QString& text)
 {
     QVariantMap result = baseResult(QStringLiteral("google"),
                                     QStringLiteral("Google Translate"), text);
@@ -382,8 +384,8 @@ QVariantMap LuteTranslationAccess::parseGoogleResponse(const QByteArray& payload
     return result;
 }
 
-QVariantMap LuteTranslationAccess::parseMyMemoryResponse(const QByteArray& payload,
-                                                         const QString& text)
+QVariantMap LuteTranslationAccess::parseMyMemoryResponse(
+    const QByteArray& payload, const QString& text)
 {
     QVariantMap result = baseResult(QStringLiteral("mymemory"),
                                     QStringLiteral("MyMemory"), text);
@@ -393,8 +395,9 @@ QVariantMap LuteTranslationAccess::parseMyMemoryResponse(const QByteArray& paylo
 
     const QJsonObject response =
         document.object().value(QStringLiteral("responseData")).toObject();
-    result.insert(QStringLiteral("translation"),
-                  response.value(QStringLiteral("translatedText")).toString().trimmed());
+    result.insert(
+        QStringLiteral("translation"),
+        response.value(QStringLiteral("translatedText")).toString().trimmed());
     result.insert(QStringLiteral("attributionUrl"),
                   QStringLiteral("https://mymemory.translated.net/"));
     return result;
@@ -406,8 +409,8 @@ QVariantMap LuteTranslationAccess::parseReversoHtml(const QString& html,
                                                     const QString& targetSlug,
                                                     bool isPhrase)
 {
-    QVariantMap result = baseResult(
-        QStringLiteral("reverso"), QStringLiteral("Reverso Context"), word);
+    QVariantMap result = baseResult(QStringLiteral("reverso"),
+                                    QStringLiteral("Reverso Context"), word);
     result.insert(QStringLiteral("attributionUrl"),
                   reversoUrl(word, sourceSlug, targetSlug).toString());
 
@@ -514,8 +517,9 @@ void LuteTranslationAccess::request(TranslationProvider provider,
         break;
     case TranslationProvider::Ai:
         // Routed through LuteAiAccess by the controller.
-        emit requestFailed(m_providerKey,
-                           QStringLiteral("AI requests are handled by the AI backend"));
+        emit requestFailed(
+            m_providerKey,
+            QStringLiteral("AI requests are handled by the AI backend"));
         return;
     }
 
@@ -523,18 +527,21 @@ void LuteTranslationAccess::request(TranslationProvider provider,
     if(isReverso)
     {
         // Best effort to look like a browser; Cloudflare may still block.
-        networkRequest.setHeader(QNetworkRequest::UserAgentHeader,
-                                 QStringLiteral("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                                                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                                                "Chrome/124.0 Safari/537.36"));
+        networkRequest.setHeader(
+            QNetworkRequest::UserAgentHeader,
+            QStringLiteral("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                           "AppleWebKit/537.36 (KHTML, like Gecko) "
+                           "Chrome/124.0 Safari/537.36"));
         acceptLanguage = QStringLiteral("en-US,en;q=0.9");
-        networkRequest.setRawHeader(QByteArrayLiteral("Accept"),
-                                    QByteArrayLiteral("text/html,application/xhtml+xml"));
+        networkRequest.setRawHeader(
+            QByteArrayLiteral("Accept"),
+            QByteArrayLiteral("text/html,application/xhtml+xml"));
     }
     else
     {
-        networkRequest.setHeader(QNetworkRequest::UserAgentHeader,
-                                 QStringLiteral("LibrumLute/0.1 (translation panel)"));
+        networkRequest.setHeader(
+            QNetworkRequest::UserAgentHeader,
+            QStringLiteral("LibrumLute/0.1 (translation panel)"));
     }
     if(!acceptLanguage.isEmpty())
         networkRequest.setRawHeader(QByteArrayLiteral("Accept-Language"),
@@ -547,43 +554,45 @@ void LuteTranslationAccess::request(TranslationProvider provider,
 
     const QString sourceSlug = reversoSlug(sourceLanguage);
     const QString targetSlug = reversoSlug(targetLanguage);
-    connect(m_reply, &QNetworkReply::finished, this,
-            [this, key, isPhrase, isReverso, sourceSlug, targetSlug]() {
-        QNetworkReply* reply = m_reply;
-        if(!reply)
-            return;
-        m_reply = nullptr;
-        reply->deleteLater();
-
-        if(reply->error() != QNetworkReply::NoError)
+    connect(
+        m_reply, &QNetworkReply::finished, this,
+        [this, key, isPhrase, isReverso, sourceSlug, targetSlug]()
         {
-            finishWithError(reply->errorString());
-            return;
-        }
+            QNetworkReply* reply = m_reply;
+            if(!reply)
+                return;
+            m_reply = nullptr;
+            reply->deleteLater();
 
-        const QByteArray payload = reply->readAll();
-        QVariantMap result;
-        if(m_provider == TranslationProvider::Google)
-            result = parseGoogleResponse(payload, m_text);
-        else if(m_provider == TranslationProvider::MyMemory)
-            result = parseMyMemoryResponse(payload, m_text);
-        else
-            result = parseReversoHtml(QString::fromUtf8(payload), m_text,
-                                      sourceSlug, targetSlug, isPhrase);
+            if(reply->error() != QNetworkReply::NoError)
+            {
+                finishWithError(reply->errorString());
+                return;
+            }
 
-        if(result.value(QStringLiteral("translation")).toString().isEmpty())
-        {
-            finishWithError(isReverso
-                                ? QStringLiteral(
-                                      "No results parsed (page layout may have changed)")
-                                : QStringLiteral("No translation returned"));
-            return;
-        }
+            const QByteArray payload = reply->readAll();
+            QVariantMap result;
+            if(m_provider == TranslationProvider::Google)
+                result = parseGoogleResponse(payload, m_text);
+            else if(m_provider == TranslationProvider::MyMemory)
+                result = parseMyMemoryResponse(payload, m_text);
+            else
+                result = parseReversoHtml(QString::fromUtf8(payload), m_text,
+                                          sourceSlug, targetSlug, isPhrase);
 
-        m_cache.insert(key, result);
-        emit busyChanged();
-        emit resultReady(result);
-    });
+            if(result.value(QStringLiteral("translation")).toString().isEmpty())
+            {
+                finishWithError(
+                    isReverso ? QStringLiteral("No results parsed (page layout "
+                                               "may have changed)")
+                              : QStringLiteral("No translation returned"));
+                return;
+            }
+
+            m_cache.insert(key, result);
+            emit busyChanged();
+            emit resultReady(result);
+        });
 }
 
 void LuteTranslationAccess::cancel()
@@ -603,4 +612,4 @@ void LuteTranslationAccess::finishWithError(const QString& message)
     emit requestFailed(m_providerKey, message);
 }
 
-} // namespace lute
+}  // namespace lute

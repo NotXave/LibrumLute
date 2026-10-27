@@ -1,8 +1,6 @@
 #include "lute_paginator.hpp"
-
 #include <QRegularExpression>
 #include <QStringList>
-
 #include "lute_text_parser.hpp"
 
 namespace lute
@@ -50,7 +48,8 @@ QVector<QString> LutePaginator::paginate(const QString& text,
                 {
                     const int gapStart = tokens.at(tokenIndex - 1).end;
                     const int gapEnd = tokens.at(tokenIndex).start;
-                    const QString gap = segment.mid(gapStart, gapEnd - gapStart);
+                    const QString gap =
+                        segment.mid(gapStart, gapEnd - gapStart);
                     bool sentenceEnded = false;
                     for(const QChar character : gap)
                     {
@@ -71,7 +70,8 @@ QVector<QString> LutePaginator::paginate(const QString& text,
                 }
             }
 
-            const QString page = segment.mid(pageStart, end - pageStart).trimmed();
+            const QString page =
+                segment.mid(pageStart, end - pageStart).trimmed();
             if(!page.isEmpty())
                 pages.append(page);
             pageStart = end;
@@ -92,4 +92,4 @@ QVector<QString> LutePaginator::paginate(const QString& text,
     return pages;
 }
 
-} // namespace lute
+}  // namespace lute

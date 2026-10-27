@@ -1,15 +1,11 @@
 #include "lute_word_extractor.hpp"
-
+#include <mupdf/classes.h>
+#include <mupdf/fitz.h>
 #include <QByteArray>
 #include <QFile>
 #include <QFileInfo>
 #include <QStringList>
-
 #include <algorithm>
-
-#include <mupdf/fitz.h>
-#include <mupdf/classes.h>
-
 #include "lute_text_parser.hpp"
 
 namespace lute
@@ -19,14 +15,14 @@ namespace
 
 QRectF quadToRect(const fz_quad& quad)
 {
-    const float minX = std::min({quad.ul.x, quad.ur.x, quad.ll.x, quad.lr.x});
-    const float maxX = std::max({quad.ul.x, quad.ur.x, quad.ll.x, quad.lr.x});
-    const float minY = std::min({quad.ul.y, quad.ur.y, quad.ll.y, quad.lr.y});
-    const float maxY = std::max({quad.ul.y, quad.ur.y, quad.ll.y, quad.lr.y});
+    const float minX = std::min({ quad.ul.x, quad.ur.x, quad.ll.x, quad.lr.x });
+    const float maxX = std::max({ quad.ul.x, quad.ur.x, quad.ll.x, quad.lr.x });
+    const float minY = std::min({ quad.ul.y, quad.ur.y, quad.ll.y, quad.lr.y });
+    const float maxY = std::max({ quad.ul.y, quad.ur.y, quad.ll.y, quad.lr.y });
     return QRectF(minX, minY, maxX - minX, maxY - minY);
 }
 
-} // namespace
+}  // namespace
 
 struct LuteWordExtractor::Impl
 {
@@ -44,7 +40,10 @@ struct LuteWordExtractor::Impl
     QHash<int, QString> textCache;
     QHash<int, QSizeF> sizeCache;
 
-    ~Impl() { teardown(); }
+    ~Impl()
+    {
+        teardown();
+    }
 
     void teardown()
     {
@@ -106,8 +105,8 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
     if(!file.open(QIODevice::ReadOnly))
     {
         if(error)
-            *error = QStringLiteral("Cannot open '%1': %2").arg(filePath,
-                                                                file.errorString());
+            *error = QStringLiteral("Cannot open '%1': %2")
+                         .arg(filePath, file.errorString());
         return false;
     }
     const QByteArray data = file.readAll();
@@ -133,10 +132,9 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
     fz_document* document = nullptr;
     fz_try(context)
     {
-        stream = fz_open_memory(context,
-                                reinterpret_cast<const unsigned char*>(
-                                    data.constData()),
-                                size_t(data.size()));
+        stream = fz_open_memory(
+            context, reinterpret_cast<const unsigned char*>(data.constData()),
+            size_t(data.size()));
         // MuPDF supports more than PDFs. Opening by path lets MuPDF sniff the
         // real format, which also works for library files without extension.
         fz_try(context)
@@ -149,10 +147,10 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
         }
         if(!document)
         {
-            stream = fz_open_memory(context,
-                                    reinterpret_cast<const unsigned char*>(
-                                        data.constData()),
-                                    size_t(data.size()));
+            stream = fz_open_memory(
+                context,
+                reinterpret_cast<const unsigned char*>(data.constData()),
+                size_t(data.size()));
             QString mimeType = QStringLiteral("application/pdf");
             const QString suffix = QFileInfo(filePath).suffix().toLower();
             if(suffix == QStringLiteral("epub"))
@@ -163,7 +161,8 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
                 mimeType = QStringLiteral("application/x-fictionbook+xml");
             else if(suffix == QStringLiteral("cbz"))
                 mimeType = QStringLiteral("application/vnd.comicbook+zip");
-            else if(suffix == QStringLiteral("html") || suffix == QStringLiteral("xhtml"))
+            else if(suffix == QStringLiteral("html") ||
+                    suffix == QStringLiteral("xhtml"))
                 mimeType = QStringLiteral("text/html");
             else if(data.startsWith("PK"))
                 mimeType = QStringLiteral("application/epub+zip");
@@ -193,7 +192,7 @@ bool LuteWordExtractor::open(const QString& filePath, QString* error)
     m_impl->path = filePath;
 
     // The PDF title, if it has one.
-    char titleBuffer[512] = {0};
+    char titleBuffer[512] = { 0 };
     fz_try(context)
     {
         fz_lookup_metadata(context, document, FZ_META_INFO_TITLE, titleBuffer,
@@ -306,10 +305,10 @@ QSizeF LuteWordExtractor::pageSize(int pageIndex)
 
 void LuteWordExtractor::setLanguage(const LuteLanguage& language)
 {
-    if(m_impl->language.id == language.id
-       && m_impl->language.regexpWordCharacters == language.regexpWordCharacters
-       && m_impl->language.characterSubstitutions
-              == language.characterSubstitutions)
+    if(m_impl->language.id == language.id &&
+       m_impl->language.regexpWordCharacters == language.regexpWordCharacters &&
+       m_impl->language.characterSubstitutions ==
+           language.characterSubstitutions)
         return;
 
     m_impl->language = language;
@@ -353,7 +352,8 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
     QPointF pageOrigin;
     int lineId = 0;
 
-    auto collect = [&](fz_stext_page* stext) {
+    auto collect = [&](fz_stext_page* stext)
+    {
         if(!stext)
             return;
         for(fz_stext_block* block = stext->first_block; block;
@@ -431,8 +431,9 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
             const fz_rect bounds = fz_bound_page(m_impl->context, page);
             pageSize = QSizeF(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
             pageOrigin = QPointF(bounds.x0, bounds.y0);
-            fz_stext_options options = {0, 0};
-            stext = fz_new_stext_page_from_page(m_impl->context, page, &options);
+            fz_stext_options options = { 0, 0 };
+            stext =
+                fz_new_stext_page_from_page(m_impl->context, page, &options);
             collect(stext);
         }
         fz_always(m_impl->context)
@@ -464,8 +465,8 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
                       rect.height() / pageSize.height());
     }
     for(qreal& baseline : charBaselines)
-        baseline = qBound(0.0, (baseline - pageOrigin.y()) / pageSize.height(),
-                          1.0);
+        baseline =
+            qBound(0.0, (baseline - pageOrigin.y()) / pageSize.height(), 1.0);
 
     LuteTextParser* parser = m_impl->ensureParser();
     const QVector<ParsedWord> tokens = parser->words(text);
@@ -482,17 +483,18 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
         QRectF partRect;
         qreal partBaseline = 0.0;
 
-        auto flushPart = [&]() {
-            if(partRect.isNull() || partRect.width() <= 0
-               || partRect.height() <= 0)
+        auto flushPart = [&]()
+        {
+            if(partRect.isNull() || partRect.width() <= 0 ||
+               partRect.height() <= 0)
                 return;
             QRectF clamped = partRect.intersected(QRectF(0, 0, 1, 1));
             if(clamped.width() <= 0 || clamped.height() <= 0)
                 return;
             WordPart part;
             part.rect = clamped;
-            part.baseline = qBound(clamped.top(), partBaseline,
-                                   clamped.bottom());
+            part.baseline =
+                qBound(clamped.top(), partBaseline, clamped.bottom());
             parts.append(part);
         };
 
@@ -516,8 +518,8 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
             else
             {
                 partRect = partRect.united(rect);
-                partBaseline = std::max(partBaseline,
-                                        charBaselines.value(i, 0.0));
+                partBaseline =
+                    std::max(partBaseline, charBaselines.value(i, 0.0));
             }
         }
         flushPart();
@@ -547,4 +549,4 @@ const QVector<WordQuad>& LuteWordExtractor::words(int pageIndex)
     return *m_impl->wordCache.insert(pageIndex, words);
 }
 
-} // namespace lute
+}  // namespace lute

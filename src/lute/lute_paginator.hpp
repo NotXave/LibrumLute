@@ -23,4 +23,4 @@ public:
                                      bool splitBySentences = false);
 };
 
-} // namespace lute
+}  // namespace lute

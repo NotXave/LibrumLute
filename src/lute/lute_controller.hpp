@@ -8,10 +8,8 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QVector>
-
 #include <memory>
 #include <optional>
-
 #include "lute_book.hpp"
 #include "lute_db_access.hpp"
 #include "lute_language.hpp"
@@ -19,7 +17,10 @@
 #include "phrase_matcher.hpp"
 #include "word_quad.hpp"
 
-namespace mupdf { struct FzDocument; }
+namespace mupdf
+{
+struct FzDocument;
+}
 
 namespace lute
 {
@@ -50,12 +51,15 @@ class LuteController : public QObject
     Q_PROPERTY(bool documentOpen READ documentOpen NOTIFY documentChanged)
     Q_PROPERTY(int pageCount READ pageCount NOTIFY documentChanged)
     Q_PROPERTY(QString documentTitle READ documentTitle NOTIFY documentChanged)
-    Q_PROPERTY(bool documentRegistered READ documentRegistered NOTIFY documentChanged)
+    Q_PROPERTY(
+        bool documentRegistered READ documentRegistered NOTIFY documentChanged)
     Q_PROPERTY(int libraryRevision READ libraryRevision NOTIFY libraryChanged)
 
-    Q_PROPERTY(bool wordPopupVisible READ wordPopupVisible NOTIFY wordPopupChanged)
+    Q_PROPERTY(
+        bool wordPopupVisible READ wordPopupVisible NOTIFY wordPopupChanged)
     Q_PROPERTY(QVariantMap activeWord READ activeWord NOTIFY wordPopupChanged)
-    Q_PROPERTY(int highlightsRevision READ highlightsRevision NOTIFY highlightsChanged)
+    Q_PROPERTY(
+        int highlightsRevision READ highlightsRevision NOTIFY highlightsChanged)
     Q_PROPERTY(QVariantMap stats READ stats NOTIFY statsChanged)
 
     Q_PROPERTY(QString aiSuggestion READ aiSuggestion NOTIFY aiChanged)
@@ -66,19 +70,23 @@ class LuteController : public QObject
                    setTranslationProvider NOTIFY translationChanged)
     Q_PROPERTY(QVariantMap translationResult READ translationResult NOTIFY
                    translationChanged)
-    Q_PROPERTY(bool translationBusy READ translationBusy NOTIFY translationChanged)
+    Q_PROPERTY(
+        bool translationBusy READ translationBusy NOTIFY translationChanged)
     Q_PROPERTY(QString translationError READ translationError NOTIFY
                    translationChanged)
 
-    Q_PROPERTY(QVariantList translationProviders READ translationProviders NOTIFY
-                   translationChanged)
+    Q_PROPERTY(QVariantList translationProviders READ translationProviders
+                   NOTIFY translationChanged)
     Q_PROPERTY(QVariantList books READ books NOTIFY booksChanged)
     Q_PROPERTY(QVariantList terms READ terms NOTIFY termsChanged)
     Q_PROPERTY(QVariantList tags READ tags NOTIFY tagsChanged)
-    Q_PROPERTY(QVariantList dictionaries READ dictionaries NOTIFY dictionariesChanged)
+    Q_PROPERTY(
+        QVariantList dictionaries READ dictionaries NOTIFY dictionariesChanged)
     Q_PROPERTY(QVariantList bookmarks READ bookmarks NOTIFY bookmarksChanged)
-    Q_PROPERTY(QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
-    Q_PROPERTY(QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
+    Q_PROPERTY(
+        QVariantList learnedSeries READ learnedSeries NOTIFY statsChanged)
+    Q_PROPERTY(
+        QVariantList createdSeries READ createdSeries NOTIFY statsChanged)
     Q_PROPERTY(QVariantMap currentBook READ currentBook NOTIFY readerChanged)
     Q_PROPERTY(bool readerOpen READ readerOpen NOTIFY readerChanged)
     Q_PROPERTY(QString readerHtml READ readerHtml NOTIFY readerChanged)
@@ -110,21 +118,47 @@ public:
     int pageCount() const;
     QString documentTitle() const;
     bool documentRegistered() const;
-    int libraryRevision() const { return m_libraryRevision; }
+
+    int libraryRevision() const
+    {
+        return m_libraryRevision;
+    }
 
     bool wordPopupVisible() const;
     QVariantMap activeWord() const;
-    int highlightsRevision() const { return m_highlightsRevision; }
-    QVariantMap stats() const { return m_stats; }
+
+    int highlightsRevision() const
+    {
+        return m_highlightsRevision;
+    }
+
+    QVariantMap stats() const
+    {
+        return m_stats;
+    }
 
     QString aiSuggestion() const;
     bool aiBusy() const;
     QString aiError() const;
     QVariantMap aiConfig() const;
-    QString translationProvider() const { return m_translationProvider; }
-    QVariantMap translationResult() const { return m_translationResult; }
+
+    QString translationProvider() const
+    {
+        return m_translationProvider;
+    }
+
+    QVariantMap translationResult() const
+    {
+        return m_translationResult;
+    }
+
     bool translationBusy() const;
-    QString translationError() const { return m_translationError; }
+
+    QString translationError() const
+    {
+        return m_translationError;
+    }
+
     QVariantList translationProviders() const;
     /// Runs the active provider for the current word; results land in
     /// translationResult (cached lookups answer immediately).
@@ -137,15 +171,51 @@ public:
     /// Canonical names usable as translation target languages (settings UI).
     Q_INVOKABLE QStringList supportedTargetLanguages();
 
-    QVariantList books() const { return m_books; }
-    QVariantList terms() const { return m_terms; }
-    QVariantList tags() const { return m_tags; }
-    QVariantList dictionaries() const { return m_dictionaries; }
-    QVariantList bookmarks() const { return m_bookmarks; }
-    QVariantList learnedSeries() const { return m_learnedSeries; }
-    QVariantList createdSeries() const { return m_createdSeries; }
-    QString readerPresentation() const { return m_readerPresentation; }
-    QString readerPanelSide() const { return m_readerPanelSide; }
+    QVariantList books() const
+    {
+        return m_books;
+    }
+
+    QVariantList terms() const
+    {
+        return m_terms;
+    }
+
+    QVariantList tags() const
+    {
+        return m_tags;
+    }
+
+    QVariantList dictionaries() const
+    {
+        return m_dictionaries;
+    }
+
+    QVariantList bookmarks() const
+    {
+        return m_bookmarks;
+    }
+
+    QVariantList learnedSeries() const
+    {
+        return m_learnedSeries;
+    }
+
+    QVariantList createdSeries() const
+    {
+        return m_createdSeries;
+    }
+
+    QString readerPresentation() const
+    {
+        return m_readerPresentation;
+    }
+
+    QString readerPanelSide() const
+    {
+        return m_readerPanelSide;
+    }
+
     Q_INVOKABLE void setReaderPresentation(const QString& presentation);
     Q_INVOKABLE void setReaderPanelSide(const QString& side);
     Q_INVOKABLE void setTranslationProvider(const QString& provider);
@@ -155,14 +225,43 @@ public:
     Q_INVOKABLE bool openGoogleTranslate();
     Q_INVOKABLE bool openDictionaryLookup();
     /// Public for tests: builds the browser URL for a translation request.
-    static QUrl googleTranslateUrl(const QString& text, const QString& targetLanguage);
-    QVariantMap currentBook() const { return m_currentBookMap; }
-    bool readerOpen() const { return m_readerOpen; }
-    QString readerHtml() const { return m_readerHtml; }
-    QString readerTitle() const { return m_currentBook.title; }
-    int readerPage() const { return m_readerPage; }
-    int readerPageCount() const { return m_readerPageCount; }
-    bool readerPageRead() const { return m_readerPageRead; }
+    static QUrl googleTranslateUrl(const QString& text,
+                                   const QString& targetLanguage);
+
+    QVariantMap currentBook() const
+    {
+        return m_currentBookMap;
+    }
+
+    bool readerOpen() const
+    {
+        return m_readerOpen;
+    }
+
+    QString readerHtml() const
+    {
+        return m_readerHtml;
+    }
+
+    QString readerTitle() const
+    {
+        return m_currentBook.title;
+    }
+
+    int readerPage() const
+    {
+        return m_readerPage;
+    }
+
+    int readerPageCount() const
+    {
+        return m_readerPageCount;
+    }
+
+    bool readerPageRead() const
+    {
+        return m_readerPageRead;
+    }
 
     QString lastMessage() const;
     bool lastMessageIsError() const;
@@ -178,9 +277,12 @@ public slots:
     bool createDatabase(const QString& path);
 
     /// Saves AI settings and keeps the controller in sync (QML convenience).
-    Q_INVOKABLE void saveAiSettings(const QString& provider, const QString& model,
-                                    const QString& baseUrl, const QString& apiKey,
-                                    const QString& targetLanguage) {
+    Q_INVOKABLE void saveAiSettings(const QString& provider,
+                                    const QString& model,
+                                    const QString& baseUrl,
+                                    const QString& apiKey,
+                                    const QString& targetLanguage)
+    {
         saveAiConfiguration(provider, model, baseUrl, apiKey, targetLanguage);
     }
 
@@ -188,7 +290,8 @@ public slots:
     bool setDocumentPath(const QString& path);
     /// Use an already opened MuPDF document (shared with the renderer) so page
     /// numbers and word coordinates match exactly.
-    bool setDocumentFromFzDocument(mupdf::FzDocument* document, const QString& path);
+    bool setDocumentFromFzDocument(mupdf::FzDocument* document,
+                                   const QString& path);
     void closeDocument();
 
     void selectLanguage(int languageId);
@@ -205,8 +308,7 @@ public slots:
     bool setStatusForWord(int pageIndex, int wordIndex, int status);
 
     /// Selecting a word at a normalised page point opens the Lute popup.
-    bool selectAtPagePoint(int pageIndex, qreal normalizedX,
-                           qreal normalizedY);
+    bool selectAtPagePoint(int pageIndex, qreal normalizedX, qreal normalizedY);
 
     /// Selects the range between two normalised page points (a drag selection
     /// in Librum's PageView).
@@ -412,4 +514,4 @@ private:
     bool m_lastMessageIsError = false;
 };
 
-} // namespace lute
+}  // namespace lute

@@ -4,13 +4,14 @@
 #include <QSizeF>
 #include <QString>
 #include <QVector>
-
 #include <memory>
-
 #include "lute_language.hpp"
 #include "word_quad.hpp"
 
-namespace mupdf { struct FzDocument; }
+namespace mupdf
+{
+struct FzDocument;
+}
 
 namespace lute
 {
@@ -60,4 +61,4 @@ private:
     std::unique_ptr<Impl> m_impl;
 };
 
-} // namespace lute
+}  // namespace lute

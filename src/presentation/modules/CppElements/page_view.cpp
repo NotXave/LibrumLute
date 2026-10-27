@@ -267,8 +267,8 @@ void PageView::mouseReleaseEvent(QMouseEvent* event)
             {
                 utils::restoreQRect(rect, m_pageController->getZoom());
                 utils::scaleQRectFToZoom(
-                    rect, m_pageController->getZoom()
-                              / window()->devicePixelRatio());
+                    rect,
+                    m_pageController->getZoom() / window()->devicePixelRatio());
                 restoredRects.push_back(rect);
             }
 

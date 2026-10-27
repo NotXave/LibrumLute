@@ -17,11 +17,15 @@ struct LuteBook
     int currentPage = 1;
     QString languageName;
 
-    bool isValid() const { return id > 0; }
+    bool isValid() const
+    {
+        return id > 0;
+    }
 };
 
 /// One row of Lute's `texts` table: a single readable page of a book.
-struct LuteDictionary {
+struct LuteDictionary
+{
     qint64 id = 0;
     int languageId = 0;
     QString useFor;
@@ -31,7 +35,8 @@ struct LuteDictionary {
     int sortOrder = 0;
 };
 
-struct LuteBookmark {
+struct LuteBookmark
+{
     qint64 id = 0;
     qint64 textId = 0;
     int page = 0;
@@ -47,7 +52,10 @@ struct LuteText
     bool read = false;
     QString text;
 
-    bool isValid() const { return id > 0; }
+    bool isValid() const
+    {
+        return id > 0;
+    }
 };
 
-} // namespace lute
+}  // namespace lute

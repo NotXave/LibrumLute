@@ -1,19 +1,16 @@
 #include "lute_controller.hpp"
-
+#include <mupdf/classes.h>
 #include <QClipboard>
-#include <QGuiApplication>
-
 #include <QDateTime>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
+#include <QGuiApplication>
 #include <QPointF>
-#include <QDesktopServices>
 #include <QSettings>
-#include <QUrlQuery>
 #include <QStandardPaths>
-
+#include <QUrlQuery>
 #include <algorithm>
-
 #include "lute_ai_access.hpp"
 #include "lute_paginator.hpp"
 #include "lute_schema.hpp"
@@ -21,8 +18,6 @@
 #include "lute_text_parser.hpp"
 #include "lute_translation_access.hpp"
 #include "lute_word_extractor.hpp"
-
-#include <mupdf/classes.h>
 
 namespace lute
 {
@@ -89,29 +84,31 @@ LuteAiConfig loadAiConfigFromSettings()
 {
     QSettings settings;
     const QString provider =
-        settings.value(QStringLiteral("lute/aiProvider"),
-                       QStringLiteral("ollama"))
+        settings
+            .value(QStringLiteral("lute/aiProvider"), QStringLiteral("ollama"))
             .toString();
     LuteAiConfig config = LuteAiConfig::defaultsFor(provider);
     config.model =
         settings.value(QStringLiteral("lute/aiModel"), config.model).toString();
     config.baseUrl =
-        settings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl).toString();
-    config.apiKey = settings.value(QStringLiteral("lute/aiApiKey")).toString();
-    config.targetLanguage =
-        settings
-            .value(QStringLiteral("lute/aiTargetLanguage"),
-                   QStringLiteral("German"))
+        settings.value(QStringLiteral("lute/aiBaseUrl"), config.baseUrl)
             .toString();
+    config.apiKey = settings.value(QStringLiteral("lute/aiApiKey")).toString();
+    config.targetLanguage = settings
+                                .value(QStringLiteral("lute/aiTargetLanguage"),
+                                       QStringLiteral("German"))
+                                .toString();
 
-    const char* kProviders[] = {"ollama", "openai", "gemini"};
-    for(const char* other : kProviders) {
+    const char* kProviders[] = { "ollama", "openai", "gemini" };
+    for(const char* other : kProviders)
+    {
         if(provider == QLatin1String(other))
             continue;
         const LuteAiConfig otherDefaults =
             LuteAiConfig::defaultsFor(QLatin1String(other));
-        if(config.baseUrl.trimmed() == otherDefaults.baseUrl
-           || config.model == otherDefaults.model) {
+        if(config.baseUrl.trimmed() == otherDefaults.baseUrl ||
+           config.model == otherDefaults.model)
+        {
             const LuteAiConfig own = LuteAiConfig::defaultsFor(provider);
             config.baseUrl = own.baseUrl;
             config.model = own.model;
@@ -122,14 +119,15 @@ LuteAiConfig loadAiConfigFromSettings()
     // Models this app once shipped as gemini defaults that the provider
     // retired: reset to the current default so saved configs keep working
     // (URL untouched).
-    if(provider == QLatin1String("gemini")
-       && config.model == QLatin1String("gemini-2.0-flash")) {
+    if(provider == QLatin1String("gemini") &&
+       config.model == QLatin1String("gemini-2.0-flash"))
+    {
         config.model = LuteAiConfig::defaultsFor(provider).model;
     }
     return config;
 }
 
-} // namespace
+}  // namespace
 
 LuteController::LuteController(QObject* parent) :
     QObject(parent),
@@ -138,7 +136,8 @@ LuteController::LuteController(QObject* parent) :
     m_translation(std::make_unique<LuteTranslationAccess>())
 {
     connect(m_ai.get(), &LuteAiAccess::suggestionReady, this,
-            [this](const QString& suggestion) {
+            [this](const QString& suggestion)
+            {
                 m_aiSuggestion = suggestion;
                 m_aiError.clear();
                 m_activeWord.insert(QStringLiteral("aiSuggestion"), suggestion);
@@ -153,7 +152,8 @@ LuteController::LuteController(QObject* parent) :
                 emit wordPopupChanged();
             });
     connect(m_ai.get(), &LuteAiAccess::requestFailed, this,
-            [this](const QString& error) {
+            [this](const QString& error)
+            {
                 m_aiError = error;
                 if(m_translationProvider == QStringLiteral("ai"))
                 {
@@ -163,47 +163,54 @@ LuteController::LuteController(QObject* parent) :
                 emit aiChanged();
             });
     connect(m_ai.get(), &LuteAiAccess::busyChanged, this,
-            [this]() {
+            [this]()
+            {
                 emit aiChanged();
                 if(m_translationProvider == QStringLiteral("ai"))
                     emit translationChanged();
             });
 
     connect(m_translation.get(), &LuteTranslationAccess::resultReady, this,
-            [this](const QVariantMap& result) {
+            [this](const QVariantMap& result)
+            {
                 m_translationResult = result;
                 m_translationError.clear();
                 emit translationChanged();
             });
-    connect(m_translation.get(), &LuteTranslationAccess::requestFailed, this,
-            [this](const QString& providerKey, const QString& error) {
-                m_translationError =
-                    LuteTranslationAccess::providerLabel(
-                        LuteTranslationAccess::providerFromKey(
-                            providerKey, TranslationProvider::Google))
-                    + QStringLiteral(": ") + error;
-                if(providerKey == QStringLiteral("reverso"))
-                {
-                    // Keep the browser link usable even after a failure.
-                    QVariantMap fallback;
-                    fallback.insert(QStringLiteral("provider"),
-                                    QStringLiteral("reverso"));
-                    fallback.insert(QStringLiteral("label"),
-                                    QStringLiteral("Reverso Context"));
-                    fallback.insert(QStringLiteral("translation"), QString());
-                    fallback.insert(
-                        QStringLiteral("attributionUrl"),
-                        LuteTranslationAccess::reversoUrl(
-                            m_activeWord.value(QStringLiteral("word")).toString(),
-                            LuteTranslationAccess::reversoSlug(languageName()),
-                            LuteTranslationAccess::reversoSlug(aiTargetLanguage()))
-                            .toString());
-                    m_translationResult = fallback;
-                }
+    connect(
+        m_translation.get(), &LuteTranslationAccess::requestFailed, this,
+        [this](const QString& providerKey, const QString& error)
+        {
+            m_translationError =
+                LuteTranslationAccess::providerLabel(
+                    LuteTranslationAccess::providerFromKey(
+                        providerKey, TranslationProvider::Google)) +
+                QStringLiteral(": ") + error;
+            if(providerKey == QStringLiteral("reverso"))
+            {
+                // Keep the browser link usable even after a failure.
+                QVariantMap fallback;
+                fallback.insert(QStringLiteral("provider"),
+                                QStringLiteral("reverso"));
+                fallback.insert(QStringLiteral("label"),
+                                QStringLiteral("Reverso Context"));
+                fallback.insert(QStringLiteral("translation"), QString());
+                fallback.insert(
+                    QStringLiteral("attributionUrl"),
+                    LuteTranslationAccess::reversoUrl(
+                        m_activeWord.value(QStringLiteral("word")).toString(),
+                        LuteTranslationAccess::reversoSlug(languageName()),
+                        LuteTranslationAccess::reversoSlug(aiTargetLanguage()))
+                        .toString());
+                m_translationResult = fallback;
+            }
+            emit translationChanged();
+        });
+    connect(m_translation.get(), &LuteTranslationAccess::busyChanged, this,
+            [this]()
+            {
                 emit translationChanged();
             });
-    connect(m_translation.get(), &LuteTranslationAccess::busyChanged, this,
-            [this]() { emit translationChanged(); });
 }
 
 LuteController::~LuteController()
@@ -265,7 +272,7 @@ QString LuteController::languageName() const
 QVariantList LuteController::statusLegend() const
 {
     QVariantList list;
-    for(int status : {1, 2, 3, 4, 5, 99, 98})
+    for(int status : { 1, 2, 3, 4, 5, 99, 98 })
         list.append(statusMap(status));
     return list;
 }
@@ -357,30 +364,33 @@ void LuteController::initialize()
     QSettings settings;
 
     const QString presentation =
-        settings.value(QStringLiteral("lute/readerPresentation"),
-                       QStringLiteral("popup"))
+        settings
+            .value(QStringLiteral("lute/readerPresentation"),
+                   QStringLiteral("popup"))
             .toString();
-    m_readerPresentation =
-        presentation == QStringLiteral("panel") ? presentation
-                                                : QStringLiteral("popup");
-    const QString panelSide =
-        settings.value(QStringLiteral("lute/readerPanelSide"),
-                       QStringLiteral("right"))
-            .toString();
+    m_readerPresentation = presentation == QStringLiteral("panel")
+                               ? presentation
+                               : QStringLiteral("popup");
+    const QString panelSide = settings
+                                  .value(QStringLiteral("lute/readerPanelSide"),
+                                         QStringLiteral("right"))
+                                  .toString();
     m_readerPanelSide = panelSide == QStringLiteral("left")
                             ? panelSide
                             : QStringLiteral("right");
     const QString savedProvider =
-        settings.value(QStringLiteral("lute/translationProvider"),
-                       QStringLiteral("reverso"))
+        settings
+            .value(QStringLiteral("lute/translationProvider"),
+                   QStringLiteral("reverso"))
             .toString();
-    const QStringList providerKeys = {QStringLiteral("reverso"),
-                                      QStringLiteral("google"),
-                                      QStringLiteral("ai"),
-                                      QStringLiteral("mymemory")};
+    const QStringList providerKeys = { QStringLiteral("reverso"),
+                                       QStringLiteral("google"),
+                                       QStringLiteral("ai"),
+                                       QStringLiteral("mymemory") };
     const QStringList savedEnabled =
-        settings.value(QStringLiteral("lute/translationEnabledProviders"),
-                       providerKeys.join(QLatin1Char(',')))
+        settings
+            .value(QStringLiteral("lute/translationEnabledProviders"),
+                   providerKeys.join(QLatin1Char(',')))
             .toString()
             .split(QLatin1Char(','), Qt::SkipEmptyParts);
     m_translationEnabledProviders.clear();
@@ -400,7 +410,8 @@ void LuteController::initialize()
     emit readerPanelSideChanged();
     emit translationChanged();
 
-    QString path = settings.value(QStringLiteral("lute/databasePath")).toString();
+    QString path =
+        settings.value(QStringLiteral("lute/databasePath")).toString();
     if(path.isEmpty())
         path = defaultDatabasePath();
 
@@ -470,8 +481,8 @@ bool LuteController::openDatabase(const QString& path)
     }
 
     m_languageId = 0;
-    if(previousLanguageName.isEmpty()
-       || !selectLanguageByName(previousLanguageName))
+    if(previousLanguageName.isEmpty() ||
+       !selectLanguageByName(previousLanguageName))
         selectFallbackLanguage();
 
     emit databaseChanged();
@@ -568,8 +579,7 @@ void LuteController::refreshLibrary()
     m_books.clear();
     if(m_database.isOpen() && m_languageId > 0)
     {
-        const QVector<LuteBook> books =
-            m_database.books(m_languageId, true);
+        const QVector<LuteBook> books = m_database.books(m_languageId, true);
         for(const LuteBook& book : books)
         {
             QVariantMap map;
@@ -604,8 +614,10 @@ void LuteController::refreshTerms(const QString& search, int status)
             map.insert(QStringLiteral("word"), term.text);
             map.insert(QStringLiteral("status"), term.status);
             map.insert(QStringLiteral("statusLabel"), statusLabel(term.status));
-            map.insert(QStringLiteral("statusAbbrev"), statusAbbreviation(term.status));
-            map.insert(QStringLiteral("color"), statusColor(term.status).name());
+            map.insert(QStringLiteral("statusAbbrev"),
+                       statusAbbreviation(term.status));
+            map.insert(QStringLiteral("color"),
+                       statusColor(term.status).name());
             map.insert(QStringLiteral("translation"), term.translation);
             map.insert(QStringLiteral("romanization"), term.romanization);
             map.insert(QStringLiteral("tokenCount"), term.tokenCount);
@@ -649,16 +661,16 @@ bool LuteController::saveLanguage(const QVariantMap& values)
     language.rightToLeft = values.value(QStringLiteral("rightToLeft")).toBool();
     language.showRomanization =
         values.value(QStringLiteral("showRomanization")).toBool();
-    language.parserType =
-        values.value(QStringLiteral("parserType")).toString();
+    language.parserType = values.value(QStringLiteral("parserType")).toString();
     if(language.parserType.isEmpty())
         language.parserType = QStringLiteral("spacedel");
 
     QString error;
     if(!m_database.saveLanguage(language, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not save the language")
-                                   : error,
+        setMessage(error.isEmpty()
+                       ? QStringLiteral("Could not save the language")
+                       : error,
                    true);
         return false;
     }
@@ -684,8 +696,9 @@ bool LuteController::deleteLanguage(int languageId)
     QString error;
     if(!m_database.deleteLanguage(languageId, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the language")
-                                   : error,
+        setMessage(error.isEmpty()
+                       ? QStringLiteral("Could not delete the language")
+                       : error,
                    true);
         return false;
     }
@@ -712,7 +725,8 @@ void LuteController::loadDictionaries()
     m_dictionaries.clear();
     if(m_database.isOpen() && m_languageId > 0)
     {
-        for(const LuteDictionary& dictionary : m_database.dictionaries(m_languageId))
+        for(const LuteDictionary& dictionary :
+            m_database.dictionaries(m_languageId))
         {
             QVariantMap map;
             map.insert(QStringLiteral("id"), dictionary.id);
@@ -731,7 +745,8 @@ void LuteController::loadBookmarks()
     m_bookmarks.clear();
     if(m_currentBook.id > 0 && m_database.isOpen())
     {
-        for(const LuteBookmark& bookmark : m_database.bookmarks(m_currentBook.id))
+        for(const LuteBookmark& bookmark :
+            m_database.bookmarks(m_currentBook.id))
         {
             QVariantMap map;
             map.insert(QStringLiteral("id"), bookmark.id);
@@ -817,12 +832,13 @@ bool LuteController::markFilteredAsWellKnown()
         return false;
     }
     QString error;
-    const int changed = m_database.setStatusForTerms(
-        m_languageId, m_termSearch, m_termStatus, 99, &error);
+    const int changed = m_database.setStatusForTerms(m_languageId, m_termSearch,
+                                                     m_termStatus, 99, &error);
     if(changed < 0)
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Bulk update failed") : error,
-                   true);
+        setMessage(
+            error.isEmpty() ? QStringLiteral("Bulk update failed") : error,
+            true);
         return false;
     }
     refreshTerms(m_termSearch, m_termStatus);
@@ -864,7 +880,8 @@ void LuteController::refreshTags()
     emit tagsChanged();
 }
 
-bool LuteController::saveTag(qint64 id, const QString& text, const QString& comment)
+bool LuteController::saveTag(qint64 id, const QString& text,
+                             const QString& comment)
 {
     if(text.trimmed().isEmpty())
     {
@@ -878,7 +895,9 @@ bool LuteController::saveTag(qint64 id, const QString& text, const QString& comm
     QString error;
     if(!m_database.saveTag(tag, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not save the tag") : error, true);
+        setMessage(
+            error.isEmpty() ? QStringLiteral("Could not save the tag") : error,
+            true);
         return false;
     }
     refreshTags();
@@ -890,7 +909,9 @@ bool LuteController::deleteTag(qint64 id)
     QString error;
     if(!m_database.deleteTag(id, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the tag") : error, true);
+        setMessage(error.isEmpty() ? QStringLiteral("Could not delete the tag")
+                                   : error,
+                   true);
         return false;
     }
     refreshTags();
@@ -934,8 +955,8 @@ bool LuteController::toggleActiveTag(qint64 tagId)
 
 bool LuteController::linkActiveParent(const QString& parentText)
 {
-    if(!m_popupVisible || !m_activeTerm || !m_activeTerm->isValid()
-       || parentText.trimmed().isEmpty())
+    if(!m_popupVisible || !m_activeTerm || !m_activeTerm->isValid() ||
+       parentText.trimmed().isEmpty())
         return false;
 
     const QString text = parentText.trimmed();
@@ -1002,7 +1023,8 @@ void LuteController::refreshActiveFamily()
     QVariantList parents;
     if(m_activeTerm && m_activeTerm->isValid())
     {
-        for(const LuteTerm& parent : m_database.parentsForTerm(m_activeTerm->id))
+        for(const LuteTerm& parent :
+            m_database.parentsForTerm(m_activeTerm->id))
         {
             QVariantMap entry;
             entry.insert(QStringLiteral("id"), parent.id);
@@ -1100,9 +1122,9 @@ bool LuteController::exportAnki(const QString& path)
     QString error;
     if(!m_database.exportAnkiTsv(path, m_languageId, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not export terms")
-                                   : error,
-                   true);
+        setMessage(
+            error.isEmpty() ? QStringLiteral("Could not export terms") : error,
+            true);
         return false;
     }
     setMessage(QStringLiteral("Anki TSV exported to %1").arg(path));
@@ -1119,9 +1141,9 @@ bool LuteController::exportTerms(const QString& path)
     QString error;
     if(!m_database.exportTermsTsv(path, m_languageId, &error))
     {
-        setMessage(error.isEmpty() ? QStringLiteral("Could not export terms")
-                                   : error,
-                   true);
+        setMessage(
+            error.isEmpty() ? QStringLiteral("Could not export terms") : error,
+            true);
         return false;
     }
     setMessage(QStringLiteral("Terms exported to %1").arg(path));
@@ -1145,8 +1167,7 @@ bool LuteController::selectTerm(qint64 termId)
     word.page = 0;
     word.index = 0;
     word.rect = QRectF();
-    buildActiveWord(0, word, 0,
-                    term->tokenCount > 0 ? term->tokenCount - 1 : 0,
+    buildActiveWord(0, word, 0, term->tokenCount > 0 ? term->tokenCount - 1 : 0,
                     term->tokenCount > 1);
     return true;
 }
@@ -1244,8 +1265,7 @@ void LuteController::closeBook()
 
 bool LuteController::selectTextWord(int index)
 {
-    if(!m_readerOpen || !m_parser || index < 0
-       || index >= m_textTokens.size())
+    if(!m_readerOpen || !m_parser || index < 0 || index >= m_textTokens.size())
         return false;
 
     const ParsedWord& token = m_textTokens.at(index);
@@ -1272,7 +1292,7 @@ void LuteController::showReader()
 }
 
 bool LuteController::createBook(const QString& title, const QString& text,
-                               bool splitBySentences)
+                                bool splitBySentences)
 {
     if(!m_database.isOpen() || m_languageId <= 0 || !m_parser)
     {
@@ -1302,8 +1322,8 @@ bool LuteController::createBook(const QString& title, const QString& text,
     }
 
     QString error;
-    const qint64 bookId =
-        m_database.findOrCreateBook(cleanTitle, QString(), m_languageId, &error);
+    const qint64 bookId = m_database.findOrCreateBook(cleanTitle, QString(),
+                                                      m_languageId, &error);
     if(bookId <= 0)
     {
         setMessage(error.isEmpty() ? QStringLiteral("Could not create the book")
@@ -1325,8 +1345,9 @@ bool LuteController::createBook(const QString& title, const QString& text,
         const int wordCount = m_parser->words(page).size();
         if(m_database.createText(bookId, order, page, wordCount, &error) <= 0)
         {
-            setMessage(error.isEmpty() ? QStringLiteral("Could not add the page")
-                                       : error,
+            setMessage(error.isEmpty()
+                           ? QStringLiteral("Could not add the page")
+                           : error,
                        true);
             return false;
         }
@@ -1386,10 +1407,9 @@ QString LuteController::buildReaderHtml(const QString& text)
         const bool showAsUnknown =
             statuses.contains(key) && !isKnownStatus(status);
         const QString style =
-            showAsUnknown
-                ? QStringLiteral("color:%1;text-decoration:underline")
-                      .arg(highlightColor(status).name())
-                : QStringLiteral("text-decoration:none");
+            showAsUnknown ? QStringLiteral("color:%1;text-decoration:underline")
+                                .arg(highlightColor(status).name())
+                          : QStringLiteral("text-decoration:none");
 
         html += QStringLiteral("<a href=\"w:%1\" style=\"%2\">%3</a>")
                     .arg(i)
@@ -1404,7 +1424,7 @@ QString LuteController::buildReaderHtml(const QString& text)
 }
 
 bool LuteController::setDocumentFromFzDocument(mupdf::FzDocument* document,
-                                             const QString& path)
+                                               const QString& path)
 {
     if(!document)
         return false;
@@ -1431,7 +1451,8 @@ bool LuteController::setDocumentFromFzDocument(mupdf::FzDocument* document,
     if(m_database.isOpen() && m_languageId > 0)
     {
         if(const auto bookId = m_database.findBookBySource(path, m_languageId))
-            m_documentRegistered = m_database.findTextForBook(*bookId).has_value();
+            m_documentRegistered =
+                m_database.findTextForBook(*bookId).has_value();
     }
 
     QSettings().setValue(QStringLiteral("lute/lastDocument"), path);
@@ -1451,26 +1472,26 @@ QString googleLanguageCode(const QString& languageName)
 {
     const QString name = languageName.trimmed().toLower();
     static const QHash<QString, QString> codes = {
-        {QStringLiteral("german"), QStringLiteral("de")},
-        {QStringLiteral("deutsch"), QStringLiteral("de")},
-        {QStringLiteral("english"), QStringLiteral("en")},
-        {QStringLiteral("polish"), QStringLiteral("pl")},
-        {QStringLiteral("french"), QStringLiteral("fr")},
-        {QStringLiteral("spanish"), QStringLiteral("es")},
-        {QStringLiteral("italian"), QStringLiteral("it")},
-        {QStringLiteral("portuguese"), QStringLiteral("pt")},
-        {QStringLiteral("russian"), QStringLiteral("ru")},
-        {QStringLiteral("ukrainian"), QStringLiteral("uk")},
-        {QStringLiteral("czech"), QStringLiteral("cs")},
-        {QStringLiteral("dutch"), QStringLiteral("nl")},
-        {QStringLiteral("swedish"), QStringLiteral("sv")},
-        {QStringLiteral("turkish"), QStringLiteral("tr")},
-        {QStringLiteral("japanese"), QStringLiteral("ja")},
-        {QStringLiteral("chinese"), QStringLiteral("zh-CN")},
+        { QStringLiteral("german"), QStringLiteral("de") },
+        { QStringLiteral("deutsch"), QStringLiteral("de") },
+        { QStringLiteral("english"), QStringLiteral("en") },
+        { QStringLiteral("polish"), QStringLiteral("pl") },
+        { QStringLiteral("french"), QStringLiteral("fr") },
+        { QStringLiteral("spanish"), QStringLiteral("es") },
+        { QStringLiteral("italian"), QStringLiteral("it") },
+        { QStringLiteral("portuguese"), QStringLiteral("pt") },
+        { QStringLiteral("russian"), QStringLiteral("ru") },
+        { QStringLiteral("ukrainian"), QStringLiteral("uk") },
+        { QStringLiteral("czech"), QStringLiteral("cs") },
+        { QStringLiteral("dutch"), QStringLiteral("nl") },
+        { QStringLiteral("swedish"), QStringLiteral("sv") },
+        { QStringLiteral("turkish"), QStringLiteral("tr") },
+        { QStringLiteral("japanese"), QStringLiteral("ja") },
+        { QStringLiteral("chinese"), QStringLiteral("zh-CN") },
     };
     return codes.value(name, QStringLiteral("auto"));
 }
-} // namespace
+}  // namespace
 
 QUrl LuteController::googleTranslateUrl(const QString& text,
                                         const QString& targetLanguage)
@@ -1513,7 +1534,8 @@ bool LuteController::translationBusy() const
 {
     if(m_translation && m_translation->isBusy())
         return true;
-    return m_translationProvider == QStringLiteral("ai") && m_ai && m_ai->isBusy();
+    return m_translationProvider == QStringLiteral("ai") && m_ai &&
+           m_ai->isBusy();
 }
 
 void LuteController::requestTranslationForActiveWord()
@@ -1540,7 +1562,8 @@ void LuteController::requestTranslationForActiveWord()
 void LuteController::openTranslationInBrowser()
 {
     const QString word = m_activeWord.value(QStringLiteral("word")).toString();
-    QUrl url = m_translationResult.value(QStringLiteral("attributionUrl")).toUrl();
+    QUrl url =
+        m_translationResult.value(QStringLiteral("attributionUrl")).toUrl();
     if((!url.isValid() || url.isEmpty()) && !word.trimmed().isEmpty())
     {
         if(m_translationProvider == QStringLiteral("reverso"))
@@ -1560,10 +1583,11 @@ QVariantList LuteController::translationProviders() const
 {
     QVariantList providers;
     const QList<QPair<QString, QString>> all = {
-        {QStringLiteral("reverso"), QStringLiteral("Reverso")},
-        {QStringLiteral("google"), QStringLiteral("Google")},
-        {QStringLiteral("ai"), QStringLiteral("KI")},
-        {QStringLiteral("mymemory"), QStringLiteral("MyMemory")}};
+        { QStringLiteral("reverso"), QStringLiteral("Reverso") },
+        { QStringLiteral("google"), QStringLiteral("Google") },
+        { QStringLiteral("ai"), QStringLiteral("KI") },
+        { QStringLiteral("mymemory"), QStringLiteral("MyMemory") }
+    };
     for(const auto& entry : all)
     {
         if(!m_translationEnabledProviders.contains(entry.first))
@@ -1583,7 +1607,7 @@ void LuteController::setTranslationProviderEnabled(const QString& key,
         LuteTranslationAccess::providerFromKey(key,
                                                TranslationProvider::Reverso));
     if(value == QStringLiteral("ai"))
-        return; // always available
+        return;  // always available
 
     QStringList updated = m_translationEnabledProviders;
     if(enabled)
@@ -1592,10 +1616,9 @@ void LuteController::setTranslationProviderEnabled(const QString& key,
         updated.removeAll(value);
 
     // Rebuild in the fixed tab order; AI is always present.
-    const QStringList order = {QStringLiteral("reverso"),
-                               QStringLiteral("google"),
-                               QStringLiteral("ai"),
-                               QStringLiteral("mymemory")};
+    const QStringList order = { QStringLiteral("reverso"),
+                                QStringLiteral("google"), QStringLiteral("ai"),
+                                QStringLiteral("mymemory") };
     m_translationEnabledProviders.clear();
     for(const QString& entry : order)
     {
@@ -1607,8 +1630,8 @@ void LuteController::setTranslationProviderEnabled(const QString& key,
     if(!m_translationEnabledProviders.contains(m_translationProvider))
     {
         m_translationProvider = m_translationEnabledProviders.isEmpty()
-            ? QStringLiteral("ai")
-            : m_translationEnabledProviders.first();
+                                    ? QStringLiteral("ai")
+                                    : m_translationEnabledProviders.first();
         m_translationResult.clear();
         m_translationError.clear();
         QSettings().setValue(QStringLiteral("lute/translationProvider"),
@@ -1629,8 +1652,7 @@ QString LuteController::aiTargetLanguage() const
 
 QString LuteController::aiProviderLabel() const
 {
-    return m_ai ? m_ai->config().providerLabel()
-                : QStringLiteral("KI");
+    return m_ai ? m_ai->config().providerLabel() : QStringLiteral("KI");
 }
 
 bool LuteController::openGoogleTranslate()
@@ -1660,12 +1682,13 @@ bool LuteController::openDictionaryLookup()
     if(!m_database.isOpen() || m_languageId <= 0)
         return false;
 
-    for(const LuteDictionary& dictionary : m_database.dictionaries(m_languageId))
+    for(const LuteDictionary& dictionary :
+        m_database.dictionaries(m_languageId))
     {
         if(!dictionary.active)
             continue;
-        if(!dictionary.useFor.isEmpty()
-           && dictionary.useFor != QStringLiteral("terms"))
+        if(!dictionary.useFor.isEmpty() &&
+           dictionary.useFor != QStringLiteral("terms"))
             continue;
         if(!dictionary.uri.contains(QStringLiteral("[LUTE]")))
             continue;
@@ -1676,7 +1699,8 @@ bool LuteController::openDictionaryLookup()
         return true;
     }
 
-    setMessage(QStringLiteral("No Lute dictionary configured, using Google Translate"));
+    setMessage(QStringLiteral(
+        "No Lute dictionary configured, using Google Translate"));
     return openGoogleTranslate();
 }
 
@@ -1730,17 +1754,19 @@ bool LuteController::setDocumentPath(const QString& path)
     if(m_database.isOpen() && m_languageId > 0)
     {
         if(const auto bookId = m_database.findBookBySource(path, m_languageId))
-            m_documentRegistered = m_database.findTextForBook(*bookId).has_value();
+            m_documentRegistered =
+                m_database.findTextForBook(*bookId).has_value();
     }
 
     QSettings().setValue(QStringLiteral("lute/lastDocument"), path);
 
     // Diagnostic: makes EPUB/PDF regressions visible in the app log.
     const auto language = currentLanguage();
-    qInfo() << "lute document opened:" << path
-            << "pages:" << m_pageCount
-            << "words on page 1:" << (m_pageCount > 0 ? m_extractor->words(0).size() : 0)
-            << "language:" << (language ? language->name : QStringLiteral("<none>"))
+    qInfo() << "lute document opened:" << path << "pages:" << m_pageCount
+            << "words on page 1:"
+            << (m_pageCount > 0 ? m_extractor->words(0).size() : 0)
+            << "language:"
+            << (language ? language->name : QStringLiteral("<none>"))
             << "db open:" << m_database.isOpen();
 
     emit documentChanged();
@@ -1786,7 +1812,7 @@ const QVector<PhraseMatch>& LuteController::phraseMatches(int pageIndex)
         return *m_phraseCache.insert(pageIndex, matches);
     }
     matches = PhraseMatcher::findMatches(m_extractor->words(pageIndex),
-                                        m_phraseTerms, *m_parser);
+                                         m_phraseTerms, *m_parser);
     return *m_phraseCache.insert(pageIndex, matches);
 }
 
@@ -1797,8 +1823,8 @@ QVariantList LuteController::highlightsForPage(int pageIndex)
         return *cached;
 
     QVariantList list;
-    if(!documentOpen() || pageIndex < 0 || pageIndex >= m_pageCount
-       || m_languageId <= 0)
+    if(!documentOpen() || pageIndex < 0 || pageIndex >= m_pageCount ||
+       m_languageId <= 0)
         return list;
 
     const QVector<WordQuad>& words = m_extractor->words(pageIndex);
@@ -1954,11 +1980,12 @@ bool LuteController::setStatusForWord(int pageIndex, int wordIndex, int status)
 
 void LuteController::recordPageVisit(int pageIndex)
 {
-    if(m_visitedPages.contains(pageIndex) || !m_database.isOpen()
-       || m_languageId <= 0)
+    if(m_visitedPages.contains(pageIndex) || !m_database.isOpen() ||
+       m_languageId <= 0)
         return;
     m_visitedPages.insert(pageIndex);
-    const int wordCount = m_extractor ? m_extractor->words(pageIndex).size() : 0;
+    const int wordCount =
+        m_extractor ? m_extractor->words(pageIndex).size() : 0;
     if(wordCount > 0)
         m_database.recordWordsRead(m_languageId, wordCount);
 }
@@ -1981,7 +2008,8 @@ void LuteController::buildActiveWord(int pageIndex, const WordQuad& word,
         {
             if(i < 0)
                 continue;
-            box = box.isNull() ? words.at(i).rect : box.united(words.at(i).rect);
+            box =
+                box.isNull() ? words.at(i).rect : box.united(words.at(i).rect);
             parts << words.at(i).word;
         }
         if(!box.isNull())
@@ -2067,7 +2095,8 @@ bool LuteController::selectAtPagePoint(int pageIndex, qreal normalizedX,
     }
 
     const QVector<PhraseMatch>& matches = phraseMatches(pageIndex);
-    const PhraseMatch* match = PhraseMatcher::matchAt(matches, words.at(index).index);
+    const PhraseMatch* match =
+        PhraseMatcher::matchAt(matches, words.at(index).index);
     if(match)
         buildActiveWord(pageIndex, words.at(index), match->firstIndex,
                         match->lastIndex, true);
@@ -2140,7 +2169,7 @@ void LuteController::setActiveStatus(int status)
     if(!m_popupVisible || !m_database.isOpen() || m_languageId <= 0)
         return;
 
-    LuteTerm term = m_activeTerm.value_or(LuteTerm{});
+    LuteTerm term = m_activeTerm.value_or(LuteTerm {});
     if(term.id <= 0)
     {
         term.languageId = m_languageId;
@@ -2181,7 +2210,7 @@ void LuteController::setActiveTranslation(const QString& text)
     if(!m_popupVisible || !m_database.isOpen() || m_languageId <= 0)
         return;
 
-    LuteTerm term = m_activeTerm.value_or(LuteTerm{});
+    LuteTerm term = m_activeTerm.value_or(LuteTerm {});
     if(term.id <= 0)
     {
         term.languageId = m_languageId;
@@ -2211,7 +2240,7 @@ void LuteController::setActiveRomanization(const QString& text)
     if(!m_popupVisible || !m_database.isOpen() || m_languageId <= 0)
         return;
 
-    LuteTerm term = m_activeTerm.value_or(LuteTerm{});
+    LuteTerm term = m_activeTerm.value_or(LuteTerm {});
     if(term.id <= 0)
     {
         term.languageId = m_languageId;
@@ -2302,8 +2331,8 @@ void LuteController::saveAiConfiguration(const QString& provider,
     LuteAiConfig config = LuteAiConfig::defaultsFor(provider);
     config.provider = provider;
     config.model = model.trimmed().isEmpty() ? config.model : model.trimmed();
-    config.baseUrl =
-        baseUrl.trimmed().isEmpty() ? config.resolvedBaseUrl() : baseUrl.trimmed();
+    config.baseUrl = baseUrl.trimmed().isEmpty() ? config.resolvedBaseUrl()
+                                                 : baseUrl.trimmed();
     config.apiKey = apiKey.trimmed();
     config.targetLanguage = targetLanguage.trimmed().isEmpty()
                                 ? QStringLiteral("German")
@@ -2357,9 +2386,8 @@ void LuteController::rebuildDocumentVocabulary()
         keys.append(it.key());
     }
 
-    m_documentTokenCount = sampledPages > 0
-                               ? int(qint64(tokens) * pages / sampledPages)
-                               : tokens;
+    m_documentTokenCount =
+        sampledPages > 0 ? int(qint64(tokens) * pages / sampledPages) : tokens;
     m_documentWordStatus = m_database.getTermsForPage(keys, m_languageId);
 
     int known = 0;
@@ -2379,7 +2407,8 @@ void LuteController::refreshStats()
     map.insert(QStringLiteral("languageName"), languageName());
     map.insert(QStringLiteral("documentTokenCount"), m_documentTokenCount);
     map.insert(QStringLiteral("documentKnownTokens"), m_documentKnownTokens);
-    map.insert(QStringLiteral("coverageEstimated"), m_documentCoverageEstimated);
+    map.insert(QStringLiteral("coverageEstimated"),
+               m_documentCoverageEstimated);
     map.insert(QStringLiteral("hasDocument"), documentOpen());
 
     int total = 0;
@@ -2397,7 +2426,7 @@ void LuteController::refreshStats()
             else if(isKnownStatus(it.key()))
                 known += it.value();
         }
-        for(int status : {1, 2, 3, 4, 5, 99, 98, 0})
+        for(int status : { 1, 2, 3, 4, 5, 99, 98, 0 })
         {
             QVariantMap entry = statusMap(status);
             entry.insert(QStringLiteral("count"), counts.value(status, 0));
@@ -2411,28 +2440,31 @@ void LuteController::refreshStats()
     map.insert(QStringLiteral("knownTerms"), known);
     map.insert(QStringLiteral("byStatus"), byStatus);
 
-    const double coverage =
-        m_documentTokenCount > 0
-            ? 100.0 * double(m_documentKnownTokens) / double(m_documentTokenCount)
-            : 0.0;
+    const double coverage = m_documentTokenCount > 0
+                                ? 100.0 * double(m_documentKnownTokens) /
+                                      double(m_documentTokenCount)
+                                : 0.0;
     map.insert(QStringLiteral("coverage"), coverage);
 
     m_learnedSeries.clear();
     m_createdSeries.clear();
     if(m_database.isOpen() && m_languageId > 0)
     {
-        auto toSeries = [](const QVector<DailyCount>& days) {
+        auto toSeries = [](const QVector<DailyCount>& days)
+        {
             QVariantList list;
             for(const DailyCount& day : days)
             {
                 QVariantMap entry;
-                entry.insert(QStringLiteral("day"), day.date.toString(QStringLiteral("MM-dd")));
+                entry.insert(QStringLiteral("day"),
+                             day.date.toString(QStringLiteral("MM-dd")));
                 entry.insert(QStringLiteral("count"), day.count);
                 list.append(entry);
             }
             return list;
         };
-        m_learnedSeries = toSeries(m_database.statusChangesPerDay(m_languageId, 14));
+        m_learnedSeries =
+            toSeries(m_database.statusChangesPerDay(m_languageId, 14));
         m_createdSeries = toSeries(m_database.createdPerDay(m_languageId, 14));
     }
 
@@ -2441,15 +2473,15 @@ void LuteController::refreshStats()
 }
 
 bool LuteController::importDocument(LuteWordExtractor& extractor,
-                                   const QString& path)
+                                    const QString& path)
 {
     QString title = extractor.title().trimmed();
     if(title.isEmpty())
         title = QFileInfo(path).completeBaseName();
 
     QString error;
-    const qint64 bookId = m_database.findOrCreateBook(title, path, m_languageId,
-                                                     &error);
+    const qint64 bookId =
+        m_database.findOrCreateBook(title, path, m_languageId, &error);
     if(bookId <= 0)
     {
         setMessage(error.isEmpty()
@@ -2488,7 +2520,8 @@ bool LuteController::importDocument(LuteWordExtractor& extractor,
         for(const QString& page : pages)
         {
             const int pageWords = m_parser->words(page).size();
-            if(m_database.createText(bookId, order, page, pageWords, &error) <= 0)
+            if(m_database.createText(bookId, order, page, pageWords, &error) <=
+               0)
             {
                 setMessage(error.isEmpty()
                                ? QStringLiteral("Could not add the text")
@@ -2544,9 +2577,9 @@ bool LuteController::addPdfToLuteLibrary(const QString& path)
     if(!importDocument(extractor, path))
         return false;
 
-    if(!m_documentPath.isEmpty()
-       && QFileInfo(path).absoluteFilePath()
-              == QFileInfo(m_documentPath).absoluteFilePath())
+    if(!m_documentPath.isEmpty() &&
+       QFileInfo(path).absoluteFilePath() ==
+           QFileInfo(m_documentPath).absoluteFilePath())
     {
         m_documentRegistered = true;
         emit documentChanged();
@@ -2568,4 +2601,4 @@ void LuteController::setMessage(const QString& message, bool isError)
     emit lastMessageChanged();
 }
 
-} // namespace lute
+}  // namespace lute

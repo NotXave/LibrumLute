@@ -6,16 +6,19 @@
 #include <QString>
 #include <QVector>
 
-namespace lute {
+namespace lute
+{
 
 /// One point of the "terms learned per day" chart.
-struct DailyCount {
+struct DailyCount
+{
     QDate date;
     int count = 0;
 };
 
 /// Aggregated learning metrics read from `lute.db` by LuteStatsEngine.
-struct LuteStats {
+struct LuteStats
+{
     int languageId = 0;
     QString languageName;
 
@@ -46,9 +49,10 @@ struct LuteStats {
     double documentCoverage() const
     {
         return documentTokenCount > 0
-            ? 100.0 * double(documentKnownTokenCount) / double(documentTokenCount)
-            : 0.0;
+                   ? 100.0 * double(documentKnownTokenCount) /
+                         double(documentTokenCount)
+                   : 0.0;
     }
 };
 
-} // namespace lute
+}  // namespace lute

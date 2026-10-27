@@ -1,17 +1,18 @@
 #pragma once
 
-#include "lute_language.hpp"
-
+#include <QPair>
 #include <QRegularExpression>
 #include <QSet>
 #include <QString>
 #include <QVector>
-#include <QPair>
+#include "lute_language.hpp"
 
-namespace lute {
+namespace lute
+{
 
 /// A word occurrence inside a run of text (offsets are UTF-16 positions).
-struct ParsedWord {
+struct ParsedWord
+{
     QString text;
     int start = 0;
     int end = 0;
@@ -29,11 +30,18 @@ public:
     LuteTextParser() = default;
     explicit LuteTextParser(const LuteLanguage& language);
 
-    const LuteLanguage& language() const { return m_language; }
+    const LuteLanguage& language() const
+    {
+        return m_language;
+    }
+
     void setLanguage(const LuteLanguage& language);
 
     /// Word character class body (the inside of `[...]`), e.g. `a-zA-ZÀ-Ö...`.
-    QString wordCharacterClass() const { return m_wordClass; }
+    QString wordCharacterClass() const
+    {
+        return m_wordClass;
+    }
 
     /// All words in `text`, in reading order.
     QVector<ParsedWord> words(const QString& text) const;
@@ -72,4 +80,4 @@ private:
     QVector<QRegularExpression> m_exceptionRegexes;
 };
 
-} // namespace lute
+}  // namespace lute

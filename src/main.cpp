@@ -2,26 +2,26 @@
 #include <qfontdatabase.h>
 #include <qqml.h>
 #include <QApplication>
-#include <QWheelEvent>
 #include <QDateTime>
 #include <QFile>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QImage>
 #include <QLocale>
+#include <QMouseEvent>
+#include <QNetworkProxy>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QQuickStyle>
-#include <QMouseEvent>
 #include <QQuickItem>
+#include <QQuickStyle>
 #include <QQuickWindow>
-#include <QTimer>
-#include <QImage>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QString>
 #include <QTextStream>
+#include <QTimer>
 #include <QTranslator>
-#include <QNetworkProxy>
+#include <QWheelEvent>
 #include <iostream>
 #include <memory>
 #include <tools_service.hpp>
@@ -53,8 +53,6 @@
 using namespace adapters::controllers;
 using namespace application::services;
 
-
-
 // Fork QA helper: find the page item visually (delegates have no QObject parent
 // chain to the window, so QObject::findChild does not see them).
 static QQuickItem* findLutePageItem(QQuickItem* root)
@@ -63,9 +61,9 @@ static QQuickItem* findLutePageItem(QQuickItem* root)
         return nullptr;
 
     if(QString::fromLatin1(root->metaObject()->className())
-           .contains(QStringLiteral("PageView"))
-       && root->property("pageNumber").toInt() == 0 && root->width() > 0
-       && root->height() > 0)
+           .contains(QStringLiteral("PageView")) &&
+       root->property("pageNumber").toInt() == 0 && root->width() > 0 &&
+       root->height() > 0)
         return root;
 
     for(QQuickItem* child : root->childItems())

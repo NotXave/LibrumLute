@@ -2,7 +2,8 @@
 
 #include <QString>
 
-namespace lute {
+namespace lute
+{
 
 /// Helpers for producing and recognising Lute v3 databases.
 ///
@@ -20,7 +21,8 @@ public:
 
     /// Copies the embedded empty lute.db to `targetPath`.
     /// Fails if a file already exists, unless `overwrite` is true.
-    static bool createDatabase(const QString& targetPath, QString* error = nullptr,
+    static bool createDatabase(const QString& targetPath,
+                               QString* error = nullptr,
                                bool overwrite = false);
 
     /// True when `path` looks like a Lute v3 database (has words/languages and
@@ -31,4 +33,4 @@ public:
     static QString defaultLibraryDirectory();
 };
 
-} // namespace lute
+}  // namespace lute

@@ -3,7 +3,8 @@
 #include <QColor>
 #include <QString>
 
-namespace lute {
+namespace lute
+{
 
 /// The eight term states used by Lute v3.
 ///
@@ -11,7 +12,8 @@ namespace lute {
 /// must never be renumbered: 1..5 are the learning ladder, 98 means "ignored",
 /// 99 means "well known". 0 is used by Lute for terms that were created without
 /// a status (and is what an unknown word implicitly maps to).
-enum TermStatus : int {
+enum TermStatus : int
+{
     StatusUnknown = 0,
     StatusNew1 = 1,
     StatusNew2 = 2,
@@ -50,4 +52,4 @@ QColor highlightColor(int status);
 /// Statuses ordered the way Lute shows them in its term lists.
 QList<int> allStatuses();
 
-} // namespace lute
+}  // namespace lute

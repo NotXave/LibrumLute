@@ -1,20 +1,19 @@
 #pragma once
 
-#include "lute_book.hpp"
-#include "lute_tag.hpp"
-#include "lute_language.hpp"
-#include "lute_stats.hpp"
-#include "lute_term.hpp"
-
 #include <QHash>
 #include <QString>
 #include <QStringList>
 #include <QVector>
-
 #include <memory>
 #include <optional>
+#include "lute_book.hpp"
+#include "lute_language.hpp"
+#include "lute_stats.hpp"
+#include "lute_tag.hpp"
+#include "lute_term.hpp"
 
-namespace lute {
+namespace lute
+{
 
 /// Read/write gateway to an official Lute v3 `lute.db` (SQLite).
 ///
@@ -50,8 +49,8 @@ public:
     bool exportAnkiTsv(const QString& path, int languageId,
                        QString* error = nullptr);
     /// Imports a TSV written by exportTermsTsv (header optional).
-    bool importTermsTsv(const QString& path, int languageId, int* imported = nullptr,
-                        QString* error = nullptr);
+    bool importTermsTsv(const QString& path, int languageId,
+                        int* imported = nullptr, QString* error = nullptr);
 
     /// Consistent copy of the database via SQLite's VACUUM INTO.
     bool backupTo(const QString& path, QString* error = nullptr);
@@ -64,10 +63,12 @@ public:
     std::optional<LuteTerm> getTermByText(const QString& word, int languageId);
 
     /// `getTermsForPage` from the plan: status per lower-cased word.
-    QHash<QString, int> getTermsForPage(const QStringList& words, int languageId);
+    QHash<QString, int> getTermsForPage(const QStringList& words,
+                                        int languageId);
 
     /// Full term records for a batch of words (used by the popup and overlay).
-    QHash<QString, LuteTerm> getTermMap(const QStringList& words, int languageId);
+    QHash<QString, LuteTerm> getTermMap(const QStringList& words,
+                                        int languageId);
 
     /// Terms of a language, optionally filtered by text and status.
     QVector<LuteTerm> terms(int languageId, const QString& search = QString(),
@@ -77,15 +78,18 @@ public:
     /// Terms stored with `WoTokenCount > 1`, i.e. phrases like "run out of".
     QVector<LuteTerm> multiWordTerms(int languageId);
 
-    QVector<LuteTerm> termsByStatus(int languageId, const QVector<int>& statuses,
+    QVector<LuteTerm> termsByStatus(int languageId,
+                                    const QVector<int>& statuses,
                                     int limit = 0);
 
     /// Inserts a new term or updates the existing row with the same
     /// (WoTextLC, WoLgID) pair. `term.id` is filled in on return.
     bool saveTerm(LuteTerm& term, QString* error = nullptr);
     bool updateStatus(qint64 wordId, int status, QString* error = nullptr);
-    bool updateTranslation(qint64 wordId, const QString& translation, QString* error = nullptr);
-    bool updateRomanization(qint64 wordId, const QString& romanization, QString* error = nullptr);
+    bool updateTranslation(qint64 wordId, const QString& translation,
+                           QString* error = nullptr);
+    bool updateRomanization(qint64 wordId, const QString& romanization,
+                            QString* error = nullptr);
     bool deleteTerm(qint64 wordId, QString* error = nullptr);
 
     // ---- tags -------------------------------------------------------------
@@ -136,16 +140,17 @@ public:
     bool setBookCurrentPage(qint64 bookId, int page);
     bool markTextRead(qint64 textId);
 
-    std::optional<qint64> findBookBySource(const QString& sourceUri, int languageId);
-    qint64 findOrCreateBook(const QString& title, const QString& sourceUri, int languageId,
-                            QString* error = nullptr);
+    std::optional<qint64> findBookBySource(const QString& sourceUri,
+                                           int languageId);
+    qint64 findOrCreateBook(const QString& title, const QString& sourceUri,
+                            int languageId, QString* error = nullptr);
     std::optional<qint64> findTextForBook(qint64 bookId);
-    qint64 createText(qint64 bookId, int order, const QString& text, int wordCount,
-                      QString* error = nullptr);
+    qint64 createText(qint64 bookId, int order, const QString& text,
+                      int wordCount, QString* error = nullptr);
 
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 };
 
-} // namespace lute
+}  // namespace lute
