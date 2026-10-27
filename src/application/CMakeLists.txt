@@ -110,6 +110,10 @@ if(UNIX)
     set(MUPDF_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>")
     set(MUPDF_OUTPUT "${MUPDF_OUTPUT_DIR}/libmupdfcpp.so")
     set(MUPDF_OUTPUT "${MUPDF_OUTPUT_DIR}/libmupdfcpp.so" PARENT_SCOPE)
+    # libmupdf.so is linked directly wherever liblute.a is linked (the C++
+    # wrapper does not re-export the C API); it must be a known product of
+    # this target or Ninja rejects the build graph.
+    set(MUPDF_EXTRA_BYPRODUCTS "${MUPDF_OUTPUT_DIR}/libmupdf.so")
     set(MUPDF_BUILD_COMMAND ./scripts/mupdfwrap.py ${VENV_OPTION} -d build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release> -b --m-target 'libs tools' ${EXTRA_MAKE_AGRS} -j 0 m01)
 elseif(WIN32)
     # Fork change: we force `--vs-upgrade 1` below, so MuPDF builds into the
@@ -120,6 +124,7 @@ elseif(WIN32)
     # Fork change: upgrade the MuPDF solution to the installed VS2022 toolset
     # (the checked-in solution targets the VS2019 toolset v142).
     set(MUPDF_BUILD_COMMAND python scripts/mupdfwrap.py --vs-upgrade 1 ${VENV_OPTION} -d build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release> -b --m-target mutool -j 0 m01)
+    set(MUPDF_EXTRA_BYPRODUCTS "")
 endif()
 
 message("MuPdf build command: " ${MUPDF_BUILD_COMMAND})
@@ -160,7 +165,7 @@ add_custom_target(mupdf
    COMMAND ${CMAKE_COMMAND} -E copy
         "${MUPDF_OUTPUT_DIR}/mutool${EXECUTABLE_EXTENSION}"
         "${PROJECT_BINARY_DIR}/mutool${EXECUTABLE_EXTENSION}"
-   BYPRODUCTS ${MUPDF_OUTPUT}
+   BYPRODUCTS ${MUPDF_OUTPUT} ${MUPDF_EXTRA_BYPRODUCTS}
    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/libs/mupdf
    COMMENT "Building mupdf (This takes a while) ..."
 )

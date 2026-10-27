@@ -54,7 +54,10 @@ jobs:
 
   test_windows:
     name: run on windows
-    runs-on: windows-latest
+    # windows-latest ships Visual Studio 18 (2026), which MuPDF's wdev.py
+    # cannot locate (it only globs "Microsoft Visual Studio\2*"); pin the
+    # VS2022 image that --vs-upgrade 1 and the Qt msvc2022 build expect.
+    runs-on: windows-2022
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
