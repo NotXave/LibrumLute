@@ -72,3 +72,6 @@ todo.txt
 # add MacOS DS_Store file
 .DS_Store
 dist/
+
+# Logs
+*.log

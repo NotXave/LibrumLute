@@ -158,8 +158,9 @@ Notes on the Windows build in this fork:
 
 ### Linux
 
-The same tree builds on Linux with Qt 6.8 (`gcc_64`), GCC or Clang, Ninja and
-`libjpeg-dev` (MuPDF links the system libjpeg there). On Linux MuPDF builds as
+The same tree builds on Linux with Qt 6.8 (`gcc_64`), GCC or Clang, Ninja,
+`pip install libclang` (MuPDF wrapper generation) and `libjpeg-dev` (MuPDF
+links the system libjpeg there). On Linux MuPDF builds as
 `libmupdfcpp.so`/`libmupdf.so` in `libs/mupdf/build/shared-release/` and the
 Lute slice resolves the MuPDF C API from those shared libraries — no static
 workaround is needed.

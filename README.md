@@ -94,8 +94,9 @@ Convenience wrappers (used during development, paths are machine-specific):
 ## Building (Linux)
 
 Prerequisites: **Qt 6.8.x** (e.g. via the [online installer](https://www.qt.io/download-open-source)
-or `aqtinstall`), GCC 12+ or Clang 16+, CMake 3.21+, Ninja, Python 3 with pip,
-and `libjpeg-dev` (MuPDF builds against the system libjpeg to match Qt).
+or `aqtinstall`), GCC 12+ or Clang 16+, CMake 3.21+, Ninja, Python 3 with pip
+(`pip install libclang` — the MuPDF wrapper generator needs it), and
+`libjpeg-dev` (MuPDF builds against the system libjpeg to match Qt).
 
 ```bash
 git clone --recurse-submodules https://github.com/NotXave/LibrumLute.git
