@@ -156,6 +156,26 @@ Notes on the Windows build in this fork:
   `OBJECT_DEPENDS` entries for them because CMake's AUTORCC otherwise kept
   stale QML in the binary after edits.
 
+### Linux
+
+The same tree builds on Linux with Qt 6.8 (`gcc_64`), GCC or Clang, Ninja and
+`libjpeg-dev` (MuPDF links the system libjpeg there). On Linux MuPDF builds as
+`libmupdfcpp.so`/`libmupdf.so` in `libs/mupdf/build/shared-release/` and the
+Lute slice resolves the MuPDF C API from those shared libraries — no static
+workaround is needed.
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DNO_VENV=ON \
+      -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.3/gcc_64
+cmake --build build --parallel
+./build/librum          # run from the build dir (mutool sits next to it)
+sudo cmake --install build   # optional: desktop entry + /usr/local install
+```
+
+The Lute database defaults to `~/.local/share/Librum-Reader/Librum/lute.db`;
+`--lute-db` and *Settings → Lute* work the same as on Windows. The
+auto-updater is Windows-only — Linux shows the manual-download dialog instead.
+
 ## Running
 
 * `librum.exe` – start page; use *Open a PDF without an account* to read.
@@ -203,7 +223,10 @@ ctest --test-dir build-tests -R LuteUnitTests --output-on-failure
 
 `tests/lute_unit_tests` covers the tokenizer/sentence splitter, the database
 round trip (template creation, terms, phrases, reading statistics, books/texts)
-and the phrase matcher (16 gtest cases).
+and the phrase matcher (16 gtest cases). The sample PDFs used by the word
+extractor tests live in `tests/lute_unit_tests/data/`, so the suite is
+self-contained on any clone. CI runs all four suites (Adapter, Domain,
+Application, Lute) on Linux and Windows on every push to `main`.
 
 ## Known limitations
 

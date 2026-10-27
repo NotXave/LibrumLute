@@ -91,6 +91,47 @@ Convenience wrappers (used during development, paths are machine-specific):
 * `build-tests\rt.bat` — run the 54 Lute unit tests; `at.bat` — the 106
   application tests
 
+## Building (Linux)
+
+Prerequisites: **Qt 6.8.x** (e.g. via the [online installer](https://www.qt.io/download-open-source)
+or `aqtinstall`), GCC 12+ or Clang 16+, CMake 3.21+, Ninja, Python 3 with pip,
+and `libjpeg-dev` (MuPDF builds against the system libjpeg to match Qt).
+
+```bash
+git clone --recurse-submodules https://github.com/NotXave/LibrumLute.git
+cd LibrumLute
+sudo apt-get install -y ninja-build libjpeg-dev libgl1-mesa-dev  # Ubuntu/Debian
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DNO_VENV=ON \
+      -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/gcc_64
+cmake --build build
+```
+
+Run from the build directory: `./build/librum` (Qt libs must be on the
+library path, e.g. `source /path/to/Qt/6.8.3/gcc_64/bin/qt-env.sh` or set
+`LD_LIBRARY_PATH`). The Lute database lives at
+`~/.local/share/Librum-Reader/Librum/lute.db`.
+
+Install system-wide with the upstream install rules:
+
+```bash
+sudo cmake --install build        # /usr/local by default
+```
+
+The auto-updater is Windows-only; on Linux the update page falls back to a
+"download manually" dialog.
+
+## Tests
+
+```bash
+cmake -B build-tests -DBUILD_TESTS=ON -DNO_VENV=ON -DCMAKE_PREFIX_PATH=...
+cmake --build build-tests
+ctest --test-dir build-tests --output-on-failure
+```
+
+Four suites run: Adapter (81), Domain (48), Application (106) and Lute (54)
+unit tests. CI (`.github/workflows/test.yml`) runs the same suites on
+`ubuntu-latest` and `windows-latest` with Qt 6.8.3 on every push/PR to `main`.
+
 ## Documentation
 
 * [`LUTE.md`](LUTE.md) — the full feature/architecture write-up of the fork
