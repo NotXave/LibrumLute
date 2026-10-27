@@ -12,64 +12,62 @@ on:
       - dev/develop
       - main
 
-    
-    
-    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test_linux:
     name: run on linux
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          version: '6.5.3'
-      
+          version: '6.8.3'
+          cache: true
+
       - name: Install tools
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-15 clang++-15
-          
-      - name: Install dependencies
-        run: sudo apt-get install -y python3-venv
-          
+        # libjpeg-dev: MuPDF builds against the system libjpeg on Linux
+        # (CMAKE passes USE_SYSTEM_LIBJPEG=yes), which matches the Qt build.
+        # libgl1-mesa-dev is required to link against the Qt GUI modules.
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libjpeg-dev libgl1-mesa-dev
+
       - name: Build
         run: |
-          mkdir build-Release
-          cd build-Release
-          cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++-15 -DBUILD_TESTS=ON ..
-          cmake --build .
-          
+          cmake -GNinja -B build-Release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DNO_VENV=ON .
+          cmake --build build-Release
+
       - name: Run tests
-        run: |
-          cd build-Release
-          ctest
+        run: ctest --test-dir build-Release --output-on-failure
 
 
 
   test_windows:
     name: run on windows
-    runs-on: windows-2019
+    runs-on: windows-latest
+    timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      
+
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          version: '6.5.3'
-          
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+          cache: true
+
       - name: Build
         run: |
-          mkdir build
-          cd build
-          cmake -DBUILD_TESTS=On ..
-          cmake --build . --config Release
-          
+          cmake -B build -DBUILD_TESTS=ON -DNO_VENV=ON .
+          cmake --build build --config Release
+
       - name: Run tests
-        run: |
-          cd build
-          ctest -C Release
+        run: ctest --test-dir build -C Release --output-on-failure

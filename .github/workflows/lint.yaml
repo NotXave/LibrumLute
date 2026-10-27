@@ -11,12 +11,17 @@ on:
       - dev/develop
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   formatting-check:
     name: Formatting Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Run clang-format
       uses: jidicula/clang-format-action@v4.11.0
       with:
