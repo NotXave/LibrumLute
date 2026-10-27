@@ -9,6 +9,14 @@
 #include <QStandardPaths>
 #include <QUuid>
 
+// Q_INIT_RESOURCE must be called from global scope: its declaration of the
+// generated init function has C++ linkage and binds to the enclosing
+// namespace otherwise (MSVC tolerates that, GCC does not link it).
+static void initLuteDataResource()
+{
+    Q_INIT_RESOURCE(lute_data);
+}
+
 namespace lute
 {
 namespace
@@ -18,7 +26,7 @@ void ensureEmbeddedResources()
 {
     static const bool initialised = []()
     {
-        Q_INIT_RESOURCE(lute_data);
+        initLuteDataResource();
         return true;
     }();
     Q_UNUSED(initialised);
