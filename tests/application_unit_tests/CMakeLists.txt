@@ -16,14 +16,21 @@ add_executable(application_unit_tests
                     utility/book_merger_tests.cpp
     )
 
-target_link_directories(application_unit_tests PRIVATE
-    "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
+if(WIN32)
+    target_link_directories(application_unit_tests PRIVATE
+        "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
+    set(APPLICATION_TESTS_MUPDF_LIB mupdfcpp64)
+else()
+    set(APPLICATION_TESTS_MUPDF_LIB
+        "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>/libmupdfcpp.so")
+    add_dependencies(application_unit_tests mupdf)
+endif()
 
 target_link_libraries(application_unit_tests
                 PRIVATE
                     domain
                     application
-                    mupdfcpp64
+                    ${APPLICATION_TESTS_MUPDF_LIB}
                     gtest
                     gmock
                     Qt6::Core

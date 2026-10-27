@@ -1,0 +1,18 @@
+# Normalize text files to LF in the repository; checkout behavior stays
+# governed by each platform's autocrlf setting.
+* text=auto
+
+# Scripts must keep deterministic line endings on every platform.
+*.bat text eol=crlf
+*.sh text eol=lf
+
+# Binaries
+*.pdf binary
+*.db binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.qm binary

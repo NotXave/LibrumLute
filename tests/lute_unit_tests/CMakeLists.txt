@@ -25,13 +25,20 @@ target_link_libraries(lute_unit_tests
                     Qt6::Sql
 )
 
-target_link_directories(lute_unit_tests PRIVATE
-    "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
-
-target_link_libraries(lute_unit_tests PRIVATE mupdfcpp64)
+if(WIN32)
+    target_link_directories(lute_unit_tests PRIVATE
+        "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
+    target_link_libraries(lute_unit_tests PRIVATE mupdfcpp64)
+else()
+    set(LUTE_MUPDF_LIB_DIR
+        "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>")
+    target_link_libraries(lute_unit_tests PRIVATE "${LUTE_MUPDF_LIB_DIR}/libmupdfcpp.so")
+    add_dependencies(lute_unit_tests mupdf)
+    set_target_properties(lute_unit_tests PROPERTIES BUILD_RPATH "${LUTE_MUPDF_LIB_DIR}")
+endif()
 
 target_compile_definitions(lute_unit_tests PRIVATE
-    LUTE_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/../data/samples")
+    LUTE_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 target_compile_options(lute_unit_tests PRIVATE "${LIBRUM_SANITIZERS};-O0;-g")
 target_link_options(lute_unit_tests PRIVATE "${LIBRUM_SANITIZERS}")
