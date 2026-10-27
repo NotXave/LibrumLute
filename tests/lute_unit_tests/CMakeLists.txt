@@ -30,11 +30,9 @@ if(WIN32)
         "${PROJECT_SOURCE_DIR}/libs/mupdf/platform/win32-vs-upgrade/x64/$<IF:$<CONFIG:Debug>,Debug,Release>")
     target_link_libraries(lute_unit_tests PRIVATE mupdfcpp64)
 else()
-    set(LUTE_MUPDF_LIB_DIR
-        "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>")
-    target_link_libraries(lute_unit_tests PRIVATE "${LUTE_MUPDF_LIB_DIR}/libmupdfcpp.so")
+    # libmupdfcpp.so / libmupdf.so reach this target through the INTERFACE
+    # link of the lute library; only the build order needs ensuring here.
     add_dependencies(lute_unit_tests mupdf)
-    set_target_properties(lute_unit_tests PROPERTIES BUILD_RPATH "${LUTE_MUPDF_LIB_DIR}")
 endif()
 
 target_compile_definitions(lute_unit_tests PRIVATE

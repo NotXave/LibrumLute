@@ -77,6 +77,17 @@ if(WIN32)
         crypt32
         ws2_32
     )
+else()
+    # The word extractor calls the raw MuPDF C API (fz_*), which the C++
+    # wrapper library does not re-export, so libmupdf.so must be linked
+    # wherever liblute.a is linked. INTERFACE propagates this to the
+    # executable and the test targets.
+    set(LUTE_MUPDF_SHARED_DIR
+        "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>")
+    target_link_libraries(lute INTERFACE
+        "${LUTE_MUPDF_SHARED_DIR}/libmupdfcpp.so"
+        "${LUTE_MUPDF_SHARED_DIR}/libmupdf.so"
+    )
 endif()
 
 target_compile_options(lute PRIVATE "$<$<CONFIG:DEBUG>:${LIBRUM_SANITIZERS};-Wall;-O0;-g>")

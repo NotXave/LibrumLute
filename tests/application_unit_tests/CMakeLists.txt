@@ -25,7 +25,6 @@ else()
         "${PROJECT_SOURCE_DIR}/libs/mupdf/build/$<IF:$<CONFIG:Debug>,shared-debug,shared-release>/libmupdfcpp.so")
     add_dependencies(application_unit_tests mupdf)
 endif()
-
 target_link_libraries(application_unit_tests
                 PRIVATE
                     domain
