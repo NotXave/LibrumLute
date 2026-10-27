@@ -35,6 +35,11 @@ set(lute_SRC
 
 add_library(lute STATIC ${lute_SRC})
 
+# mupdfwrap generates the wrapper headers (e.g. platform/c++/include/mupdf/
+# classes.h) that lute_word_extractor.cpp includes, so the lute target must
+# not compile before the mupdf target has run.
+add_dependencies(lute mupdf)
+
 target_include_directories(lute
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
